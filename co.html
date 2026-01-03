@@ -549,7 +549,7 @@
             margin: 0;
         }
         
-        @media (max-width: 600px) {
+@media (max-width: 600px) {
             #product-modal .modal-content {
                 flex-direction: column;
                 max-width: 97vw;
@@ -571,7 +571,7 @@
                 width: 90px;
                 height: 90px;
             }
-}
+        }
         @media (max-width: 800px) {
             main#products-container {
                 grid-template-columns: 1fr;
@@ -589,12 +589,30 @@
             flex-direction: column;
         }
         
+        /* שמירה על רוחב מלא לאלמנטים */
+        #announcement-bar,
+        header,
+        #cart-toggle-button,
+        main#products-container,
+        #cart-container,
+        #checkout-modal,
+        #product-modal {
+            flex-shrink: 0;
+        }
+        
         .contact-section {
             order: 2;
+            flex-shrink: 0;
+            width: 100%;
+            max-width: 600px;
+            box-sizing: border-box;
         }
         
         .my-about-card {
             order: 1;
+            flex-shrink: 0;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         @keyframes logoPulse {
