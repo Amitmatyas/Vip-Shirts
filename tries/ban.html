@@ -1138,19 +1138,35 @@
     let customFieldsCount = 0;
     
     function addOptionItem(optionsList, optionData = null) {
-        const optionItem = document.createElement('div');
-        optionItem.className = 'option-item';
-        optionItem.innerHTML = `
-            <input type="text" placeholder="ערך האפשרות" class="option-value" value="${optionData?.value || ''}">
-            <input type="url" placeholder="URL לתמונה (אופציונלי)" class="option-image" value="${optionData?.image || ''}">
-            <button type="button" class="remove-option-btn">X</button>
-        `;
-        optionItem.querySelector('.remove-option-btn').addEventListener('click', () => {
-            optionItem.remove();
-        });
-        optionsList.appendChild(optionItem);
-    }
+    const optionItem = document.createElement('div');
+    optionItem.className = 'option-item';
     
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text';
+    valueInput.placeholder = 'ערך האפשרות';
+    valueInput.className = 'option-value';
+    valueInput.value = optionData?.value || '';
+    
+    const imageInput = document.createElement('input');
+    imageInput.type = 'url';
+    imageInput.placeholder = 'URL לתמונה (אופציונלי)';
+    imageInput.className = 'option-image';
+    imageInput.value = optionData?.image || '';
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = 'X';
+    removeBtn.className = 'remove-option-btn';
+    removeBtn.addEventListener('click', () => {
+        optionItem.remove();
+    });
+    
+    optionItem.appendChild(valueInput);
+    optionItem.appendChild(imageInput);
+    optionItem.appendChild(removeBtn);
+    optionsList.appendChild(optionItem);
+}
+        
     function createCustomFieldUI(fieldData = null, container) {
         const fieldId = customFieldsCount++;
         const fieldContainer = document.createElement('div');
@@ -1161,8 +1177,8 @@
         
 fieldContainer.innerHTML = `
             <div class="custom-field-header">
-                <input type="text" placeholder="שם השדה" class="field-name" value="${fieldData?.name || ''}" style="flex: 1; max-width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <select class="field-type" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+<input type="text" placeholder="שם השדה" class="field-name" value="${fieldData?.name || ''}" style="width: 200px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+<select class="field-type" style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                     <option value="select" ${isSelectType ? 'selected' : ''}>בחירה מרשימה</option>
                     <option value="text" ${fieldData?.type === 'text' ? 'selected' : ''}>כתיבה חופשית</option>
                 </select>
