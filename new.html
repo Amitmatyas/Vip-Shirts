@@ -1353,6 +1353,9 @@ async function sendReceiptEmail(orderData) {
     try {
         // בניית רשימת המוצרים עבור הטבלה
         const productsListHTML = orderData.items.map(item => {
+            // תיקון ה-undefined: בדיקה אם השם נמצא ב-productName או ב-name
+            const finalName = item.productName || item.name || "מוצר VIP";
+            
             const optionsText = item.selectedOptions 
                 ? Object.entries(item.selectedOptions)
                     .filter(([_, value]) => value)
@@ -1360,25 +1363,41 @@ async function sendReceiptEmail(orderData) {
                     .join(', ')
                 : '';
             
-            const productDescription = item.productName + (optionsText ? ` (${optionsText})` : '');
+            // בניית תיאור מוצר עם ירידת שורה לאופציות ויישור לימין
+            const productDescription = `
+                <div style="font-weight: bold; margin-bottom: 4px;">${finalName}</div>
+                ${optionsText ? `<div style="font-size: 13px; color: #666;">(${optionsText})</div>` : ''}
+            `;
             
             return `
                 <tr>
-                    <td>${productDescription}</td>
-                    <td>${item.quantity}</td>
-                    <td>₪${item.price.toFixed(2)}</td>
-                    <td>₪${(item.price * item.quantity).toFixed(2)}</td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
+                        ${productDescription}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
+                        ${item.quantity}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
+                        ₪${item.price.toFixed(2)}
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
+                        ₪${(item.price * item.quantity).toFixed(2)}
+                    </td>
                 </tr>
             `;
         }).join('');
 
-        // חישוב הנחה
+// חישוב הנחה
         let discountAmount = 0;
-        if (orderData.appliedCoupon && appliedCoupon) {
-            if (appliedCoupon.Type === 'fixed_discount') {
-                discountAmount = appliedCoupon.Value;
-            } else if (appliedCoupon.Type === 'percentage_discount') {
-                discountAmount = (orderData.subtotal * appliedCoupon.Value) / 100;
+        
+        // שליפת פרטי הקופון מההזמנה או מהמשתנה הגלובלי (גיבוי)
+        const coupon = orderData.couponDetails || (typeof appliedCoupon !== 'undefined' ? appliedCoupon : null);
+
+        if (orderData.appliedCoupon && coupon) {
+            if (coupon.Type === 'fixed_discount') {
+                discountAmount = coupon.Value;
+            } else if (coupon.Type === 'percentage_discount') {
+                discountAmount = (orderData.subtotal * coupon.Value) / 100;
             }
         }
 
@@ -1420,12 +1439,13 @@ async function sendReceiptEmail(orderData) {
         return false;
     }
 }
-        document.addEventListener('DOMContentLoaded', async () => {
-            await loadSettings();
-            await loadAnnouncements();
-            await fetchProducts();
-            updateCartDisplay();
-        });
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadSettings();
+    await loadAnnouncements();
+    await fetchProducts();
+    updateCartDisplay();
+});
     </script>
 </body>
 </html>
