@@ -1280,6 +1280,7 @@ onApprove: function(data, actions) {
                 items: cart.map(item => ({
                     productId: item.id,
                     productName: item.name,
+                    name: item.name, // שמירה גם תחת name לצורך תאימות
                     quantity: item.quantity,
                     price: item.price,
                     selectedOptions: item.selectedOptions || null,
