@@ -614,6 +614,15 @@
             width: 100%;
             box-sizing: border-box;
         }
+
+        .terms-section {
+            order: 3;
+            flex-shrink: 0;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            padding: 20px 0; /* הוספת קצת מרווח */
+        }
         
         @keyframes logoPulse {
             0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
@@ -1449,7 +1458,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
     </script>
     
-<div style="text-align: center;">
+<div class="terms-section">
     <a href="terms.html" style="text-decoration: none; color: #007bff; font-weight: bold; font-family: Arial, sans-serif;">תקנון</a>
 </div>
 
