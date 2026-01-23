@@ -38,17 +38,32 @@
             100% { opacity: 1; transform: translateY(0); }
         }
         
-        header {
-            background: #222;
-            color: #fff;
-            padding: 2em 0 1em 0;
-            text-align: center;
-            font-size: 2.2em;
-            letter-spacing: 4px;
-            border-bottom-left-radius: 16% 8%;
-            border-bottom-right-radius: 16% 8%;
-            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.12);
-        }
+header {
+    background: #222;
+    color: #fff;
+    padding: 20px 30px;          /* קטן יותר */
+    display: flex;
+    align-items: center;         /* יישור אנכי */
+    justify-content: center;     /* יישור אופקי */
+    gap: 20px;
+    font-size: 1.8em;
+    letter-spacing: 3px;
+    border-bottom-left-radius: 16% 8%;
+    border-bottom-right-radius: 16% 8%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+header img {
+    width: 90px;                 /* לוגו קטן יותר */
+    height: auto;
+    margin: 0;
+}
+
+header h1 {
+    margin: 0;
+    line-height: 1;
+}
+
         #cart-toggle-button {
             position: fixed;
             top: 20px;
@@ -789,10 +804,10 @@
         <div class="announcement-text"></div>
     </div>
     
-    <header>
-        <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts" style="width: 200px; height: auto; display: block; margin-left: auto; margin-right: auto;">
-        <h1>VIP Shirts</h1>
-    </header>
+<header>
+    <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
+    <h1>VIP Shirts</h1>
+</header>
     
     <button id="cart-toggle-button">הצג/הסתר עגלת קניות</button>
     
