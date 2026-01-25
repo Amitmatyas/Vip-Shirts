@@ -1675,7 +1675,6 @@ function updateModalPrice() {
             } else {
                 modalProductPrice.textContent = `${totalPrice.toFixed(2)} ₪`;
             }
-        }
 
         modalAddToCartBtn.addEventListener('click', function() {
             const product = products.find(p => p.id === currentModalProductId);
@@ -1689,6 +1688,7 @@ function updateModalPrice() {
                         return;
                     }
                 }
+            }
             
             const currentDisplayImage = modalProductImage.src;
             addToCart(currentModalProductId, {...currentProductOptions}, currentDisplayImage, currentProductPrice, isCouponProduct);
