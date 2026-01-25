@@ -1755,109 +1755,110 @@ function updateModalPrice() {
         });
 
         function renderPayPalButton() {
-            const container = document.getElementById('paypal-button-container');
-            if (!container) return;
-            container.innerHTML = "";
-            paypal.Buttons({
-                style: {
-                    color: 'blue',
-                    shape: 'pill',
-                    label: 'pay',
-                    height: 40
-                },
-                createOrder: function(data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: {
-                                value: total.toFixed(2),
-                                currency_code: 'ILS'
-                            },
-                            description: 'רכישת חולצות כדורגל'
-                        }]
+    const container = document.getElementById('paypal-button-container');
+    if (!container) return;
+    container.innerHTML = "";
+
+    paypal.Buttons({
+        style: {
+            color: 'blue',
+            shape: 'pill',
+            label: 'pay',
+            height: 40
+        },
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: total.toFixed(2),
+                        currency_code: 'ILS'
+                    },
+                    description: 'רכישת חולצות כדורגל'
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(async function(details) {
+                try {
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const phone = document.getElementById('phone').value;
+                    const address = document.getElementById('address').value;
+
+                    const orderRef = await db.collection('orders').add({
+                        customerName: name,
+                        customerEmail: email,
+                        customerPhone: phone,
+                        customerAddress: address,
+                        items: cart.map(item => ({
+                            productId: item.id,
+                            productName: item.name,
+                            name: item.name,
+                            quantity: item.quantity,
+                            price: item.price,
+                            originalPrice: item.originalPrice || null,
+                            selectedOptions: item.selectedOptions || null,
+                            isFreebie: item.isFreebie || false
+                        })),
+                        subtotal: parseFloat(subtotal.toFixed(2)),
+                        shippingCost: parseFloat(shippingCost.toFixed(2)),
+                        totalAmount: parseFloat(total.toFixed(2)),
+                        appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                        couponDetails: appliedCoupon || null,
+                        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'completed',
+                        completed: false,
+                        paymentType: 'paypal',
+                        paypalOrderId: details.id
                     });
-                },
-onApprove: function(data, actions) {
-    return actions.order.capture().then(async function(details) {
-        try {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const address = document.getElementById('address').value;
 
-            const orderRef = await db.collection('orders').add({
-                customerName: name,
-                customerEmail: email,
-                customerPhone: phone,
-                customerAddress: address,
-                items: cart.map(item => ({
-                    productId: item.id,
-                    productName: item.name,
-                    name: item.name,
-                    quantity: item.quantity,
-                    price: item.price,
-                    originalPrice: item.originalPrice || null,
-                    selectedOptions: item.selectedOptions || null,
-                    isFreebie: item.isFreebie || false
-                })),
-                subtotal: parseFloat(subtotal.toFixed(2)),
-                shippingCost: parseFloat(shippingCost.toFixed(2)),
-                totalAmount: parseFloat(total.toFixed(2)),
-                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                couponDetails: appliedCoupon || null,
-                orderDate: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'completed',
-                completed: false,
-                paymentType: 'paypal',
-                paypalOrderId: details.id
-            });
+                    const emailSent = await sendReceiptEmail({
+                        orderId: orderRef.id,
+                        customerName: name,
+                        customerEmail: email,
+                        customerPhone: phone,
+                        customerAddress: address,
+                        items: cart,
+                        subtotal: subtotal,
+                        shippingCost: shippingCost,
+                        totalAmount: total,
+                        appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                        couponDetails: appliedCoupon
+                    });
 
-            const emailSent = await sendReceiptEmail({
-                orderId: orderRef.id,
-                customerName: name,
-                customerEmail: email,
-                customerPhone: phone,
-                customerAddress: address,
-                items: cart,
-                subtotal: subtotal,
-                shippingCost: shippingCost,
-                totalAmount: total,
-                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                couponDetails: appliedCoupon
-            });
+                    if (emailSent) {
+                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
+                    } else {
+                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
+                    }
 
-            if (emailSent) {
-                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
-            } else {
-                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
-            }
+                    cart = [];
+                    appliedCoupon = null;
+                    couponInput.value = '';
+                    couponInput.disabled = false;
+                    applyCouponBtn.disabled = false;
+                    couponMessage.innerHTML = '';
+                    localStorage.removeItem('vipshirts_cart');
+                    localStorage.removeItem('vipshirts_coupon');
+                    updateCartDisplay();
+                    checkoutModal.style.display = 'none';
+                    checkoutForm.reset();
 
-            cart = [];
-            appliedCoupon = null;
-            couponInput.value = '';
-            couponInput.disabled = false;
-            applyCouponBtn.disabled = false;
-            couponMessage.innerHTML = '';
-            localStorage.removeItem('vipshirts_cart');
-            localStorage.removeItem('vipshirts_coupon');
-            updateCartDisplay();
-            checkoutModal.style.display = 'none';
-            checkoutForm.reset();
-        } catch (error) {
-            console.error('Error:', error);
-            alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
-        }
-    });
-}
-                onCancel: function(data) {
-                    alert('התשלום בוטל.');
-                },
-                onError: function(err) {
-                    alert('שגיאה בתשלום: נסה שוב.');
-                    console.error(err);
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
                 }
-            }).render('#paypal-button-container');
+            });
+        }, // סגירה נכונה של onApprove עם פסיק להמשך
+        onCancel: function(data) {
+            alert('התשלום בוטל.');
+        },
+        onError: function(err) {
+            alert('שגיאה בתשלום: נסה שוב.');
+            console.error(err);
         }
-
+    }).render('#paypal-button-container');
+}
         const EMAILJS_SERVICE_ID = 'service_pypll0n';
         const EMAILJS_TEMPLATE_ID = 'vipshirts';
         const EMAILJS_PUBLIC_KEY = 'f-U3pdugkQiavzAvU';
