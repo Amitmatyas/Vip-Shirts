@@ -41,10 +41,10 @@
 header {
     background: #222;
     color: #fff;
-    padding: 45px 40px;          /* גובה גדול יותר (אבל לא מוגזם) */
+    padding: 45px 40px;
     display: flex;
-    align-items: center;         /* יישור אנכי */
-    justify-content: center;     /* מרכז כללי */
+    align-items: center;
+    justify-content: center;
     gap: 30px;
     font-size: 2.1em;
     letter-spacing: 3px;
@@ -54,7 +54,7 @@ header {
 }
 
 header img {
-    width: 150px;                /* לוגו גדול */
+    width: 150px;
     height: auto;
     margin: 0;
 }
@@ -989,41 +989,60 @@ header h1 {
         let isCouponProduct = false;
 
         // טעינת עגלה מ-localStorage
-function loadCartFromStorage() {
-    const savedCart = localStorage.getItem('vipshirts_cart');
-    const savedCoupon = localStorage.getItem('vipshirts_coupon');
-    
-    if (savedCart) {
-        try {
-            cart = JSON.parse(savedCart);
-        } catch (e) {
-            cart = [];
+        function loadCartFromStorage() {
+            const savedCart = localStorage.getItem('vipshirts_cart');
+            const savedCoupon = localStorage.getItem('vipshirts_coupon');
+            
+            if (savedCart) {
+                try {
+                    cart = JSON.parse(savedCart);
+                } catch (e) {
+                    cart = [];
+                }
+            }
+            
+            if (savedCoupon) {
+                try {
+                    const couponData = JSON.parse(savedCoupon);
+                    // בדיקת תוקף קופון
+                    if (couponData.ExpiryDate) {
+                        const expiry = new Date(couponData.ExpiryDate);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        
+                        if (expiry >= today) {
+                            appliedCoupon = couponData;
+                            couponInput.value = couponData.Code;
+                            couponInput.disabled = true;
+                            applyCouponBtn.disabled = true;
+                            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+                        } else {
+                            // קופון פג תוקפו - נקה אותו
+                            localStorage.removeItem('vipshirts_coupon');
+                        }
+                    } else {
+                        appliedCoupon = couponData;
+                        couponInput.value = couponData.Code;
+                        couponInput.disabled = true;
+                        applyCouponBtn.disabled = true;
+                        couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+                    }
+                } catch (e) {
+                    appliedCoupon = null;
+                    localStorage.removeItem('vipshirts_coupon');
+                }
+            }
         }
-    }
-    
-    if (savedCoupon) {
-        try {
-            const couponData = JSON.parse(savedCoupon);
-            appliedCoupon = couponData;
-            couponInput.value = couponData.Code;
-            couponInput.disabled = true;
-            applyCouponBtn.disabled = true;
-            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
-        } catch (e) {
-            appliedCoupon = null;
-        }
-    }
-}
 
-// שמירת עגלה ל-localStorage
-function saveCartToStorage() {
-    localStorage.setItem('vipshirts_cart', JSON.stringify(cart));
-    if (appliedCoupon) {
-        localStorage.setItem('vipshirts_coupon', JSON.stringify(appliedCoupon));
-    } else {
-        localStorage.removeItem('vipshirts_coupon');
-    }
-}
+        // שמירת עגלה ל-localStorage
+        function saveCartToStorage() {
+            localStorage.setItem('vipshirts_cart', JSON.stringify(cart));
+            if (appliedCoupon) {
+                localStorage.setItem('vipshirts_coupon', JSON.stringify(appliedCoupon));
+            } else {
+                localStorage.removeItem('vipshirts_coupon');
+            }
+        }
         
         async function loadAnnouncements() {
             try {
@@ -1249,85 +1268,85 @@ function saveCartToStorage() {
         }
 
         function applyCouponDiscount() {
-    if (!appliedCoupon) return 0;
-    
-    let discount = 0;
-    
-    if (appliedCoupon.Type === 'free_shipping') {
-        discount = shippingCost;
-        shippingCost = 0;
-    } else if (appliedCoupon.Type === 'fixed_discount') {
-        discount = Math.min(appliedCoupon.Value, subtotal);
-    } else if (appliedCoupon.Type === 'percentage_discount') {
-        discount = (subtotal * appliedCoupon.Value) / 100;
-    }
-    
-    return discount;
-}
-
-function updateCartDisplay() {
-    cartItemsList.innerHTML = '';
-    subtotal = 0;
-    
-    cart.forEach(item => {
-        const listItem = document.createElement('li');
-        let optionsText = '';
-        if (item.selectedOptions) {
-            Object.keys(item.selectedOptions).forEach(key => {
-                if (item.selectedOptions[key]) {
-                    optionsText += `${key}: ${item.selectedOptions[key]} `;
-                }
-            });
+            if (!appliedCoupon) return 0;
+            
+            let discount = 0;
+            
+            if (appliedCoupon.Type === 'free_shipping') {
+                discount = shippingCost;
+                shippingCost = 0;
+            } else if (appliedCoupon.Type === 'fixed_discount') {
+                discount = Math.min(appliedCoupon.Value, subtotal);
+            } else if (appliedCoupon.Type === 'percentage_discount') {
+                discount = (subtotal * appliedCoupon.Value) / 100;
+            }
+            
+            return discount;
         }
-        
-        const freebieTag = item.isFreebie ? '<span class="freebie-badge">מתנה</span>' : '';
-        
-        listItem.innerHTML = `
-            <div class="cart-item-details">
-                <img src="${item.displayImage || item.image}" alt="${item.name}">
-                <div class="cart-item-info">
-                    <span>${freebieTag}${item.name}</span>
-                    ${optionsText ? `<span style="font-size:0.9em;color:#666;">${optionsText}</span>` : ''}
-                    <span>${item.price.toFixed(2)} ₪ ליחידה</span>
-                </div>
-            </div>
-            <div class="cart-item-quantity">
-                <button class="decrease-quantity" data-cart-index="${cart.indexOf(item)}">-</button>
-                <span>${item.quantity}</span>
-                <button class="increase-quantity" data-cart-index="${cart.indexOf(item)}">+</button>
-            </div>
-            <button class="remove-from-cart" data-cart-index="${cart.indexOf(item)}" title="הסר מהעגלה" style="background:#dc3545;color:#fff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1em;margin-right:8px;">🗑</button>
-            <span>סה"כ: ${(item.price * item.quantity).toFixed(2)} ₪</span>
-        `;
-        cartItemsList.appendChild(listItem);
-        subtotal += item.price * item.quantity;
-    });
-    
-    calculateShipping();
-    const discount = applyCouponDiscount();
-    total = subtotal + shippingCost - discount;
-    
-    cartSubtotalElement.textContent = subtotal.toFixed(2);
-    shippingCostElement.textContent = shippingCost.toFixed(2);
-    cartTotalElement.textContent = total.toFixed(2);
-    
-    if (cart.length === 0) {
-        const emptyCartMessage = document.createElement('li');
-        emptyCartMessage.textContent = 'העגלה ריקה';
-        cartItemsList.appendChild(emptyCartMessage);
-        checkoutButton.disabled = true;
-        shippingInfoElement.innerHTML = '';
-    } else {
-        checkoutButton.disabled = false;
-    }
-    
-    saveCartToStorage();
-}
-function removeFromCart(cartIndex) {
-    cart.splice(cartIndex, 1);
-    updateCartDisplay();
-    saveCartToStorage();
-}
+
+        function updateCartDisplay() {
+            cartItemsList.innerHTML = '';
+            subtotal = 0;
+            
+            cart.forEach(item => {
+                const listItem = document.createElement('li');
+                let optionsText = '';
+                if (item.selectedOptions) {
+                    Object.keys(item.selectedOptions).forEach(key => {
+                        if (item.selectedOptions[key]) {
+                            optionsText += `${key}: ${item.selectedOptions[key]} `;
+                        }
+                    });
+                }
+                
+                const freebieTag = item.isFreebie ? '<span class="freebie-badge">מתנה</span>' : '';
+                
+                listItem.innerHTML = `
+                    <div class="cart-item-details">
+                        <img src="${item.displayImage || item.image}" alt="${item.name}">
+                        <div class="cart-item-info">
+                            <span>${freebieTag}${item.name}</span>
+                            ${optionsText ? `<span style="font-size:0.9em;color:#666;">${optionsText}</span>` : ''}
+                            <span>${item.price.toFixed(2)} ₪ ליחידה</span>
+                        </div>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="decrease-quantity" data-cart-index="${cart.indexOf(item)}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="increase-quantity" data-cart-index="${cart.indexOf(item)}">+</button>
+                    </div>
+                    <button class="remove-from-cart" data-cart-index="${cart.indexOf(item)}" title="הסר מהעגלה" style="background:#dc3545;color:#fff;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:1em;margin-right:8px;">🗑</button>
+                    <span>סה"כ: ${(item.price * item.quantity).toFixed(2)} ₪</span>
+                `;
+                cartItemsList.appendChild(listItem);
+                subtotal += item.price * item.quantity;
+            });
+            
+            calculateShipping();
+            const discount = applyCouponDiscount();
+            total = subtotal + shippingCost - discount;
+            
+            cartSubtotalElement.textContent = subtotal.toFixed(2);
+            shippingCostElement.textContent = shippingCost.toFixed(2);
+            cartTotalElement.textContent = total.toFixed(2);
+            
+            if (cart.length === 0) {
+                const emptyCartMessage = document.createElement('li');
+                emptyCartMessage.textContent = 'העגלה ריקה';
+                cartItemsList.appendChild(emptyCartMessage);
+                checkoutButton.disabled = true;
+                shippingInfoElement.innerHTML = '';
+            } else {
+                checkoutButton.disabled = false;
+            }
+            
+            saveCartToStorage();
+        }
+
+        function removeFromCart(cartIndex) {
+            cart.splice(cartIndex, 1);
+            updateCartDisplay();
+        }
 
         function addToCart(productId, selectedOptions, displayImage, finalPrice, isFreebie = false) {
             const productToAdd = products.find(p => p.id === productId);
@@ -1360,16 +1379,15 @@ function removeFromCart(cartIndex) {
             cartContainer.style.display = 'block';
         }
 
-function changeQuantity(cartIndex, change) {
-    if (cart[cartIndex]) {
-        cart[cartIndex].quantity += change;
-        if (cart[cartIndex].quantity < 1) {
-            cart.splice(cartIndex, 1);
+        function changeQuantity(cartIndex, change) {
+            if (cart[cartIndex]) {
+                cart[cartIndex].quantity += change;
+                if (cart[cartIndex].quantity < 1) {
+                    cart.splice(cartIndex, 1);
+                }
+                updateCartDisplay();
+            }
         }
-        updateCartDisplay();
-        saveCartToStorage();
-    }
-}
 
         cartItemsList.addEventListener('click', (event) => {
             const cartIndex = parseInt(event.target.dataset.cartIndex);
@@ -1383,89 +1401,87 @@ function changeQuantity(cartIndex, change) {
                 }
             }
         });
-applyCouponBtn.addEventListener('click', async () => {
-    const code = couponInput.value.trim();
-    if (!code) {
-        couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>';
-        return;
-    }
-    
-    if (!settings || !settings.Coupons) {
-        couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>';
-        return;
-    }
-    
-    const coupon = settings.Coupons.find(c => c.Code === code);
-    
-    if (!coupon) {
-        couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>';
-        return;
-    }
-    
-    // בדיקת תוקף
-    if (coupon.ExpiryDate) {
-        const expiry = new Date(coupon.ExpiryDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // איפוס השעה להשוואה נכונה
-        
-        if (expiry < today) {
-            couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>';
-            return;
-        }
-    }
-    
-    // הסרת קופון קודם אם היה
-    if (appliedCoupon) {
-        // הסרת מוצר מתנה מהעגלה אם היה
-        if (appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
-            cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
-        }
-        couponMessage.innerHTML = '<span style="color: #ff9800;">הקופון הקודם הוחלף</span>';
-    }
-    
-    appliedCoupon = coupon;
-    
-    if (coupon.Type === 'free_product' && coupon.ProductId) {
-        const freeProduct = products.find(p => p.id === coupon.ProductId);
-        if (freeProduct) {
-            const exists = cart.find(item => item.id === coupon.ProductId && item.isFreebie);
-            if (!exists) {
-                if (freeProduct.customFields && freeProduct.customFields.length > 0) {
-                    const hasUnfilledRequired = freeProduct.customFields.some(field => {
-                        if (!field.required) return false;
-                        if (coupon.SelectedOptions && coupon.SelectedOptions[field.name]) return false;
-                        return true;
-                    });
-                    
-                    const hasTextFields = freeProduct.customFields.some(field => field.type === 'text');
-                    
-                    if (hasUnfilledRequired || hasTextFields) {
-                        couponLockedOptions = coupon.SelectedOptions || {};
-                        isCouponProduct = true;
-                        openProductModal(coupon.ProductId, true);
-                        couponMessage.innerHTML = '<span style="color: #3498db;">אנא מלא את הפרטים החסרים למוצר המתנה</span>';
-                        return;
+
+        applyCouponBtn.addEventListener('click', async () => {
+            const code = couponInput.value.trim();
+            if (!code) {
+                couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>';
+                return;
+            }
+            
+            if (!settings || !settings.Coupons) {
+                couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>';
+                return;
+            }
+            
+            const coupon = settings.Coupons.find(c => c.Code === code);
+            
+            if (!coupon) {
+                couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>';
+                return;
+            }
+            
+            // בדיקת תוקף
+            if (coupon.ExpiryDate) {
+                const expiry = new Date(coupon.ExpiryDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                if (expiry < today) {
+                    couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>';
+                    return;
+                }
+            }
+            
+            // הסרת קופון קודם אם היה
+            if (appliedCoupon) {
+                if (appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
+                    cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
+                }
+                couponMessage.innerHTML = '<span style="color: #ff9800;">הקופון הקודם הוחלף</span>';
+            }
+            
+            appliedCoupon = coupon;
+            
+            if (coupon.Type === 'free_product' && coupon.ProductId) {
+                const freeProduct = products.find(p => p.id === coupon.ProductId);
+                if (freeProduct) {
+                    const exists = cart.find(item => item.id === coupon.ProductId && item.isFreebie);
+                    if (!exists) {
+                        if (freeProduct.customFields && freeProduct.customFields.length > 0) {
+                            const hasUnfilledRequired = freeProduct.customFields.some(field => {
+                                if (!field.required) return false;
+                                if (coupon.SelectedOptions && coupon.SelectedOptions[field.name]) return false;
+                                return true;
+                            });
+                            
+                            const hasTextFields = freeProduct.customFields.some(field => field.type === 'text');
+                            
+                            if (hasUnfilledRequired || hasTextFields) {
+                                couponLockedOptions = coupon.SelectedOptions || {};
+                                isCouponProduct = true;
+                                openProductModal(coupon.ProductId, true);
+                                couponMessage.innerHTML = '<span style="color: #3498db;">אנא מלא את הפרטים החסרים למוצר המתנה</span>';
+                                return;
+                            }
+                        }
+                        
+                        addToCart(
+                            coupon.ProductId,
+                            coupon.SelectedOptions || {},
+                            freeProduct.image,
+                            0,
+                            true
+                        );
                     }
                 }
-                
-                addToCart(
-                    coupon.ProductId,
-                    coupon.SelectedOptions || {},
-                    freeProduct.image,
-                    0,
-                    true
-                );
             }
-        }
-    }
-    
-    updateCartDisplay();
-    couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
-    
-    // לא נוסיף disable - נאפשר החלפת קופונים
-    // couponInput.disabled = true;
-    // applyCouponBtn.disabled = true;
-});
+            
+            updateCartDisplay();
+            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+            couponInput.disabled = true;
+            applyCouponBtn.disabled = true;
+        });
 
         checkoutButton.addEventListener('click', () => {
             if (cart.length > 0) {
@@ -1606,75 +1622,53 @@ applyCouponBtn.addEventListener('click', async () => {
             currentModalProductId = product.id;
         }
 
-function updateModalPrice() {
-    const product = products.find(p => p.id === currentModalProductId);
-    if (!product) return;
-    
-    // מתחילים ממחיר הבסיס (רגיל או מבצע)
-    const basePrice = getEffectivePrice(product);
-    let totalPrice = basePrice;
-    
-    // מוסיפים עלויות נוספות מהשדות המותאמים
-    if (product.customFields) {
-        product.customFields.forEach((field, index) => {
-            const fieldElement = document.getElementById(`custom-field-${index}`);
-            if (!fieldElement) return;
+        // פונקציה מתוקנת לעדכון מחיר במודל - ללא כפילות
+        function updateModalPrice() {
+            const product = products.find(p => p.id === currentModalProductId);
+            if (!product) return;
             
-            const fieldExtraPrice = parseFloat(field.extraPrice) || 0;
+            // מחיר בסיס (רגיל או מבצע)
+            const basePrice = getEffectivePrice(product);
+            let totalPrice = basePrice;
             
-            if (field.type === 'select' && fieldElement.value) {
-                // עלות השדה עצמו
-                totalPrice += fieldExtraPrice;
-                
-                // עלות האפשרות הנבחרת
-                const selectedOption = fieldElement.options[fieldElement.selectedIndex];
-                const optionExtraPrice = parseFloat(selectedOption.dataset.extraPrice) || 0;
-                totalPrice += optionExtraPrice;
-            } else if (field.type === 'text' && fieldElement.value) {
-                totalPrice += fieldExtraPrice;
+            // הוספת עלויות נוספות מהשדות
+            if (product.customFields) {
+                product.customFields.forEach((field, index) => {
+                    const fieldElement = document.getElementById(`custom-field-${index}`);
+                    if (!fieldElement) return;
+                    
+                    const fieldExtraPrice = parseFloat(field.extraPrice) || 0;
+                    
+                    if (field.type === 'select' && fieldElement.value) {
+                        totalPrice += fieldExtraPrice;
+                        const selectedOption = fieldElement.options[fieldElement.selectedIndex];
+                        const optionExtraPrice = parseFloat(selectedOption.dataset.extraPrice) || 0;
+                        totalPrice += optionExtraPrice;
+                    } else if (field.type === 'text' && fieldElement.value) {
+                        totalPrice += fieldExtraPrice;
+                    }
+                });
             }
-        });
-    }
-    
-    currentProductPrice = totalPrice;
-    
-    // תצוגת המחיר
-    const onSale = isProductOnSale(product);
-    if (onSale) {
-        // חישוב המחיר המקורי עם התוספות
-        const originalBasePrice = product.price;
-        const extraCost = totalPrice - basePrice; // ההפרש בין המחיר הסופי למחיר המבצע
-        const originalTotalPrice = originalBasePrice + extraCost;
-        
-        modalProductPrice.innerHTML = `
-            <span class="price on-sale">
-                <span class="original-price">${originalTotalPrice.toFixed(2)} ₪</span>
-                <span class="sale-price">${totalPrice.toFixed(2)} ₪</span>
-            </span>
-        `;
-    } else {
-        modalProductPrice.textContent = `${totalPrice.toFixed(2)} ₪`;
-    }
-}
             
             currentProductPrice = totalPrice;
             
+            // תצוגת מחיר
             const onSale = isProductOnSale(product);
             if (onSale) {
-                const basePrice = product.price;
-                const baseSalePrice = product.salePrice;
-                const extraCost = totalPrice - baseSalePrice;
-                const originalTotal = basePrice + extraCost;
+                const originalBasePrice = product.price;
+                const extraCost = totalPrice - basePrice;
+                const originalTotalPrice = originalBasePrice + extraCost;
                 
                 modalProductPrice.innerHTML = `
                     <span class="price on-sale">
-                        <span class="original-price">${originalTotal.toFixed(2)} ₪</span>
+                        <span class="original-price">${originalTotalPrice.toFixed(2)} ₪</span>
                         <span class="sale-price">${totalPrice.toFixed(2)} ₪</span>
                     </span>
                 `;
             } else {
                 modalProductPrice.textContent = `${totalPrice.toFixed(2)} ₪`;
             }
+        }
 
         modalAddToCartBtn.addEventListener('click', function() {
             const product = products.find(p => p.id === currentModalProductId);
@@ -1755,110 +1749,111 @@ function updateModalPrice() {
         });
 
         function renderPayPalButton() {
-    const container = document.getElementById('paypal-button-container');
-    if (!container) return;
-    container.innerHTML = "";
+            const container = document.getElementById('paypal-button-container');
+            if (!container) return;
+            container.innerHTML = "";
 
-    paypal.Buttons({
-        style: {
-            color: 'blue',
-            shape: 'pill',
-            label: 'pay',
-            height: 40
-        },
-        createOrder: function(data, actions) {
-            return actions.order.create({
-                purchase_units: [{
-                    amount: {
-                        value: total.toFixed(2),
-                        currency_code: 'ILS'
-                    },
-                    description: 'רכישת חולצות כדורגל'
-                }]
-            });
-        },
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(async function(details) {
-                try {
-                    const name = document.getElementById('name').value;
-                    const email = document.getElementById('email').value;
-                    const phone = document.getElementById('phone').value;
-                    const address = document.getElementById('address').value;
-
-                    const orderRef = await db.collection('orders').add({
-                        customerName: name,
-                        customerEmail: email,
-                        customerPhone: phone,
-                        customerAddress: address,
-                        items: cart.map(item => ({
-                            productId: item.id,
-                            productName: item.name,
-                            name: item.name,
-                            quantity: item.quantity,
-                            price: item.price,
-                            originalPrice: item.originalPrice || null,
-                            selectedOptions: item.selectedOptions || null,
-                            isFreebie: item.isFreebie || false
-                        })),
-                        subtotal: parseFloat(subtotal.toFixed(2)),
-                        shippingCost: parseFloat(shippingCost.toFixed(2)),
-                        totalAmount: parseFloat(total.toFixed(2)),
-                        appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                        couponDetails: appliedCoupon || null,
-                        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        status: 'completed',
-                        completed: false,
-                        paymentType: 'paypal',
-                        paypalOrderId: details.id
+            paypal.Buttons({
+                style: {
+                    color: 'blue',
+                    shape: 'pill',
+                    label: 'pay',
+                    height: 40
+                },
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toFixed(2),
+                                currency_code: 'ILS'
+                            },
+                            description: 'רכישת חולצות כדורגל'
+                        }]
                     });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(async function(details) {
+                        try {
+                            const name = document.getElementById('name').value;
+                            const email = document.getElementById('email').value;
+                            const phone = document.getElementById('phone').value;
+                            const address = document.getElementById('address').value;
 
-                    const emailSent = await sendReceiptEmail({
-                        orderId: orderRef.id,
-                        customerName: name,
-                        customerEmail: email,
-                        customerPhone: phone,
-                        customerAddress: address,
-                        items: cart,
-                        subtotal: subtotal,
-                        shippingCost: shippingCost,
-                        totalAmount: total,
-                        appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                        couponDetails: appliedCoupon
+                            const orderRef = await db.collection('orders').add({
+                                customerName: name,
+                                customerEmail: email,
+                                customerPhone: phone,
+                                customerAddress: address,
+                                items: cart.map(item => ({
+                                    productId: item.id,
+                                    productName: item.name,
+                                    name: item.name,
+                                    quantity: item.quantity,
+                                    price: item.price,
+                                    originalPrice: item.originalPrice || null,
+                                    selectedOptions: item.selectedOptions || null,
+                                    isFreebie: item.isFreebie || false
+                                })),
+                                subtotal: parseFloat(subtotal.toFixed(2)),
+                                shippingCost: parseFloat(shippingCost.toFixed(2)),
+                                totalAmount: parseFloat(total.toFixed(2)),
+                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                                couponDetails: appliedCoupon || null,
+                                orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+                                status: 'completed',
+                                completed: false,
+                                paymentType: 'paypal',
+                                paypalOrderId: details.id
+                            });
+
+                            const emailSent = await sendReceiptEmail({
+                                orderId: orderRef.id,
+                                customerName: name,
+                                customerEmail: email,
+                                customerPhone: phone,
+                                customerAddress: address,
+                                items: cart,
+                                subtotal: subtotal,
+                                shippingCost: shippingCost,
+                                totalAmount: total,
+                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                                couponDetails: appliedCoupon
+                            });
+
+                            if (emailSent) {
+                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
+                            } else {
+                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
+                            }
+
+                            cart = [];
+                            appliedCoupon = null;
+                            couponInput.value = '';
+                            couponInput.disabled = false;
+                            applyCouponBtn.disabled = false;
+                            couponMessage.innerHTML = '';
+                            localStorage.removeItem('vipshirts_cart');
+                            localStorage.removeItem('vipshirts_coupon');
+                            updateCartDisplay();
+                            checkoutModal.style.display = 'none';
+                            checkoutForm.reset();
+
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
+                        }
                     });
-
-                    if (emailSent) {
-                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
-                    } else {
-                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
-                    }
-
-                    cart = [];
-                    appliedCoupon = null;
-                    couponInput.value = '';
-                    couponInput.disabled = false;
-                    applyCouponBtn.disabled = false;
-                    couponMessage.innerHTML = '';
-                    localStorage.removeItem('vipshirts_cart');
-                    localStorage.removeItem('vipshirts_coupon');
-                    updateCartDisplay();
-                    checkoutModal.style.display = 'none';
-                    checkoutForm.reset();
-
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
+                },
+                onCancel: function(data) {
+                    alert('התשלום בוטל.');
+                },
+                onError: function(err) {
+                    alert('שגיאה בתשלום: נסה שוב.');
+                    console.error(err);
                 }
-            });
-        }, // סגירה נכונה של onApprove עם פסיק להמשך
-        onCancel: function(data) {
-            alert('התשלום בוטל.');
-        },
-        onError: function(err) {
-            alert('שגיאה בתשלום: נסה שוב.');
-            console.error(err);
+            }).render('#paypal-button-container');
         }
-    }).render('#paypal-button-container');
-}
+
         const EMAILJS_SERVICE_ID = 'service_pypll0n';
         const EMAILJS_TEMPLATE_ID = 'vipshirts';
         const EMAILJS_PUBLIC_KEY = 'f-U3pdugkQiavzAvU';
@@ -1959,13 +1954,13 @@ function updateModalPrice() {
             }
         }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadSettings();
-    await loadAnnouncements();
-    await fetchProducts();
-    loadCartFromStorage(); // הוסף את השורה הזו
-    updateCartDisplay();
-});
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSettings();
+            await loadAnnouncements();
+            await fetchProducts();
+            loadCartFromStorage();
+            updateCartDisplay();
+        });
     </script>
 </body>
 </html>
