@@ -849,15 +849,15 @@
                     </div>
                     
                     <div class="sale-info-box">
-                        <h4>⭐ הגדרות מבצע (אופציונלי)</h4>
+                        <h4>הגדרות מבצע (אופציונלי)</h4>
                         <div class="form-group">
-                            <label for="product-sale-price">💰 מחיר מבצע:</label>
+                            <label for="product-sale-price">מחיר מבצע:</label>
                             <input type="number" id="product-sale-price" step="0.01" min="0" placeholder="השאר ריק אם אין מבצע">
                             <small>אם תזין מחיר מבצע, המוצר יוצג עם תג הנחה</small>
                         </div>
                         
                         <div class="form-group">
-                            <label for="product-sale-end">📅 תאריך סיום מבצע:</label>
+                            <label for="product-sale-end">תאריך סיום מבצע:</label>
                             <input type="date" id="product-sale-end">
                             <small>אם ריק, המבצע לא יפוג. אם מלא, המבצע יסתיים בתאריך זה</small>
                         </div>
@@ -873,7 +873,7 @@
                     <div class="form-group">
                         <label>תמונה: *</label>
                         <div class="image-upload-container" id="product-image-upload">
-                            <p>📸 לחץ או גרור תמונה לכאן</p>
+                            <p>לחץ או גרור תמונה לכאן</p>
                             <input type="file" id="product-image-file" accept="image/*" style="display: none;">
                             <img id="product-image-preview" class="image-preview">
                             <div id="product-upload-status" class="upload-status"></div>
@@ -1196,17 +1196,17 @@
             
             // Upload to ImgBB
             container.classList.add('uploading');
-            status.textContent = '⏳ מעלה תמונה...';
+            status.textContent = 'מעלה תמונה...';
             status.className = 'upload-status';
             
             try {
                 const url = await uploadImageToImgBB(file);
                 urlInput.value = url;
-                status.textContent = '✅ תמונה הועלתה בהצלחה!';
+                status.textContent = 'תמונה הועלתה בהצלחה!';
                 status.classList.add('success');
                 container.classList.remove('uploading');
             } catch (error) {
-                status.textContent = '❌ שגיאה בהעלאת תמונה';
+                status.textContent = 'שגיאה בהעלאת תמונה';
                 status.classList.add('error');
                 container.classList.remove('uploading');
                 alert('שגיאה בהעלאת תמונה. אנא נסה שוב.');
@@ -1885,15 +1885,15 @@
                 </div>
                 
                 <div class="sale-info-box">
-                    <h4>⭐ הגדרות מבצע (אופציונלי)</h4>
+                    <h4>הגדרות מבצע (אופציונלי)</h4>
                     <div class="form-group">
-                        <label for="edit-product-sale-price">💰 מחיר מבצע:</label>
+                        <label for="edit-product-sale-price">מחיר מבצע:</label>
                         <input type="number" id="edit-product-sale-price" step="0.01" min="0" value="${product.salePrice || ''}" placeholder="השאר ריק אם אין מבצע">
                         <small>אם תזין מחיר מבצע, המוצר יוצג עם תג הנחה</small>
                     </div>
                     
                     <div class="form-group">
-                        <label for="edit-product-sale-end">📅 תאריך סיום מבצע:</label>
+                        <label for="edit-product-sale-end">תאריך סיום מבצע:</label>
                         <input type="date" id="edit-product-sale-end" value="${product.saleEndDate || ''}">
                         <small>אם ריק, המבצע לא יפוג</small>
                     </div>
@@ -1910,7 +1910,7 @@
                     <label>תמונה נוכחית:</label>
                     <img src="${product.image}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px;">
                     <div class="image-upload-container" id="edit-product-image-upload">
-                        <p>📸 לחץ או גרור תמונה חדשה (אופציונלי)</p>
+                        <p>לחץ או גרור תמונה חדשה (אופציונלי)</p>
                         <input type="file" id="edit-product-image-file" accept="image/*" style="display: none;">
                         <img id="edit-product-image-preview" class="image-preview">
                         <div id="edit-product-upload-status" class="upload-status"></div>
