@@ -14,8 +14,13 @@
             color: #333;
             direction: rtl;
             overflow-x: hidden;
+            transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
+        body.cart-open {
+            margin-right: 33.333vw;
+        }
+
         #announcement-bar {
             background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
             color: white;
@@ -28,41 +33,41 @@
             overflow: hidden;
             min-height: 20px;
         }
-        
+
         .announcement-text {
             animation: fadeInOut 0.5s ease-in-out;
         }
-        
+
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translateY(-10px); }
             100% { opacity: 1; transform: translateY(0); }
         }
-        
-header {
-    background: #222;
-    color: #fff;
-    padding: 45px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    font-size: 2.1em;
-    letter-spacing: 3px;
-    border-bottom-left-radius: 16% 8%;
-    border-bottom-right-radius: 16% 8%;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-}
 
-header img {
-    width: 150px;
-    height: auto;
-    margin: 0;
-}
+        header {
+            background: #222;
+            color: #fff;
+            padding: 45px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            font-size: 2.1em;
+            letter-spacing: 3px;
+            border-bottom-left-radius: 16% 8%;
+            border-bottom-right-radius: 16% 8%;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        }
 
-header h1 {
-    margin: 0;
-    line-height: 1.1;
-}
+        header img {
+            width: 150px;
+            height: auto;
+            margin: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            line-height: 1.1;
+        }
 
         #cart-toggle-button {
             position: fixed;
@@ -78,11 +83,14 @@ header h1 {
             cursor: pointer;
             box-shadow: 0 2px 8px 0 rgba(0,0,0,0.12);
             z-index: 1001;
-            transition: background 0.2s, transform 0.2s;
+            transition: background 0.2s, transform 0.2s, left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
         #cart-toggle-button:hover {
             background: #c82333;
             transform: scale(1.04) rotate(-1deg);
+        }
+        body.cart-open #cart-toggle-button {
+            left: calc(20px + 33.333vw);
         }
 
         #filters {
@@ -111,7 +119,7 @@ header h1 {
             max-width: 1200px;
             padding: 0 20px;
         }
-        
+
         .category-filter button {
             padding: 10px 20px;
             border: none;
@@ -123,13 +131,13 @@ header h1 {
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        
+
         .category-filter button:hover {
             background: #f0f0f0;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        
+
         .category-filter button.active {
             background: #dc3545;
             color: white;
@@ -141,6 +149,7 @@ header h1 {
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 32px;
         }
+
         .product-card {
             background: #fff;
             border-radius: 24px 24px 14px 14px;
@@ -243,25 +252,28 @@ header h1 {
             background: #c82333;
             transform: scale(1.05);
         }
+
+        /* ===== CART SLIDE PANEL ===== */
         #cart-container {
             position: fixed;
-            top: 80px;
-            left: 20px;
+            top: 0;
+            right: 0;
+            width: 33.333vw;
+            height: 100vh;
             background: #fff;
-            border: 2px solid #ffdddd;
-            border-radius: 20px;
-            padding: 16px 14px 20px 14px;
-            box-shadow: 0 2px 18px 0 rgba(0,0,0,0.11);
-            max-height: 80vh;
+            border-left: 2px solid #ffdddd;
+            box-shadow: -4px 0 20px 0 rgba(0,0,0,0.13);
             overflow-y: auto;
-            width: 370px;
-            display: none;
             z-index: 1000;
-            transition: box-shadow 0.2s;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 24px 18px 30px 18px;
+            box-sizing: border-box;
         }
-        #cart-container:active, #cart-container:focus-within {
-            box-shadow: 0 4px 24px 0 #dc354533;
+        #cart-container.open {
+            transform: translateX(0);
         }
+
         #cart h2 {
             margin: 0 0 13px 0;
             font-size: 1.3em;
@@ -451,6 +463,16 @@ header h1 {
             border: 1.5px solid #dc3545;
             outline: none;
         }
+
+        .address-row {
+            display: flex;
+            gap: 10px;
+        }
+        .address-row .form-group {
+            flex: 1;
+            min-width: 0;
+        }
+
         .form-actions {
             text-align: center;
             margin-top: 15px;
@@ -646,7 +668,7 @@ header h1 {
             font-weight: 900;
             margin-right: 8px;
         }
-        
+
         .contact-section {
             max-width: 600px;
             margin: 50px auto;
@@ -668,8 +690,8 @@ header h1 {
             padding: 30px;
             border-radius: 20px;
             direction: rtl;
-            max-width: 800px; 
-            margin: 50px auto; 
+            max-width: 800px;
+            margin: 50px auto;
             width: calc(100% - 40px);
             border: 1px solid #333;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -711,7 +733,7 @@ header h1 {
             line-height: 1.6;
             margin: 0;
         }
-        
+
         @media (max-width: 600px) {
             #product-modal .modal-content {
                 flex-direction: column;
@@ -734,23 +756,41 @@ header h1 {
                 width: 90px;
                 height: 90px;
             }
+            #cart-container {
+                width: 85vw;
+            }
+            body.cart-open {
+                margin-right: 85vw;
+            }
+            body.cart-open #cart-toggle-button {
+                left: calc(20px + 85vw);
+            }
+            .address-row {
+                flex-direction: column;
+                gap: 0;
+            }
         }
         @media (max-width: 800px) {
             main#products-container {
                 grid-template-columns: 1fr;
                 padding: 24px 2vw 0 2vw;
             }
-            #cart-container { 
-                width: 97vw; 
-                left: 1.5vw; 
+            #cart-container {
+                width: 70vw;
+            }
+            body.cart-open {
+                margin-right: 70vw;
+            }
+            body.cart-open #cart-toggle-button {
+                left: calc(20px + 70vw);
             }
         }
-        
+
         body {
             display: flex;
             flex-direction: column;
         }
-        
+
         #announcement-bar,
         header,
         #cart-toggle-button,
@@ -760,7 +800,7 @@ header h1 {
         #product-modal {
             flex-shrink: 0;
         }
-        
+
         .contact-section {
             order: 2;
             flex-shrink: 0;
@@ -768,7 +808,7 @@ header h1 {
             max-width: 600px;
             box-sizing: border-box;
         }
-        
+
         .my-about-card {
             order: 1;
             flex-shrink: 0;
@@ -784,7 +824,7 @@ header h1 {
             text-align: center;
             padding: 20px 0;
         }
-        
+
         @keyframes logoPulse {
             0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
             50% { filter: drop-shadow(0 0 10px rgba(0,210,255,0.5)); }
@@ -803,14 +843,14 @@ header h1 {
     <div id="announcement-bar">
         <div class="announcement-text"></div>
     </div>
-    
-<header>
-    <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
-    <h1>VIP Shirts</h1>
-</header>
-    
+
+    <header>
+        <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
+        <h1>VIP Shirts</h1>
+    </header>
+
     <button id="cart-toggle-button">הצג/הסתר עגלת קניות</button>
-    
+
     <div id="filters" style="display:flex;gap:10px;justify-content:center;margin:20px;">
         <input type="text" id="search-input" placeholder="חפש מוצר..." />
         <select id="sort-select">
@@ -825,7 +865,8 @@ header h1 {
     </div>
 
     <main id="products-container"></main>
-    
+
+    <!-- CART SLIDE PANEL -->
     <div id="cart-container">
         <div id="cart">
             <h2>עגלת קניות</h2>
@@ -846,7 +887,7 @@ header h1 {
             </div>
         </div>
     </div>
-    
+
     <div class="contact-section">
         <h2>צור קשר</h2>
         <form id="contact-form">
@@ -869,7 +910,7 @@ header h1 {
             <button type="submit" style="background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%;">שלח פנייה</button>
         </form>
     </div>
-    
+
     <div class="my-about-card">
         <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts Logo" class="my-about-logo">
         <div class="my-about-content">
@@ -883,7 +924,7 @@ header h1 {
 תודה שבחרתם להיות חלק מהדרך שלנו.</p>
         </div>
     </div>
-    
+
     <div id="checkout-modal">
         <form id="checkout-form">
             <button type="button" class="close-modal-button">&times;</button>
@@ -900,16 +941,37 @@ header h1 {
                 <label for="phone">טלפון:</label>
                 <input type="tel" id="phone" name="phone" required>
             </div>
-            <div class="form-group">
-                <label for="address">כתובת:</label>
-                <input type="text" id="address" name="address" required>
+            <!-- ADDRESS FIELDS: שם רחוב, מספר בית, עיר, מדינה, מיקוד -->
+            <div class="address-row">
+                <div class="form-group">
+                    <label for="address-street">שם רחוב:</label>
+                    <input type="text" id="address-street" name="address-street" required>
+                </div>
+                <div class="form-group" style="flex: 0 0 auto; width: 100px;">
+                    <label for="address-house">מספר בית:</label>
+                    <input type="text" id="address-house" name="address-house" required>
+                </div>
+            </div>
+            <div class="address-row">
+                <div class="form-group">
+                    <label for="address-city">עיר:</label>
+                    <input type="text" id="address-city" name="address-city" required>
+                </div>
+                <div class="form-group">
+                    <label for="address-country">מדינה:</label>
+                    <input type="text" id="address-country" name="address-country" required value="ישראל">
+                </div>
+                <div class="form-group" style="flex: 0 0 auto; width: 110px;">
+                    <label for="address-zip">מיקוד:</label>
+                    <input type="text" id="address-zip" name="address-zip" required>
+                </div>
             </div>
             <div class="form-group">
                 <div id="paypal-button-container"></div>
             </div>
         </form>
     </div>
-    
+
     <div id="product-modal">
         <div class="modal-content">
             <button class="close-product-modal" type="button">&times;</button>
@@ -931,7 +993,7 @@ header h1 {
     <div class="terms-section">
         <a href="terms.html" style="text-decoration: none; color: #007bff; font-weight: bold; font-family: Arial, sans-serif;">תקנון</a>
     </div>
-    
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
@@ -944,7 +1006,7 @@ header h1 {
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        
+
         const productsContainer = document.getElementById('products-container');
         const cartItemsList = document.getElementById('cart-items');
         const cartSubtotalElement = document.getElementById('cart-subtotal');
@@ -970,7 +1032,7 @@ header h1 {
         const couponMessage = document.getElementById('coupon-message');
         const contactForm = document.getElementById('contact-form');
         const announcementBar = document.querySelector('.announcement-text');
-        
+
         let cart = [];
         let products = [];
         let categories = [];
@@ -987,12 +1049,47 @@ header h1 {
         let currentCategoryFilter = 'all';
         let couponLockedOptions = null;
         let isCouponProduct = false;
+        let cartOpen = false;
+
+        // ===== HELPER: get product categories as array (supports both old .category string and new .categories array) =====
+        function getProductCategories(product) {
+            if (Array.isArray(product.categories) && product.categories.length > 0) {
+                return product.categories;
+            }
+            if (product.category) {
+                return [product.category];
+            }
+            return [];
+        }
+
+        function productInCategory(product, cat) {
+            return getProductCategories(product).includes(cat);
+        }
+
+        // ===== CART SLIDE OPEN/CLOSE =====
+        function openCart() {
+            if (cartOpen) return;
+            cartOpen = true;
+            cartContainer.classList.add('open');
+            document.body.classList.add('cart-open');
+        }
+
+        function closeCart() {
+            if (!cartOpen) return;
+            cartOpen = false;
+            cartContainer.classList.remove('open');
+            document.body.classList.remove('cart-open');
+        }
+
+        function toggleCart() {
+            if (cartOpen) closeCart(); else openCart();
+        }
 
         // טעינת עגלה מ-localStorage
         function loadCartFromStorage() {
             const savedCart = localStorage.getItem('vipshirts_cart');
             const savedCoupon = localStorage.getItem('vipshirts_coupon');
-            
+
             if (savedCart) {
                 try {
                     cart = JSON.parse(savedCart);
@@ -1000,16 +1097,14 @@ header h1 {
                     cart = [];
                 }
             }
-            
+
             if (savedCoupon) {
                 try {
                     const couponData = JSON.parse(savedCoupon);
-                    // בדיקת תוקף קופון
                     if (couponData.ExpiryDate) {
                         const expiry = new Date(couponData.ExpiryDate);
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
-                        
                         if (expiry >= today) {
                             appliedCoupon = couponData;
                             couponInput.value = couponData.Code;
@@ -1017,7 +1112,6 @@ header h1 {
                             applyCouponBtn.disabled = true;
                             couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
                         } else {
-                            // קופון פג תוקפו - נקה אותו
                             localStorage.removeItem('vipshirts_coupon');
                         }
                     } else {
@@ -1034,7 +1128,6 @@ header h1 {
             }
         }
 
-        // שמירת עגלה ל-localStorage
         function saveCartToStorage() {
             localStorage.setItem('vipshirts_cart', JSON.stringify(cart));
             if (appliedCoupon) {
@@ -1043,18 +1136,16 @@ header h1 {
                 localStorage.removeItem('vipshirts_coupon');
             }
         }
-        
+
         async function loadAnnouncements() {
             try {
                 const settingsDoc = await db.collection('Settings').doc('main').get();
                 if (settingsDoc.exists) {
                     const data = settingsDoc.data();
                     announcements = data.Announcements || [];
-                    
                     if (data.Shipping && data.Shipping.FreeThreshold > 0) {
                         announcements.push(`משלוח חינם על קניות מעל ${data.Shipping.FreeThreshold}₪!`);
                     }
-                    
                     if (announcements.length > 0) {
                         showNextAnnouncement();
                         setInterval(showNextAnnouncement, 5000);
@@ -1064,7 +1155,7 @@ header h1 {
                 console.error('Error loading announcements:', error);
             }
         }
-        
+
         function showNextAnnouncement() {
             if (announcements.length === 0) return;
             announcementBar.textContent = announcements[currentAnnouncementIndex];
@@ -1078,28 +1169,18 @@ header h1 {
             let filtered = [...products];
 
             if (currentCategoryFilter !== 'all') {
-                filtered = filtered.filter(p => p.category === currentCategoryFilter);
+                filtered = filtered.filter(p => productInCategory(p, currentCategoryFilter));
             }
 
             const searchValue = searchInput.value.toLowerCase();
             if (searchValue) {
-                filtered = filtered.filter(p =>
-                    p.name.toLowerCase().includes(searchValue)
-                );
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchValue));
             }
 
             if (sortSelect.value === 'price-asc') {
-                filtered.sort((a, b) => {
-                    const priceA = getEffectivePrice(a);
-                    const priceB = getEffectivePrice(b);
-                    return priceA - priceB;
-                });
+                filtered.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
             } else if (sortSelect.value === 'price-desc') {
-                filtered.sort((a, b) => {
-                    const priceA = getEffectivePrice(a);
-                    const priceB = getEffectivePrice(b);
-                    return priceB - priceA;
-                });
+                filtered.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
             }
 
             renderFilteredProducts(filtered);
@@ -1109,9 +1190,7 @@ header h1 {
             if (product.salePrice && product.salePrice > 0) {
                 if (product.saleEndDate) {
                     const endDate = new Date(product.saleEndDate);
-                    if (endDate >= new Date()) {
-                        return product.salePrice;
-                    }
+                    if (endDate >= new Date()) return product.salePrice;
                 } else {
                     return product.salePrice;
                 }
@@ -1121,12 +1200,10 @@ header h1 {
 
         function isProductOnSale(product) {
             if (!product.salePrice || product.salePrice <= 0) return false;
-            
             if (product.saleEndDate) {
                 const endDate = new Date(product.saleEndDate);
                 return endDate >= new Date();
             }
-            
             return true;
         }
 
@@ -1136,16 +1213,22 @@ header h1 {
                 productsContainer.innerHTML = '<p style="text-align: center; width: 100%; padding: 40px;">לא נמצאו מוצרים.</p>';
                 return;
             }
+
+            // Determine badge visibility:
+            // - If filtering by a specific category (not "all") → hide badges entirely
+            // - If showing "all" → show badge only if product is in exactly 1 category
+            const showBadges = (currentCategoryFilter === 'all');
+
             list.forEach(product => {
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                
+
                 const onSale = isProductOnSale(product);
                 const effectivePrice = getEffectivePrice(product);
-                
+
                 let priceHTML = `<p class="price">${effectivePrice.toFixed(2)} ₪</p>`;
                 let saleBadge = '';
-                
+
                 if (onSale) {
                     const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
                     saleBadge = `<div class="sale-badge">-${discount}%</div>`;
@@ -1154,11 +1237,18 @@ header h1 {
                         <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
                     </p>`;
                 }
-                
+
+                // Badge logic: show only when on "all" AND product has exactly one category
+                const cats = getProductCategories(product);
+                let badgeHTML = '';
+                if (showBadges && cats.length === 1) {
+                    badgeHTML = `<div class="category-badge">${cats[0]}</div>`;
+                }
+
                 card.innerHTML = `
                     ${saleBadge}
                     <img src="${product.image}">
-                    ${product.category ? `<div class="category-badge">${product.category}</div>` : ''}
+                    ${badgeHTML}
                     <h3>${product.name}</h3>
                     ${priceHTML}
                     <button onclick="openProductModal('${product.id}')">הוסף לעגלה</button>
@@ -1175,7 +1265,7 @@ header h1 {
         function updateCategoryFilter() {
             const filterDiv = document.getElementById('category-filter');
             filterDiv.innerHTML = '<button class="active" data-category="all">הכל</button>';
-            
+
             categories.forEach(cat => {
                 const btn = document.createElement('button');
                 btn.textContent = cat;
@@ -1183,20 +1273,16 @@ header h1 {
                 btn.addEventListener('click', () => filterByCategory(cat));
                 filterDiv.appendChild(btn);
             });
-            
+
             filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => filterByCategory('all'));
         }
 
         function filterByCategory(category) {
             currentCategoryFilter = category;
-            
             document.querySelectorAll('#category-filter button').forEach(btn => {
                 btn.classList.remove('active');
-                if (btn.dataset.category === category) {
-                    btn.classList.add('active');
-                }
+                if (btn.dataset.category === category) btn.classList.add('active');
             });
-            
             applyFilters();
         }
 
@@ -1208,19 +1294,11 @@ header h1 {
                     categories = settings.Categories || [];
                     updateCategoryFilter();
                 } else {
-                    settings = {
-                        Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 },
-                        Coupons: [],
-                        Categories: []
-                    };
+                    settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [] };
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
-                settings = {
-                    Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 },
-                    Coupons: [],
-                    Categories: []
-                };
+                settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [] };
             }
         }
 
@@ -1229,25 +1307,19 @@ header h1 {
                 const productsSnapshot = await db.collection('soccer_shirts').get();
                 products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 applyFilters();
-            } catch (error) { 
-                alert("שגיאה בטעינת חולצות."); 
+            } catch (error) {
+                alert("שגיאה בטעינת חולצות.");
             }
         }
 
         function calculateShipping() {
-            if (!settings || !settings.Shipping) {
-                shippingCost = 0;
-                return;
-            }
-            
+            if (!settings || !settings.Shipping) { shippingCost = 0; return; }
             const shipping = settings.Shipping;
-            
             if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
                 shippingCost = 0;
                 shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
                 return;
             }
-            
             if (shipping.Method === 'percentage') {
                 shippingCost = (subtotal * shipping.Value) / 100;
             } else if (shipping.Method === 'per_item') {
@@ -1256,7 +1328,6 @@ header h1 {
             } else {
                 shippingCost = shipping.Value;
             }
-            
             if (shipping.FreeThreshold > 0) {
                 const remaining = shipping.FreeThreshold - subtotal;
                 if (remaining > 0) {
@@ -1269,9 +1340,7 @@ header h1 {
 
         function applyCouponDiscount() {
             if (!appliedCoupon) return 0;
-            
             let discount = 0;
-            
             if (appliedCoupon.Type === 'free_shipping') {
                 discount = shippingCost;
                 shippingCost = 0;
@@ -1280,14 +1349,13 @@ header h1 {
             } else if (appliedCoupon.Type === 'percentage_discount') {
                 discount = (subtotal * appliedCoupon.Value) / 100;
             }
-            
             return discount;
         }
 
         function updateCartDisplay() {
             cartItemsList.innerHTML = '';
             subtotal = 0;
-            
+
             cart.forEach(item => {
                 const listItem = document.createElement('li');
                 let optionsText = '';
@@ -1298,9 +1366,8 @@ header h1 {
                         }
                     });
                 }
-                
                 const freebieTag = item.isFreebie ? '<span class="freebie-badge">מתנה</span>' : '';
-                
+
                 listItem.innerHTML = `
                     <div class="cart-item-details">
                         <img src="${item.displayImage || item.image}" alt="${item.name}">
@@ -1321,15 +1388,15 @@ header h1 {
                 cartItemsList.appendChild(listItem);
                 subtotal += item.price * item.quantity;
             });
-            
+
             calculateShipping();
             const discount = applyCouponDiscount();
             total = subtotal + shippingCost - discount;
-            
+
             cartSubtotalElement.textContent = subtotal.toFixed(2);
             shippingCostElement.textContent = shippingCost.toFixed(2);
             cartTotalElement.textContent = total.toFixed(2);
-            
+
             if (cart.length === 0) {
                 const emptyCartMessage = document.createElement('li');
                 emptyCartMessage.textContent = 'העגלה ריקה';
@@ -1339,7 +1406,6 @@ header h1 {
             } else {
                 checkoutButton.disabled = false;
             }
-            
             saveCartToStorage();
         }
 
@@ -1350,7 +1416,7 @@ header h1 {
 
         function addToCart(productId, selectedOptions, displayImage, finalPrice, isFreebie = false) {
             const productToAdd = products.find(p => p.id === productId);
-            
+
             const existingItemIndex = cart.findIndex(item => {
                 if (item.id !== productToAdd.id) return false;
                 if (item.isFreebie !== isFreebie) return false;
@@ -1358,15 +1424,14 @@ header h1 {
                 if (!item.selectedOptions || !selectedOptions) return false;
                 return JSON.stringify(item.selectedOptions) === JSON.stringify(selectedOptions);
             });
-            
+
             if (existingItemIndex !== -1) {
                 cart[existingItemIndex].quantity++;
             } else {
                 const originalPrice = isProductOnSale(productToAdd) && !isFreebie ? productToAdd.price : null;
-                
-                cart.push({ 
-                    ...productToAdd, 
-                    quantity: 1, 
+                cart.push({
+                    ...productToAdd,
+                    quantity: 1,
                     price: finalPrice,
                     originalPrice: originalPrice,
                     selectedOptions: selectedOptions,
@@ -1374,17 +1439,14 @@ header h1 {
                     isFreebie: isFreebie
                 });
             }
-            
             updateCartDisplay();
-            cartContainer.style.display = 'block';
+            openCart();
         }
 
         function changeQuantity(cartIndex, change) {
             if (cart[cartIndex]) {
                 cart[cartIndex].quantity += change;
-                if (cart[cartIndex].quantity < 1) {
-                    cart.splice(cartIndex, 1);
-                }
+                if (cart[cartIndex].quantity < 1) cart.splice(cartIndex, 1);
                 updateCartDisplay();
             }
         }
@@ -1392,57 +1454,36 @@ header h1 {
         cartItemsList.addEventListener('click', (event) => {
             const cartIndex = parseInt(event.target.dataset.cartIndex);
             if (!isNaN(cartIndex)) {
-                if (event.target.classList.contains('increase-quantity')) {
-                    changeQuantity(cartIndex, 1);
-                } else if (event.target.classList.contains('decrease-quantity')) {
-                    changeQuantity(cartIndex, -1);
-                } else if (event.target.classList.contains('remove-from-cart')) {
-                    removeFromCart(cartIndex);
-                }
+                if (event.target.classList.contains('increase-quantity')) changeQuantity(cartIndex, 1);
+                else if (event.target.classList.contains('decrease-quantity')) changeQuantity(cartIndex, -1);
+                else if (event.target.classList.contains('remove-from-cart')) removeFromCart(cartIndex);
             }
         });
 
         applyCouponBtn.addEventListener('click', async () => {
             const code = couponInput.value.trim();
-            if (!code) {
-                couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>';
-                return;
-            }
-            
-            if (!settings || !settings.Coupons) {
-                couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>';
-                return;
-            }
-            
+            if (!code) { couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>'; return; }
+            if (!settings || !settings.Coupons) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>'; return; }
+
             const coupon = settings.Coupons.find(c => c.Code === code);
-            
-            if (!coupon) {
-                couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>';
-                return;
-            }
-            
-            // בדיקת תוקף
+            if (!coupon) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>'; return; }
+
             if (coupon.ExpiryDate) {
                 const expiry = new Date(coupon.ExpiryDate);
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                
-                if (expiry < today) {
-                    couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>';
-                    return;
-                }
+                if (expiry < today) { couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>'; return; }
             }
-            
-            // הסרת קופון קודם אם היה
+
             if (appliedCoupon) {
                 if (appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
                     cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
                 }
                 couponMessage.innerHTML = '<span style="color: #ff9800;">הקופון הקודם הוחלף</span>';
             }
-            
+
             appliedCoupon = coupon;
-            
+
             if (coupon.Type === 'free_product' && coupon.ProductId) {
                 const freeProduct = products.find(p => p.id === coupon.ProductId);
                 if (freeProduct) {
@@ -1454,9 +1495,8 @@ header h1 {
                                 if (coupon.SelectedOptions && coupon.SelectedOptions[field.name]) return false;
                                 return true;
                             });
-                            
                             const hasTextFields = freeProduct.customFields.some(field => field.type === 'text');
-                            
+
                             if (hasUnfilledRequired || hasTextFields) {
                                 couponLockedOptions = coupon.SelectedOptions || {};
                                 isCouponProduct = true;
@@ -1465,18 +1505,11 @@ header h1 {
                                 return;
                             }
                         }
-                        
-                        addToCart(
-                            coupon.ProductId,
-                            coupon.SelectedOptions || {},
-                            freeProduct.image,
-                            0,
-                            true
-                        );
+                        addToCart(coupon.ProductId, coupon.SelectedOptions || {}, freeProduct.image, 0, true);
                     }
                 }
             }
-            
+
             updateCartDisplay();
             couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
             couponInput.disabled = true;
@@ -1493,54 +1526,46 @@ header h1 {
         });
 
         closeModalButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                checkoutModal.style.display = 'none';
-            });
+            button.addEventListener('click', () => { checkoutModal.style.display = 'none'; });
         });
 
-        cartToggleButton.addEventListener('click', () => {
-            cartContainer.style.display = cartContainer.style.display === 'none' ? 'block' : 'none';
-        });
+        cartToggleButton.addEventListener('click', toggleCart);
 
         function openProductModal(productId, isCouponFreebie = false) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
-            
+
             modalProductImage.src = product.image;
             modalProductImage.alt = product.name;
             modalProductTitle.textContent = product.name;
-            
+
             const onSale = isProductOnSale(product);
             const effectivePrice = getEffectivePrice(product);
-            
             currentProductPrice = isCouponFreebie ? 0 : effectivePrice;
-            
+
             if (isCouponFreebie) {
                 modalProductPrice.innerHTML = '<span style="color: #28a745; font-weight: 900;">מתנה - 0.00 ₪</span>';
             } else if (onSale) {
-                const priceHTML = `
+                modalProductPrice.innerHTML = `
                     <span class="price on-sale">
                         <span class="original-price">${product.price.toFixed(2)} ₪</span>
                         <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
-                    </span>
-                `;
-                modalProductPrice.innerHTML = priceHTML;
+                    </span>`;
             } else {
                 modalProductPrice.textContent = `${currentProductPrice.toFixed(2)} ₪`;
             }
-            
+
             modalProductDescription.textContent = product.description || '';
-            
             currentProductOptions = {};
             customOptionsContainer.innerHTML = '';
-            
+
             if (product.customFields && product.customFields.length > 0) {
                 product.customFields.forEach((field, index) => {
                     const optionGroup = document.createElement('div');
                     optionGroup.className = 'option-group';
-                    
+
                     const isLocked = isCouponFreebie && couponLockedOptions && couponLockedOptions[field.name];
-                    
+
                     const label = document.createElement('label');
                     label.textContent = field.name + (field.required ? ' *' : '') + ':';
                     if (field.extraPrice && field.extraPrice > 0 && !isCouponFreebie) {
@@ -1550,13 +1575,13 @@ header h1 {
                         label.appendChild(priceTag);
                     }
                     optionGroup.appendChild(label);
-                    
+
                     if (field.type === 'select') {
                         const select = document.createElement('select');
                         select.id = `custom-field-${index}`;
                         select.dataset.fieldExtraPrice = (!isCouponFreebie && field.extraPrice) ? field.extraPrice : 0;
                         select.innerHTML = '<option value="" data-extra-price="0">בחר ' + field.name + '</option>';
-                        
+
                         field.options.forEach(option => {
                             const opt = document.createElement('option');
                             opt.value = option.value;
@@ -1564,38 +1589,25 @@ header h1 {
                             opt.textContent = option.value + (optionPrice > 0 ? ` (+${optionPrice.toFixed(2)}₪)` : '');
                             opt.dataset.image = option.image || '';
                             opt.dataset.extraPrice = optionPrice;
-                            
-                            if (isLocked && option.value === couponLockedOptions[field.name]) {
-                                opt.selected = true;
-                            }
-                            
+                            if (isLocked && option.value === couponLockedOptions[field.name]) opt.selected = true;
                             select.appendChild(opt);
                         });
-                        
+
                         if (isLocked) {
                             select.disabled = true;
                             select.classList.add('locked-option');
                             currentProductOptions[field.name] = couponLockedOptions[field.name];
-                            
                             const lockedOption = field.options.find(o => o.value === couponLockedOptions[field.name]);
-                            if (lockedOption && lockedOption.image) {
-                                modalProductImage.src = lockedOption.image;
-                            }
+                            if (lockedOption && lockedOption.image) modalProductImage.src = lockedOption.image;
                         }
-                        
+
                         select.addEventListener('change', (e) => {
                             currentProductOptions[field.name] = e.target.value;
                             const selectedOption = field.options.find(o => o.value === e.target.value);
-                            if (selectedOption && selectedOption.image) {
-                                modalProductImage.src = selectedOption.image;
-                            } else {
-                                modalProductImage.src = product.image;
-                            }
-                            if (!isCouponFreebie) {
-                                updateModalPrice();
-                            }
+                            if (selectedOption && selectedOption.image) modalProductImage.src = selectedOption.image;
+                            else modalProductImage.src = product.image;
+                            if (!isCouponFreebie) updateModalPrice();
                         });
-                        
                         optionGroup.appendChild(select);
                     } else if (field.type === 'text') {
                         const input = document.createElement('input');
@@ -1603,42 +1615,32 @@ header h1 {
                         input.id = `custom-field-${index}`;
                         input.placeholder = 'הזן ' + field.name;
                         input.dataset.fieldExtraPrice = (!isCouponFreebie && field.extraPrice) ? field.extraPrice : 0;
-                        
                         input.addEventListener('input', (e) => {
                             currentProductOptions[field.name] = e.target.value;
-                            if (!isCouponFreebie) {
-                                updateModalPrice();
-                            }
+                            if (!isCouponFreebie) updateModalPrice();
                         });
-                        
                         optionGroup.appendChild(input);
                     }
-                    
                     customOptionsContainer.appendChild(optionGroup);
                 });
             }
-            
+
             productModal.style.display = 'flex';
             currentModalProductId = product.id;
         }
 
-        // פונקציה מתוקנת לעדכון מחיר במודל - ללא כפילות
         function updateModalPrice() {
             const product = products.find(p => p.id === currentModalProductId);
             if (!product) return;
-            
-            // מחיר בסיס (רגיל או מבצע)
+
             const basePrice = getEffectivePrice(product);
             let totalPrice = basePrice;
-            
-            // הוספת עלויות נוספות מהשדות
+
             if (product.customFields) {
                 product.customFields.forEach((field, index) => {
                     const fieldElement = document.getElementById(`custom-field-${index}`);
                     if (!fieldElement) return;
-                    
                     const fieldExtraPrice = parseFloat(field.extraPrice) || 0;
-                    
                     if (field.type === 'select' && fieldElement.value) {
                         totalPrice += fieldExtraPrice;
                         const selectedOption = fieldElement.options[fieldElement.selectedIndex];
@@ -1649,31 +1651,27 @@ header h1 {
                     }
                 });
             }
-            
+
             currentProductPrice = totalPrice;
-            
-            // תצוגת מחיר
+
             const onSale = isProductOnSale(product);
             if (onSale) {
-                const originalBasePrice = product.price;
                 const extraCost = totalPrice - basePrice;
-                const originalTotalPrice = originalBasePrice + extraCost;
-                
+                const originalTotalPrice = product.price + extraCost;
                 modalProductPrice.innerHTML = `
                     <span class="price on-sale">
                         <span class="original-price">${originalTotalPrice.toFixed(2)} ₪</span>
                         <span class="sale-price">${totalPrice.toFixed(2)} ₪</span>
-                    </span>
-                `;
+                    </span>`;
             } else {
                 modalProductPrice.textContent = `${totalPrice.toFixed(2)} ₪`;
             }
         }
 
-        modalAddToCartBtn.addEventListener('click', function() {
+        modalAddToCartBtn.addEventListener('click', function () {
             const product = products.find(p => p.id === currentModalProductId);
             if (!product) return;
-            
+
             if (product.customFields && product.customFields.length > 0) {
                 for (let i = 0; i < product.customFields.length; i++) {
                     const field = product.customFields[i];
@@ -1683,10 +1681,10 @@ header h1 {
                     }
                 }
             }
-            
+
             const currentDisplayImage = modalProductImage.src;
-            addToCart(currentModalProductId, {...currentProductOptions}, currentDisplayImage, currentProductPrice, isCouponProduct);
-            
+            addToCart(currentModalProductId, { ...currentProductOptions }, currentDisplayImage, currentProductPrice, isCouponProduct);
+
             if (isCouponProduct) {
                 couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
                 couponInput.disabled = true;
@@ -1694,7 +1692,7 @@ header h1 {
                 isCouponProduct = false;
                 couponLockedOptions = null;
             }
-            
+
             productModal.style.display = 'none';
             currentProductOptions = {};
         });
@@ -1707,18 +1705,17 @@ header h1 {
         }
 
         closeProductModalBtn.addEventListener('click', closeProductModal);
-        productModal.addEventListener('mousedown', function(e) {
+        productModal.addEventListener('mousedown', function (e) {
             if (e.target === productModal) closeProductModal();
         });
 
-        window.addEventListener('keydown', function(e) {
+        window.addEventListener('keydown', function (e) {
             if (productModal.style.display === 'flex' && e.key === 'Escape') closeProductModal();
             if (checkoutModal.style.display === 'flex' && e.key === 'Escape') checkoutModal.style.display = 'none';
         });
 
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const contactData = {
                 name: document.getElementById('contact-name').value,
                 phone: document.getElementById('contact-phone').value,
@@ -1728,17 +1725,13 @@ header h1 {
                 status: 'open',
                 linkedOrderId: null
             };
-            
             try {
                 const ordersSnapshot = await db.collection('orders')
                     .where('customerPhone', '==', contactData.phone)
-                    .where('customerEmail', '==', contactData.email)
-                    .get();
-                
+                    .where('customerEmail', '==', contactData.email).get();
                 if (!ordersSnapshot.empty && ordersSnapshot.docs.length === 1) {
                     contactData.linkedOrderId = ordersSnapshot.docs[0].id;
                 }
-                
                 await db.collection('ContactLeads').add(contactData);
                 alert('הפנייה נשלחה בהצלחה! ניצור איתך קשר בהקדם.');
                 contactForm.reset();
@@ -1748,36 +1741,38 @@ header h1 {
             }
         });
 
+        // ===== HELPER: build combined address string =====
+        function getFullAddress() {
+            const street = document.getElementById('address-street').value.trim();
+            const house = document.getElementById('address-house').value.trim();
+            const city = document.getElementById('address-city').value.trim();
+            const country = document.getElementById('address-country').value.trim();
+            const zip = document.getElementById('address-zip').value.trim();
+            return `${street} ${house}, ${city}, ${country} ${zip}`;
+        }
+
         function renderPayPalButton() {
             const container = document.getElementById('paypal-button-container');
             if (!container) return;
             container.innerHTML = "";
 
             paypal.Buttons({
-                style: {
-                    color: 'blue',
-                    shape: 'pill',
-                    label: 'pay',
-                    height: 40
-                },
-                createOrder: function(data, actions) {
+                style: { color: 'blue', shape: 'pill', label: 'pay', height: 40 },
+                createOrder: function (data, actions) {
                     return actions.order.create({
                         purchase_units: [{
-                            amount: {
-                                value: total.toFixed(2),
-                                currency_code: 'ILS'
-                            },
+                            amount: { value: total.toFixed(2), currency_code: 'ILS' },
                             description: 'רכישת חולצות כדורגל'
                         }]
                     });
                 },
-                onApprove: function(data, actions) {
-                    return actions.order.capture().then(async function(details) {
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(async function (details) {
                         try {
                             const name = document.getElementById('name').value;
                             const email = document.getElementById('email').value;
                             const phone = document.getElementById('phone').value;
-                            const address = document.getElementById('address').value;
+                            const address = getFullAddress();
 
                             const orderRef = await db.collection('orders').add({
                                 customerName: name,
@@ -1837,84 +1832,48 @@ header h1 {
                             updateCartDisplay();
                             checkoutModal.style.display = 'none';
                             checkoutForm.reset();
-
                         } catch (error) {
                             console.error('Error:', error);
                             alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
                         }
                     });
                 },
-                onCancel: function(data) {
-                    alert('התשלום בוטל.');
-                },
-                onError: function(err) {
-                    alert('שגיאה בתשלום: נסה שוב.');
-                    console.error(err);
-                }
+                onCancel: function () { alert('התשלום בוטל.'); },
+                onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
             }).render('#paypal-button-container');
         }
 
         const EMAILJS_SERVICE_ID = 'service_pypll0n';
         const EMAILJS_TEMPLATE_ID = 'vipshirts';
         const EMAILJS_PUBLIC_KEY = 'f-U3pdugkQiavzAvU';
-
         emailjs.init(EMAILJS_PUBLIC_KEY);
 
         async function sendReceiptEmail(orderData) {
             try {
                 const productsListHTML = orderData.items.map(item => {
                     const finalName = item.productName || item.name || "מוצר VIP";
-                    
-                    const optionsText = item.selectedOptions 
-                        ? Object.entries(item.selectedOptions)
-                            .filter(([_, value]) => value)
-                            .map(([key, value]) => `${key}: ${value}`)
-                            .join(', ')
+                    const optionsText = item.selectedOptions
+                        ? Object.entries(item.selectedOptions).filter(([_, value]) => value).map(([key, value]) => `${key}: ${value}`).join(', ')
                         : '';
-                    
                     const freebieTag = item.isFreebie ? ' <strong style="color: #28a745;">(מתנה)</strong>' : '';
-                    
                     let priceDisplay = `₪${item.price.toFixed(2)}`;
                     if (item.originalPrice && item.originalPrice > item.price && !item.isFreebie) {
-                        priceDisplay = `
-                            <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₪${item.originalPrice.toFixed(2)}</span>
-                            <br>
-                            <span style="color: #e74c3c; font-weight: bold;">₪${item.price.toFixed(2)}</span>
-                        `;
+                        priceDisplay = `<span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₪${item.originalPrice.toFixed(2)}</span><br><span style="color: #e74c3c; font-weight: bold;">₪${item.price.toFixed(2)}</span>`;
                     }
-                    
-                    const productDescription = `
-                        <div style="font-weight: bold; margin-bottom: 4px;">${finalName}${freebieTag}</div>
-                        ${optionsText ? `<div style="font-size: 13px; color: #666;">(${optionsText})</div>` : ''}
-                    `;
-                    
-                    return `
-                        <tr>
-                            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
-                                ${productDescription}
-                            </td>
-                            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
-                                ${item.quantity}
-                            </td>
-                            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
-                                ${priceDisplay}
-                            </td>
-                            <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">
-                                ₪${(item.price * item.quantity).toFixed(2)}
-                            </td>
-                        </tr>
-                    `;
+                    const productDescription = `<div style="font-weight: bold; margin-bottom: 4px;">${finalName}${freebieTag}</div>${optionsText ? `<div style="font-size: 13px; color: #666;">(${optionsText})</div>` : ''}`;
+                    return `<tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${productDescription}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${item.quantity}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${priceDisplay}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">₪${(item.price * item.quantity).toFixed(2)}</td>
+                    </tr>`;
                 }).join('');
 
                 let discountAmount = 0;
                 const coupon = orderData.couponDetails;
-
                 if (orderData.appliedCoupon && coupon) {
-                    if (coupon.Type === 'fixed_discount') {
-                        discountAmount = coupon.Value;
-                    } else if (coupon.Type === 'percentage_discount') {
-                        discountAmount = (orderData.subtotal * coupon.Value) / 100;
-                    }
+                    if (coupon.Type === 'fixed_discount') discountAmount = coupon.Value;
+                    else if (coupon.Type === 'percentage_discount') discountAmount = (orderData.subtotal * coupon.Value) / 100;
                 }
 
                 const templateParams = {
@@ -1925,13 +1884,7 @@ header h1 {
                     phone: orderData.customerPhone,
                     address: orderData.customerAddress,
                     order_id: orderData.orderId,
-                    date: new Date().toLocaleDateString('he-IL', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
+                    date: new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
                     products_list: productsListHTML,
                     subtotal: orderData.subtotal.toFixed(2),
                     coupon_code: orderData.appliedCoupon || '',
@@ -1940,12 +1893,7 @@ header h1 {
                     total_amount: orderData.totalAmount.toFixed(2)
                 };
 
-                const response = await emailjs.send(
-                    EMAILJS_SERVICE_ID,
-                    EMAILJS_TEMPLATE_ID,
-                    templateParams
-                );
-
+                const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
                 console.log('Email sent successfully:', response);
                 return true;
             } catch (error) {
