@@ -1554,64 +1554,69 @@
             return discount;
         }
 
-        function updateCartDisplay() {
-            cartItemsList.innerHTML = '';
-            subtotal = 0;
+function updateCartDisplay() {
+    cartItemsList.innerHTML = '';
+    subtotal = 0;
 
-            if (cart.length === 0) {
-                cartItemsList.innerHTML = `
-                    <div class="empty-cart-message">
-                        <div class="empty-icon">🛒</div>
-                        <p>העגלה ריקה</p>
-                        <p style="font-size: 0.9em; color: #999;">הוסף מוצרים כדי להמשיך</p>
-                    </div>
-                `;
-                shippingInfoElement.innerHTML = '';
-            } else {
-                cart.forEach(item => {
-                    const listItem = document.createElement('li');
-                    let optionsText = '';
-                    if (item.selectedOptions) {
-                        Object.keys(item.selectedOptions).forEach(key => {
-                            if (item.selectedOptions[key]) {
-                                optionsText += `${key}: ${item.selectedOptions[key]} `;
-                            }
-                        });
+    if (cart.length === 0) {
+        cartItemsList.innerHTML = `
+            <div class="empty-cart-message">
+                <div class="empty-icon">🛒</div>
+                <p>העגלה ריקה</p>
+                <p style="font-size: 0.9em; color: #999;">הוסף מוצרים כדי להמשיך</p>
+            </div>
+        `;
+        shippingInfoElement.innerHTML = '';
+    } else {
+        cart.forEach(item => {
+            const listItem = document.createElement('li');
+            let optionsText = '';
+            if (item.selectedOptions) {
+                Object.keys(item.selectedOptions).forEach(key => {
+                    if (item.selectedOptions[key]) {
+                        optionsText += `${key}: ${item.selectedOptions[key]} `;
                     }
-                    const freebieTag = item.isFreebie ? '<span class="freebie-badge">מתנה</span>' : '';
-
-                    listItem.innerHTML = `
-                        <div class="cart-item-details">
-                            <img src="${item.displayImage || item.image}" alt="${item.name}">
-                            <div class="cart-item-info">
-                                <span><strong>${freebieTag}${item.name}</strong></span>
-                                ${optionsText ? `<span style="font-size:0.85em;color:#666;">${optionsText}</span>` : ''}
-                                <span style="color:#28a745;font-weight:600;">${item.price.toFixed(2)} ₪</span>
-                            </div>
-                        </div>
-                        <div class="cart-item-quantity">
-                            <button class="decrease-quantity" data-cart-index="${cart.indexOf(item)}">-</button>
-                            <span>${item.quantity}</span>
-                            <button class="increase-quantity" data-cart-index="${cart.indexOf(item)}">+</button>
-                        </div>
-                        <button class="remove-from-cart" data-cart-index="${cart.indexOf(item)}" title="הסר">🗑</button>
-                    `;
-                    cartItemsList.appendChild(listItem);
-                    subtotal += item.price * item.quantity;
                 });
             }
+            const freebieTag = item.isFreebie ? '<span class="freebie-badge">מתנה</span>' : '';
 
-            calculateShipping();
-            const discount = applyCouponDiscount();
-            total = subtotal + shippingCost - discount;
+            listItem.innerHTML = `
+                <div class="cart-item-details">
+                    <img src="${item.displayImage || item.image}" alt="${item.name}">
+                    <div class="cart-item-info">
+                        <span><strong>${freebieTag}${item.name}</strong></span>
+                        ${optionsText ? `<span style="font-size:0.85em;color:#666;">${optionsText}</span>` : ''}
+                        <span style="color:#28a745;font-weight:600;">${item.price.toFixed(2)} ₪</span>
+                    </div>
+                </div>
+                <div class="cart-item-quantity">
+                    <button class="decrease-quantity" data-cart-index="${cart.indexOf(item)}">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="increase-quantity" data-cart-index="${cart.indexOf(item)}">+</button>
+                </div>
+                <button class="remove-from-cart" data-cart-index="${cart.indexOf(item)}" title="הסר">🗑</button>
+            `;
+            cartItemsList.appendChild(listItem);
+            subtotal += item.price * item.quantity;
+        });
+    }
 
-            cartSubtotalElement.textContent = subtotal.toFixed(2);
-            shippingCostElement.textContent = shippingCost.toFixed(2);
-            cartTotalElement.textContent = total.toFixed(2);
+    calculateShipping();
+    const discount = applyCouponDiscount();
+    total = subtotal + shippingCost - discount;
 
-            updateCartButton();
-            saveCartToStorage();
-        }
+    cartSubtotalElement.textContent = subtotal.toFixed(2);
+    shippingCostElement.textContent = shippingCost.toFixed(2);
+    cartTotalElement.textContent = total.toFixed(2);
+
+    updateCartButton();
+    saveCartToStorage();
+    
+    // ===== סנכרון PayPal =====
+    if (cartOpen) {
+        renderPayPalButton();
+    }
+}
 
         function removeFromCart(cartIndex) {
             cart.splice(cartIndex, 1);
@@ -1816,6 +1821,8 @@
 
             productModal.style.display = 'flex';
             currentModalProductId = product.id;
+                    window.history.replaceState(null, '', '#' + encodeURIComponent(product.name));
+
         }
 
         function updateModalPrice() {
@@ -1891,6 +1898,7 @@
             currentProductOptions = {};
             isCouponProduct = false;
             couponLockedOptions = null;
+                    window.history.replaceState(null, '', window.location.pathname);
         }
 
         closeProductModalBtn.addEventListener('click', closeProductModal);
@@ -2100,12 +2108,37 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
             await loadSettings();
             await loadAnnouncements();
             await fetchProducts();
             loadCartFromStorage();
             updateCartDisplay();
+        });
+
+        // ===== DEEP LINK SUPPORT =====
+        function handleDeepLink() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#')) {
+                const productName = decodeURIComponent(hash.substring(1));
+                
+                // חפש מוצר לפי שם
+                const product = products.find(p => p.name === productName);
+                if (product) {
+                    // המתן קצת שהכל ייטען
+                    setTimeout(() => {
+                        openProductModal(product.id);
+                    }, 500);
+                }
+            }
+        }
+
+        // האזן לשינויים ב-hash
+        window.addEventListener('hashchange', handleDeepLink);
+
+        // בדוק deep link בטעינה ראשונית
+        window.addEventListener('load', () => {
+            setTimeout(handleDeepLink, 1000);
         });
     </script>
 </body>
