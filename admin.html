@@ -470,7 +470,7 @@
                     <div class="form-group">
                         <label>קטגוריות: *</label>
                         <div class="category-checkboxes" id="product-category-checkboxes"></div>
-                        <small>בחר קטגוריה אחת לפחות</small>
+                        <small>בחר קטגוריה</small>
                     </div>
                     <div class="form-group">
                         <label>תמונה: *</label>
@@ -490,8 +490,16 @@
                     <button type="submit" class="btn btn-dark">הוסף חולצה</button>
                 </form>
 
-                <div class="section-divider"></div>
+<div class="section-divider"></div>
                 <h3 style="margin-bottom: 20px; color: #2c3e50;">כל החולצות</h3>
+                
+                <!-- חיפוש מוצרים -->
+                <div class="search-container">
+                    <input type="text" id="product-search" placeholder="חיפוש מוצרים לפי שם...">
+                    <button class="btn btn-primary" id="search-product-btn">חפש</button>
+                    <button class="btn btn-secondary" id="clear-product-search-btn">נקה</button>
+                </div>
+                
                 <div class="products-grid" id="all-products-grid"></div>
             </div>
 
@@ -887,6 +895,8 @@
                         </div>`;
                     }
 
+const productLink = `${window.location.origin.replace('/admin.html', '')}/#${encodeURIComponent(product.name)}`;
+
                     productCard.innerHTML = `
                         ${saleBadge}
                         <img src="${product.image}" alt="${product.name}">
@@ -894,6 +904,7 @@
                         ${priceHTML}
                         <div class="product-mini-actions">
                             <button class="btn btn-dark btn-edit-product" data-product-id="${product.id}">ערוך</button>
+                            <button class="btn btn-success btn-copy-link" data-product-link="${productLink}" title="העתק קישור" style="padding: 6px 10px; font-size: 0.85em;">🔗</button>
                         </div>
                     `;
                     productsContainer.appendChild(productCard);
@@ -907,10 +918,28 @@
         document.querySelectorAll('.btn-delete-category').forEach(btn => {
             btn.addEventListener('click', () => deleteCategory(btn.dataset.category));
         });
-        document.querySelectorAll('.btn-edit-product').forEach(btn => {
+document.querySelectorAll('.btn-edit-product').forEach(btn => {
             btn.addEventListener('click', () => {
                 const product = products.find(p => p.id === btn.dataset.productId);
                 openEditProductModal(btn.dataset.productId, product);
+            });
+        });
+
+        document.querySelectorAll('.btn-copy-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const link = btn.dataset.productLink;
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '✓';
+                    btn.style.background = '#27ae60';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                    }, 2000);
+                }).catch(err => {
+                    alert('שגיאה בהעתקת הקישור');
+                    console.error(err);
+                });
             });
         });
     }
@@ -1021,18 +1050,32 @@
     // ============================================
     // PRODUCTS - LOAD ALL
     // ============================================
-    async function loadAllProducts() {
+// ============================================
+    // PRODUCTS - LOAD ALL
+    // ============================================
+    async function loadAllProducts(searchTerm = '') {
         const allProductsGrid = document.getElementById('all-products-grid');
         allProductsGrid.innerHTML = '';
         const productsSnapshot = await db.collection('soccer_shirts').get();
         products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        if (products.length === 0) {
-            allProductsGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">אין חולצות. הוסף חולצה חדשה למעלה.</p>';
+        // Filter by search term (חיפוש כללי)
+        let filteredProducts = products;
+        if (searchTerm) {
+            filteredProducts = products.filter(p => 
+                p.name.toLowerCase().includes(searchTerm)
+            );
+        }
+
+        if (filteredProducts.length === 0) {
+            allProductsGrid.innerHTML = searchTerm 
+                ? '<p style="grid-column: 1/-1; text-align: center; color: #666;">לא נמצאו חולצות התואמות לחיפוש.</p>'
+                : '<p style="grid-column: 1/-1; text-align: center; color: #666;">אין חולצות. הוסף חולצה חדשה למעלה.</p>';
+            updateCouponProductSelect();
             return;
         }
 
-        products.forEach(product => {
+        filteredProducts.forEach(product => {
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
             const onSale = isProductOnSale(product);
@@ -1052,6 +1095,9 @@
             const cats = getProductCategories(product);
             const catBadges = cats.map(c => `<span class="product-category">${c}</span>`).join('');
 
+            // Create deep link (קישור ישיר למוצר)
+            const productLink = `${window.location.origin.replace('/admin.html', '')}/#${encodeURIComponent(product.name)}`;
+
             productCard.innerHTML = `
                 ${saleBadge}
                 <img src="${product.image}" alt="${product.name}">
@@ -1061,6 +1107,7 @@
                 <div class="product-card-actions">
                     <button class="btn btn-dark btn-edit-product-main" data-product-id="${product.id}">ערוך</button>
                     <button class="btn btn-danger btn-delete-product-main" data-product-id="${product.id}">מחק</button>
+                    <button class="btn btn-success btn-copy-link-main" data-product-link="${productLink}" title="העתק קישור">🔗</button>
                 </div>
             `;
             allProductsGrid.appendChild(productCard);
@@ -1074,6 +1121,25 @@
         });
         document.querySelectorAll('.btn-delete-product-main').forEach(btn => {
             btn.addEventListener('click', () => deleteProductDirect(btn.dataset.productId));
+        });
+
+        // Copy link functionality (העתקת קישור)
+        document.querySelectorAll('.btn-copy-link-main').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const link = btn.dataset.productLink;
+                navigator.clipboard.writeText(link).then(() => {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '✓';
+                    btn.style.background = '#27ae60';
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.style.background = '';
+                    }, 2000);
+                }).catch(err => {
+                    alert('שגיאה בהעתקת הקישור');
+                    console.error(err);
+                });
+            });
         });
 
         // Also refresh coupon product select
@@ -1220,10 +1286,10 @@
         const selectedCats = getSelectedCategories('product-category-checkboxes');
         const image = document.getElementById('product-image-url').value.trim();
 
-        if (!name || !description || isNaN(price) || price < 0 || !image || selectedCats.length === 0) {
-            alert('אנא מלא את כל השדות החובה (כולל קטגוריה אחת לפחות).');
-            return;
-        }
+if (!name || !description || isNaN(price) || price < 0 || !image) {
+    alert('אנא מלא את כל השדות החובה.');
+    return;
+}
         if (salePrice && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
 
         const customFields = extractCustomFields(customFieldsContainer);
@@ -1292,7 +1358,7 @@
                 <div class="form-group">
                     <label>קטגוריות:</label>
                     <div class="category-checkboxes" id="edit-category-checkboxes"></div>
-                    <small>בחר קטגוריה אחת לפחות</small>
+                    <small>בחר קטגוריה</small>
                 </div>
                 <div class="form-group">
                     <label>תמונה נוכחית:</label>
@@ -1336,10 +1402,10 @@
             const selectedCats = getSelectedCategories('edit-category-checkboxes');
             const image = document.getElementById('edit-product-image-url').value.trim();
 
-            if (!name || !description || isNaN(price) || price < 0 || !image || selectedCats.length === 0) {
-                alert('אנא מלא את כל השדות החובה (כולל קטגוריה אחת לפחות).');
-                return;
-            }
+if (!name || !description || isNaN(price) || price < 0 || !image) {
+    alert('אנא מלא את כל השדות החובה.');
+    return;
+}
             if (salePrice && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
 
             const customFields = extractCustomFields(editCustomFieldsContainer);
@@ -1383,7 +1449,32 @@
 
         editProductModal.classList.add('active');
     }
+// ============================================
+    // PRODUCT SEARCH
+    // ============================================
+    const productSearchInput = document.getElementById('product-search');
+    const searchProductBtn = document.getElementById('search-product-btn');
+    const clearProductSearchBtn = document.getElementById('clear-product-search-btn');
+    let currentProductSearchTerm = '';
 
+    searchProductBtn.addEventListener('click', () => { 
+        currentProductSearchTerm = productSearchInput.value.trim().toLowerCase(); 
+        loadAllProducts(currentProductSearchTerm); 
+    });
+
+    clearProductSearchBtn.addEventListener('click', () => { 
+        productSearchInput.value = ''; 
+        currentProductSearchTerm = ''; 
+        loadAllProducts(); 
+    });
+
+    productSearchInput.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') { 
+            currentProductSearchTerm = productSearchInput.value.trim().toLowerCase(); 
+            loadAllProducts(currentProductSearchTerm); 
+        } 
+    });
+        
     // ============================================
     // ORDERS
     // ============================================
