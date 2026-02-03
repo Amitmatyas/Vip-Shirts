@@ -1,0 +1,2707 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Shirts</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+    <link href="https://fonts.googleapis.com/css?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', Arial, sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+            color: #333;
+            direction: rtl;
+            overflow-x: hidden;
+            transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.cart-open {
+            margin-right: min(450px, 90vw);
+        }
+
+        #announcement-bar {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.05em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 20px;
+        }
+
+        .announcement-text {
+            animation: fadeInOut 0.5s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            background: #222;
+            color: #fff;
+            padding: 45px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            font-size: 2.1em;
+            letter-spacing: 3px;
+            border-bottom-left-radius: 16% 8%;
+            border-bottom-right-radius: 16% 8%;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        }
+
+        header img {
+            width: 150px;
+            height: auto;
+            margin: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        /* ===== ENHANCED CART TOGGLE BUTTON ===== */
+        #cart-toggle-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+            z-index: 1001;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 50px;
+            justify-content: center;
+        }
+
+        #cart-toggle-button:hover {
+            background: #c82333;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.5);
+        }
+
+        #cart-toggle-button.cart-open-state {
+            background: #333;
+            padding: 12px;
+            border-radius: 50%;
+            min-width: 48px;
+            height: 48px;
+        }
+
+        #cart-toggle-button.cart-open-state:hover {
+            background: #444;
+        }
+
+        body.cart-open #cart-toggle-button {
+            left: calc(20px + min(450px, 90vw));
+        }
+
+        .cart-icon {
+            font-size: 1.3em;
+        }
+
+        .cart-count {
+            background: white;
+            color: #dc3545;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            font-weight: 900;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .close-icon {
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        #filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        #filters input, #filters select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            width: 200px;
+        }
+
+        .category-filter {
+            margin: 30px auto;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .category-filter button {
+            padding: 10px 20px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1em;
+            font-weight: 700;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .category-filter button:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .category-filter button.active {
+            background: #dc3545;
+            color: white;
+        }
+
+        main#products-container {
+            padding: 40px 6vw 0 6vw;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 24px 24px 14px 14px;
+            box-shadow: 0 3px 12px 0 rgba(52, 52, 90, 0.13);
+            padding: 20px 10px 15px 10px;
+            text-align: center;
+            transition: transform 0.18s, box-shadow 0.18s;
+            border: 1.5px solid #e1e1e1;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: scale(1.03) rotate(-1deg);
+            box-shadow: 0 8px 28px 0 rgba(52,52,90,0.16);
+            border-color: #dc3545;
+        }
+
+        .sale-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            font-weight: 900;
+            font-size: 0.9em;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            text-transform: uppercase;
+        }
+
+        .product-card img {
+            max-width: 98%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 22px;
+            margin-bottom: 13px;
+            border: 3px solid #f1f1f1;
+            box-shadow: 0 1px 8px 0 rgba(90,90,130,0.09);
+            transition: filter 0.2s;
+            cursor: pointer;
+        }
+        .product-card img:hover {
+            filter: brightness(1.09) saturate(1.05) drop-shadow(0 2px 7px #dc354533);
+        }
+
+        .product-card .category-badge {
+            display: inline-block;
+            background: #dc3545;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 0.85em;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .product-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.3em;
+            color: #dc3545;
+            cursor: pointer;
+        }
+        .product-card .price {
+            font-weight: bold;
+            color: #c82333;
+            margin-bottom: 9px;
+            font-size: 1.12em;
+        }
+
+        .product-card .price.on-sale {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .product-card .price.on-sale .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        .product-card .price.on-sale .sale-price {
+            color: #e74c3c;
+            font-weight: 900;
+        }
+
+        .product-card button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            box-shadow: 0 1px 4px 0 rgba(52,52,90,0.08);
+            transition: background 0.18s, transform 0.13s;
+        }
+        .product-card button:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        /* ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== */
+        #cart-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(450px, 90vw);
+            height: 100vh;
+            background: #fff;
+            border-left: 2px solid #ffdddd;
+            box-shadow: -4px 0 20px 0 rgba(0,0,0,0.13);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
+        }
+
+        #cart-container.open {
+            transform: translateX(0);
+        }
+
+        /* Cart Header */
+        .cart-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .cart-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Cart Content */
+        .cart-content {
+            padding: 20px;
+        }
+
+        .cart-section {
+            margin-bottom: 25px;
+        }
+
+        .cart-section-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #dc3545;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ffe5e5;
+        }
+
+        #cart ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #cart li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95em;
+            gap: 8px;
+        }
+        #cart li:last-child {
+            border-bottom: none;
+        }
+        .cart-item-details {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            flex: 1;
+        }
+        .cart-item-details img {
+            width: 50px;
+            height: 50px;
+            margin-left: 12px;
+            border-radius: 12px;
+            border: 2px solid #ffe5e5;
+            object-fit: cover;
+            box-shadow: 0 1px 6px 0 #dc354522;
+            flex-shrink: 0;
+        }
+        .cart-item-info {
+            flex-grow: 1;
+            text-align: right;
+            font-size: 0.95em;
+            min-width: 0;
+        }
+        .cart-item-info span {
+            display: block;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .cart-item-quantity button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.17s;
+            min-width: 30px;
+        }
+        .cart-item-quantity button:hover {
+            background: #c82333;
+        }
+        .cart-item-quantity span {
+            min-width: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .remove-from-cart {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background 0.17s;
+            flex-shrink: 0;
+        }
+        .remove-from-cart:hover {
+            background: #bd2130;
+        }
+
+        .shipping-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            text-align: center;
+            margin: 15px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .coupon-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        .coupon-section input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+        .coupon-section button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .coupon-section button:hover {
+            background: #218838;
+        }
+        .coupon-applied {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 8px;
+            display: block;
+            text-align: center;
+        }
+
+        .cart-totals {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 1em;
+        }
+
+        .total-row.grand-total {
+            font-size: 1.3em;
+            font-weight: 900;
+            color: #dc3545;
+            border-top: 2px solid #dc3545;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+
+        /* ===== INTEGRATED CHECKOUT SECTION ===== */
+        .checkout-section {
+            background: white;
+            border: 2px solid #dc3545;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .checkout-section-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #dc3545;
+            margin-bottom: 15px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: #fffafa;
+            color: #232323;
+            transition: border 0.15s;
+        }
+        .form-group input:focus {
+            border: 1.5px solid #dc3545;
+            outline: none;
+        }
+
+        .address-row {
+            display: flex;
+            gap: 10px;
+        }
+        .address-row .form-group {
+            flex: 1;
+            min-width: 0;
+        }
+        .address-row .form-group.small {
+            flex: 0 0 90px;
+        }
+
+        .terms-agreement {
+            background: #fff8e1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            text-align: center;
+            margin: 15px 0;
+            border: 1px solid #ffd54f;
+        }
+
+        #paypal-button-container {
+            margin-top: 15px;
+        }
+
+        .freebie-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 900;
+            margin-left: 5px;
+        }
+
+        .locked-option {
+            background: #f0f0f0 !important;
+            cursor: not-allowed !important;
+        }
+
+        .option-price-tag {
+            color: #28a745;
+            font-weight: 900;
+            font-size: 0.9em;
+        }
+
+        /* ===== PRODUCT MODAL ===== */
+        #product-modal {
+            display: none;
+            position: fixed;
+            top: 0; right: 0; left: 0; bottom: 0;
+            background: rgba(56, 56, 80, 0.22);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        #product-modal .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 32px 0 #dc354522;
+            display: flex;
+            flex-direction: row;
+            max-width: 520px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #product-modal .modal-image {
+            flex: 1.2;
+            background: #fffafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            padding: 20px;
+        }
+        #product-modal .modal-image img {
+            max-width: 100%;
+            max-height: 320px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+        #product-modal .modal-details {
+            flex: 2.2;
+            padding: 24px 16px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        #product-modal .close-product-modal {
+            position: absolute;
+            top: 11px;
+            left: 11px;
+            background: white;
+            border: none;
+            font-size: 1.8em;
+            color: #dc3545;
+            cursor: pointer;
+            z-index: 5;
+            transition: color 0.14s;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #product-modal .close-product-modal:hover {
+            color: #c82333;
+            background: #f0f0f0;
+        }
+        #product-modal .modal-details h2 {
+            margin: 0 0 7px 0;
+            color: #dc3545;
+            font-size: 1.32em;
+            white-space: pre-line;
+        }
+        #product-modal .modal-details .price {
+            color: #c82333;
+            font-weight: bold;
+            font-size: 1.08em;
+            margin-bottom: 8px;
+        }
+
+        #product-modal .modal-details .price.on-sale {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #product-modal .modal-details .price.on-sale .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        #product-modal .modal-details .price.on-sale .sale-price {
+            color: #e74c3c;
+            font-weight: 900;
+        }
+
+        #product-modal .modal-details .description {
+            color: #333;
+            font-size: 1.05em;
+            margin-bottom: 0;
+            white-space: pre-line;
+        }
+        .option-group {
+            margin: 10px 0;
+        }
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .option-group select, .option-group input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 1em;
+            background: #fffafa;
+            color: #232323;
+            transition: border 0.15s;
+        }
+        .option-group select:focus, .option-group input[type="text"]:focus {
+            border: 1.5px solid #dc3545;
+            outline: none;
+        }
+
+        .option-group select:disabled,
+        .option-group input[type="text"]:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        #modal-add-to-cart {
+            margin-top: 18px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        #modal-add-to-cart:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .contact-section {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 3px 12px rgba(52, 52, 90, 0.13);
+        }
+        .contact-section h2 {
+            text-align: center;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+
+        .my-about-card {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            direction: rtl;
+            max-width: 800px;
+            margin: 50px auto;
+            width: calc(100% - 40px);
+            border: 1px solid #333;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .my-about-card:hover {
+            transform: translateY(-5px);
+            border-color: #00d2ff;
+            box-shadow: 0 15px 40px rgba(0, 210, 255, 0.15);
+        }
+        .my-about-logo {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            margin-left: 25px;
+            transition: transform 0.5s ease;
+            flex-shrink: 0;
+        }
+        .my-about-card:hover .my-about-logo {
+            transform: rotate(-5deg) scale(1.1);
+        }
+        .my-about-content {
+            flex: 1;
+        }
+        .my-about-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #00d2ff;
+            margin: 0 0 10px 0;
+            display: inline-block;
+            position: relative;
+        }
+        .my-about-text {
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .terms-section {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .terms-section a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+
+        @keyframes logoPulse {
+            0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
+            50% { filter: drop-shadow(0 0 10px rgba(0,210,255,0.5)); }
+            100% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
+        }
+        .my-about-card:hover .my-about-logo {
+            animation: logoPulse 1.5s infinite;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            header {
+                padding: 30px 20px;
+                font-size: 1.5em;
+                gap: 15px;
+            }
+
+            header img {
+                width: 100px;
+            }
+
+            main#products-container {
+                grid-template-columns: 1fr;
+                padding: 24px 4vw 0 4vw;
+                gap: 20px;
+            }
+
+            #cart-container {
+                width: 90vw;
+            }
+
+            body.cart-open {
+                margin-right: 90vw;
+            }
+
+            body.cart-open #cart-toggle-button {
+                left: calc(20px + 90vw);
+            }
+
+            #cart-toggle-button {
+                top: 15px;
+                left: 15px;
+                padding: 10px 16px;
+                font-size: 1em;
+            }
+
+            #cart-toggle-button.cart-open-state {
+                padding: 10px;
+                min-width: 42px;
+                height: 42px;
+            }
+
+            body.cart-open #cart-toggle-button {
+                left: calc(15px + 90vw);
+            }
+
+            .cart-content {
+                padding: 15px;
+            }
+
+            .checkout-section {
+                padding: 15px;
+            }
+
+            .address-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .address-row .form-group.small {
+                flex: 1;
+            }
+
+            #product-modal .modal-content {
+                flex-direction: column;
+                max-width: 95vw;
+            }
+
+            #product-modal .modal-image {
+                padding: 15px;
+            }
+
+            #product-modal .modal-image img {
+                max-height: 200px;
+            }
+
+            .my-about-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 25px 15px;
+                margin: 30px auto;
+            }
+
+            .my-about-logo {
+                margin-left: 0;
+                margin-bottom: 15px;
+                width: 90px;
+                height: 90px;
+            }
+
+            #filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #filters input,
+            #filters select {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Empty cart message */
+        .empty-cart-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-cart-message .empty-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.paypal.com/sdk/js?client-id=AcvNAO7_IAc9jQw98w56c_oLCYgNofTqSzLQiFSy1JcC77TRkbQdoxIjlgixjyo5NYKPFdkqV9ZXNn4I&currency=ILS"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+    <div id="announcement-bar">
+        <div class="announcement-text"></div>
+    </div>
+
+<header>
+        <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
+        <h1>VIP Shirts</h1>
+        <button id="club-btn" style="position: absolute; top: 20px; right: 20px; background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 50px; font-size: 1em; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4); transition: all 0.3s; display: flex; align-items: center; gap: 8px;">
+            <span>⭐</span>
+            <span id="club-btn-text">מועדון VIP</span>
+            <span id="club-btn-points" style="background: white; color: #28a745; padding: 2px 8px; border-radius: 20px; font-size: 0.85em; display: none;"></span>
+        </button>
+    </header>
+
+    <!-- ENHANCED TOGGLE BUTTON -->
+    <button id="cart-toggle-button">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-text">עגלת קניות</span>
+        <span class="cart-count" style="display: none;">0</span>
+    </button>
+
+    <div id="filters">
+        <input type="text" id="search-input" placeholder="חפש מוצר..." />
+        <select id="sort-select">
+            <option value="">מיון לפי</option>
+            <option value="price-asc">מחיר: מהזול ליקר</option>
+            <option value="price-desc">מחיר: מהיקר לזול</option>
+        </select>
+    </div>
+
+    <div class="category-filter" id="category-filter">
+        <button class="active" data-category="all">הכל</button>
+    </div>
+
+    <main id="products-container"></main>
+
+    <!-- ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== -->
+    <div id="cart-container">
+        <div class="cart-header">
+            <h2>
+                <span>🛒</span>
+                <span>עגלת הקניות שלי</span>
+            </h2>
+        </div>
+
+        <div class="cart-content">
+            <!-- Cart Items Section -->
+            <div class="cart-section">
+                <div class="cart-section-title">מוצרים בעגלה</div>
+                <ul id="cart-items"></ul>
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="shipping-info" id="shipping-info"></div>
+
+            <!-- Coupon Section -->
+            <div class="cart-section">
+                <div class="cart-section-title">קוד הנחה</div>
+                <div class="coupon-section">
+                    <input type="text" id="coupon-input" placeholder="הזן קוד קופון">
+                    <button id="apply-coupon-btn">החל קופון</button>
+                    <div id="coupon-message"></div>
+                </div>
+            </div>
+          
+<!-- Club Points Section -->
+            <div class="cart-section" id="club-points-section" style="display: none;">
+                <div class="cart-section-title">נקודות מועדון</div>
+                <div class="coupon-section">
+                    <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
+                        <div style="font-size: 1.3em; font-weight: 900; color: #28a745; margin-bottom: 5px;">
+                            ⭐ <span id="available-points-display">0</span> נקודות זמינות
+                        </div>
+                        <div style="font-size: 0.85em; color: #666;">כל נקודה = 1₪ הנחה</div>
+                    </div>
+                    <input type="number" id="points-input" placeholder="כמה נקודות לנצל?" min="10" step="1">
+                    <button id="apply-points-btn">השתמש בנקודות</button>
+                    <div id="points-message"></div>
+                </div>
+            </div>
+          
+            <!-- Cart Totals -->
+            <div class="cart-totals">
+                <div class="total-row">
+                    <span>סה"כ מוצרים:</span>
+                    <span><span id="cart-subtotal">0.00</span> ₪</span>
+                </div>
+                <div class="total-row">
+                    <span>דמי משלוח:</span>
+                    <span><span id="shipping-cost">0.00</span> ₪</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>סה"כ לתשלום:</span>
+                    <span><span id="cart-total">0.00</span> ₪</span>
+                </div>
+            </div>
+
+            <!-- ===== INTEGRATED CHECKOUT SECTION ===== -->
+            <div class="checkout-section" id="checkout-section">
+                <div class="checkout-section-title">
+                    <span>💳</span>
+                    <span>השלמת פרטים ותשלום</span>
+                </div>
+
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="name">שם מלא *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">אימייל *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">טלפון *</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+
+                    <div class="cart-section-title" style="margin-top: 20px;">כתובת למשלוח</div>
+
+                    <div class="address-row">
+                        <div class="form-group">
+                            <label for="address-street">שם רחוב *</label>
+                            <input type="text" id="address-street" name="address-street" required>
+                        </div>
+                        <div class="form-group small">
+                            <label for="address-house">מס' בית *</label>
+                            <input type="text" id="address-house" name="address-house" required>
+                        </div>
+                    </div>
+
+                    <div class="address-row">
+                        <div class="form-group">
+                            <label for="address-city">עיר *</label>
+                            <input type="text" id="address-city" name="address-city" required>
+                        </div>
+                        <div class="form-group small">
+                            <label for="address-zip">מיקוד *</label>
+                            <input type="text" id="address-zip" name="address-zip" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address-country">מדינה *</label>
+                        <input type="text" id="address-country" name="address-country" required value="ישראל">
+                    </div>
+                  
+<div id="join-club-checkbox-container" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #ffc107; display: none;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                            <input type="checkbox" id="join-club-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
+                            <span>⭐ הצטרף למועדון VIP וקבל 2% החזר נקודות על קנייה זו!</span>
+                        </label>
+                        <div id="club-signup-fields" style="margin-top: 10px; display: none;">
+                            <div class="form-group">
+                                <label for="club-signup-password">בחר סיסמה למועדון *</label>
+                                <input type="password" id="club-signup-password" minlength="6" placeholder="לפחות 6 תווים">
+                            </div>
+                        </div>
+                    </div>
+                  
+                    <div class="terms-agreement">
+                        ⏱️ זמן משלוח מוערך: 3 שבועות<br>
+                        📋 בביצוע התשלום אני מאשר/ת את <a href="terms.html" target="_blank" style="color: #dc3545; font-weight: bold;">התקנון</a>
+                    </div>
+
+                    <div id="paypal-button-container"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+<!-- ===== CLUB MODAL (Login/Register) ===== -->
+    <div id="club-modal" style="display: none; position: fixed; top: 0; right: 0; left: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2001; justify-content: center; align-items: center; padding: 20px;">
+        <div style="background: white; border-radius: 20px; max-width: 450px; width: 100%; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
+            <button id="close-club-modal" style="position: absolute; top: 15px; left: 15px; background: white; border: none; font-size: 1.8em; color: #dc3545; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">&times;</button>
+            
+            <div id="club-login-view">
+                <h2 style="text-align: center; color: #dc3545; margin-bottom: 20px;">התחברות למועדון VIP</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">אימייל *</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">סיסמה *</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; margin-top: 10px;">התחבר</button>
+                </form>
+                <p style="text-align: center; margin-top: 15px;">
+                    עדיין לא חבר? 
+                    <a href="#" id="show-register" style="color: #dc3545; font-weight: bold; text-decoration: none;">הצטרף עכשיו</a>
+                </p>
+            </div>
+
+            <div id="club-register-view" style="display: none;">
+                <h2 style="text-align: center; color: #dc3545; margin-bottom: 20px;">הצטרפות למועדון VIP</h2>
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-name">שם מלא *</label>
+                        <input type="text" id="register-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">אימייל *</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-phone">טלפון *</label>
+                        <input type="tel" id="register-phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">סיסמה *</label>
+                        <input type="password" id="register-password" required minlength="6">
+                    </div>
+                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; margin-top: 10px;">הצטרף למועדון</button>
+                </form>
+                <p style="text-align: center; margin-top: 15px;">
+                    כבר חבר? 
+                    <a href="#" id="show-login" style="color: #dc3545; font-weight: bold; text-decoration: none;">התחבר</a>
+                </p>
+            </div>
+
+            <div id="club-profile-view" style="display: none;">
+                <h2 style="text-align: center; color: #dc3545; margin-bottom: 20px;">האזור האישי שלי</h2>
+                
+                <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 1.3em;">שלום, <span id="profile-name"></span>!</h3>
+                    <div style="font-size: 2em; font-weight: 900; margin: 10px 0;">
+                        ⭐ <span id="profile-points">0</span> נקודות
+                    </div>
+                    <p style="margin: 5px 0; font-size: 0.95em; opacity: 0.9;">כל נקודה = 1₪ הנחה</p>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #dc3545; margin-bottom: 10px;">פרטים אישיים</h3>
+                    <form id="profile-edit-form">
+                        <div class="form-group">
+                            <label>שם מלא *</label>
+                            <input type="text" id="profile-edit-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>אימייל *</label>
+                            <input type="email" id="profile-edit-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label>טלפון *</label>
+                            <input type="tel" id="profile-edit-phone" required>
+                        </div>
+                        <div class="address-row">
+                            <div class="form-group">
+                                <label>רחוב</label>
+                                <input type="text" id="profile-edit-street">
+                            </div>
+                            <div class="form-group small">
+                                <label>מספר</label>
+                                <input type="text" id="profile-edit-house">
+                            </div>
+                        </div>
+                        <div class="address-row">
+                            <div class="form-group">
+                                <label>עיר</label>
+                                <input type="text" id="profile-edit-city">
+                            </div>
+                            <div class="form-group small">
+                                <label>מיקוד</label>
+                                <input type="text" id="profile-edit-zip">
+                            </div>
+                        </div>
+                        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">עדכן פרטים</button>
+                    </form>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <h3 style="color: #dc3545; margin-bottom: 10px;">היסטוריית הזמנות</h3>
+                    <div id="profile-orders-list" style="max-height: 200px; overflow-y: auto;"></div>
+                </div>
+
+                <button id="logout-btn" style="background: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">התנתק</button>
+            </div>
+        </div>
+    </div>
+  
+    <!-- ===== PRODUCT MODAL ===== -->
+    <div id="product-modal">
+        <div class="modal-content">
+            <button class="close-product-modal" type="button">&times;</button>
+            <div class="modal-image">
+                <img src="" alt="חולצה" id="modal-product-image">
+            </div>
+            <div class="modal-details">
+                <h2 id="modal-product-title"></h2>
+                <div class="price" id="modal-product-price"></div>
+                <div class="description" id="modal-product-description"></div>
+                <div id="custom-options-container"></div>
+                <button id="modal-add-to-cart">הוסף לעגלה</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="contact-section">
+        <h2>צור קשר</h2>
+        <form id="contact-form">
+            <div class="form-group">
+                <label for="contact-name">שם מלא *</label>
+                <input type="text" id="contact-name" required>
+            </div>
+            <div class="form-group">
+                <label for="contact-phone">מספר טלפון *</label>
+                <input type="tel" id="contact-phone" required>
+            </div>
+            <div class="form-group">
+                <label for="contact-email">אימייל *</label>
+                <input type="email" id="contact-email" required>
+            </div>
+            <div class="form-group">
+                <label for="contact-message">תוכן הפנייה *</label>
+                <textarea id="contact-message" required style="width: 100%; padding: 10px; border: 1.5px solid #d0d0d0; border-radius: 8px; min-height: 100px; resize: vertical;"></textarea>
+            </div>
+            <button type="submit" style="background: #dc3545; color: white; border: none; padding: 12px 24px; border-radius: 12px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; transition: all 0.2s;">שלח פנייה</button>
+        </form>
+    </div>
+
+    <!-- About Section -->
+    <div class="my-about-card">
+        <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts Logo" class="my-about-logo">
+        <div class="my-about-content">
+            <h3 class="my-about-title">על VIP Shirts</h3>
+            <p class="my-about-text">האתר שלנו נולד מאהבה אמיתית לכדורגל
+כמו הרבה אוהדים, רצינו ללבוש בגאווה את צבעי הקבוצות שאנחנו אוהבים – במחיר הוגן ובלי סיבוכים.
+מכאן התחיל הרעיון להקים מקום אחד שמרכז חולצות כדורגל איכותיות, בעיצובי המועדונים המובילים בעולם, ומנגיש אותן לכל אוהד.
+אנחנו עובדים מול ספקים נבחרים בחו״ל, וההזמנות נשלחות ישירות מהיצרן ללקוח – כדי לחסוך עלויות ולהציע מחירים משתלמים ככל האפשר. כל חולצה נבחרת בקפידה, מתוך מחשבה על נוחות, מראה ואיכות.
+העסק הוא משפחתי וקטן, ואנחנו מאמינים בשירות אישי, שקיפות ויחס הוגן.
+יש לנו מטרה אחת: שכל לקוח יקבל חולצה שהוא גאה ללבוש וחוויית קנייה נעימה ופשוטה.
+תודה שבחרתם להיות חלק מהדרך שלנו.</p>
+        </div>
+    </div>
+
+    <!-- Terms Link -->
+    <div class="terms-section">
+        <a href="terms.html">תקנון</a>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+            authDomain: "timetable-titus.firebaseapp.com",
+            projectId: "timetable-titus",
+            storageBucket: "timetable-titus.firebasestorage.app",
+            messagingSenderId: "199146911555",
+            appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
+            measurementId: "G-JQ02VEC325"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const productsContainer = document.getElementById('products-container');
+        const cartItemsList = document.getElementById('cart-items');
+        const cartSubtotalElement = document.getElementById('cart-subtotal');
+        const shippingCostElement = document.getElementById('shipping-cost');
+        const cartTotalElement = document.getElementById('cart-total');
+        const shippingInfoElement = document.getElementById('shipping-info');
+        const checkoutForm = document.getElementById('checkout-form');
+        const cartToggleButton = document.getElementById('cart-toggle-button');
+        const cartContainer = document.getElementById('cart-container');
+        const productModal = document.getElementById('product-modal');
+        const modalProductImage = document.getElementById('modal-product-image');
+        const modalProductTitle = document.getElementById('modal-product-title');
+        const modalProductPrice = document.getElementById('modal-product-price');
+        const modalProductDescription = document.getElementById('modal-product-description');
+        const closeProductModalBtn = document.querySelector('.close-product-modal');
+        const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
+        const customOptionsContainer = document.getElementById('custom-options-container');
+        const couponInput = document.getElementById('coupon-input');
+        const applyCouponBtn = document.getElementById('apply-coupon-btn');
+        const couponMessage = document.getElementById('coupon-message');
+        const contactForm = document.getElementById('contact-form');
+        const announcementBar = document.querySelector('.announcement-text');
+        const cartCountBadge = document.querySelector('.cart-count');
+
+        let cart = [];
+        let products = [];
+        let categories = [];
+      let currentUser = null;
+        let usedPoints = 0;
+        let settings = null;
+        let appliedCoupon = null;
+        let currentModalProductId = null;
+        let currentProductOptions = {};
+        let currentProductPrice = 0;
+        let subtotal = 0;
+        let shippingCost = 0;
+        let total = 0;
+        let announcements = [];
+        let currentAnnouncementIndex = 0;
+        let currentCategoryFilter = 'all';
+        let couponLockedOptions = null;
+        let isCouponProduct = false;
+        let cartOpen = false;
+
+        // ===== HELPER: get product categories =====
+        function getProductCategories(product) {
+            if (Array.isArray(product.categories) && product.categories.length > 0) {
+                return product.categories;
+            }
+            if (product.category) {
+                return [product.category];
+            }
+            return [];
+        }
+
+        function productInCategory(product, cat) {
+            return getProductCategories(product).includes(cat);
+        }
+
+        // ===== ENHANCED CART TOGGLE WITH BUTTON STATE CHANGE =====
+        function updateCartButton() {
+            const cartIcon = cartToggleButton.querySelector('.cart-icon');
+            const cartText = cartToggleButton.querySelector('.cart-text');
+            const closeIcon = '<span class="close-icon">✕</span>';
+            
+            if (cartOpen) {
+                cartToggleButton.classList.add('cart-open-state');
+                cartToggleButton.innerHTML = closeIcon;
+            } else {
+                cartToggleButton.classList.remove('cart-open-state');
+                const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+                
+                if (itemCount > 0) {
+                    cartToggleButton.innerHTML = `
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count">${itemCount}</span>
+                    `;
+                } else {
+                    cartToggleButton.innerHTML = `
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-text">עגלת קניות</span>
+                    `;
+                }
+            }
+        }
+
+        function openCart() {
+            if (cartOpen) return;
+            cartOpen = true;
+            cartContainer.classList.add('open');
+            document.body.classList.add('cart-open');
+            updateCartButton();
+            renderPayPalButton(); // Render PayPal when cart opens
+        }
+
+        function closeCart() {
+            if (!cartOpen) return;
+            cartOpen = false;
+            cartContainer.classList.remove('open');
+            document.body.classList.remove('cart-open');
+            updateCartButton();
+        }
+
+        function toggleCart() {
+            if (cartOpen) closeCart(); 
+            else openCart();
+        }
+
+        cartToggleButton.addEventListener('click', toggleCart);
+// ===== CLUB SYSTEM =====
+        function loadUserFromStorage() {
+            const savedUser = localStorage.getItem('vipshirts_user');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    updateClubUI();
+                } catch (e) {
+                    currentUser = null;
+                }
+            }
+        }
+
+        function saveUserToStorage() {
+            if (currentUser) {
+                localStorage.setItem('vipshirts_user', JSON.stringify(currentUser));
+            } else {
+                localStorage.removeItem('vipshirts_user');
+            }
+        }
+
+        function updateClubUI() {
+            const clubBtn = document.getElementById('club-btn');
+            const clubBtnText = document.getElementById('club-btn-text');
+            const clubBtnPoints = document.getElementById('club-btn-points');
+            const clubPointsSection = document.getElementById('club-points-section');
+            const joinClubCheckbox = document.getElementById('join-club-checkbox-container');
+
+            if (currentUser) {
+                clubBtnText.textContent = currentUser.name.split(' ')[0];
+                clubBtnPoints.textContent = `${currentUser.points || 0} ⭐`;
+                clubBtnPoints.style.display = 'inline-block';
+                clubPointsSection.style.display = 'block';
+                joinClubCheckbox.style.display = 'none';
+                document.getElementById('available-points-display').textContent = currentUser.points || 0;
+                prefillCheckoutForm();
+            } else {
+                clubBtnText.textContent = 'מועדון VIP';
+                clubBtnPoints.style.display = 'none';
+                clubPointsSection.style.display = 'none';
+                joinClubCheckbox.style.display = 'block';
+            }
+        }
+
+        function prefillCheckoutForm() {
+            if (!currentUser) return;
+            document.getElementById('name').value = currentUser.name || '';
+            document.getElementById('email').value = currentUser.email || '';
+            document.getElementById('phone').value = currentUser.phone || '';
+            if (currentUser.address) {
+                document.getElementById('address-street').value = currentUser.address.street || '';
+                document.getElementById('address-house').value = currentUser.address.house || '';
+                document.getElementById('address-city').value = currentUser.address.city || '';
+                document.getElementById('address-zip').value = currentUser.address.zip || '';
+            }
+        }
+
+        // Club Modal Controls
+        document.getElementById('club-btn').addEventListener('click', () => {
+            if (currentUser) {
+                showProfileView();
+            } else {
+                showLoginView();
+            }
+            document.getElementById('club-modal').style.display = 'flex';
+        });
+
+        document.getElementById('close-club-modal').addEventListener('click', () => {
+            document.getElementById('club-modal').style.display = 'none';
+        });
+
+        document.getElementById('show-register').addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegisterView();
+        });
+
+        document.getElementById('show-login').addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginView();
+        });
+
+        function showLoginView() {
+            document.getElementById('club-login-view').style.display = 'block';
+            document.getElementById('club-register-view').style.display = 'none';
+            document.getElementById('club-profile-view').style.display = 'none';
+        }
+
+        function showRegisterView() {
+            document.getElementById('club-login-view').style.display = 'none';
+            document.getElementById('club-register-view').style.display = 'block';
+            document.getElementById('club-profile-view').style.display = 'none';
+        }
+
+        function showProfileView() {
+            document.getElementById('club-login-view').style.display = 'none';
+            document.getElementById('club-register-view').style.display = 'none';
+            document.getElementById('club-profile-view').style.display = 'block';
+            loadProfileData();
+        }
+
+        async function loadProfileData() {
+            if (!currentUser) return;
+            
+            document.getElementById('profile-name').textContent = currentUser.name;
+            document.getElementById('profile-points').textContent = currentUser.points || 0;
+            document.getElementById('profile-edit-name').value = currentUser.name || '';
+            document.getElementById('profile-edit-email').value = currentUser.email || '';
+            document.getElementById('profile-edit-phone').value = currentUser.phone || '';
+            
+            if (currentUser.address) {
+                document.getElementById('profile-edit-street').value = currentUser.address.street || '';
+                document.getElementById('profile-edit-house').value = currentUser.address.house || '';
+                document.getElementById('profile-edit-city').value = currentUser.address.city || '';
+                document.getElementById('profile-edit-zip').value = currentUser.address.zip || '';
+            }
+
+            // Load orders
+            try {
+                const ordersSnapshot = await db.collection('orders')
+                    .where('clubMemberId', '==', currentUser.id)
+                    .orderBy('orderDate', 'desc')
+                    .limit(10)
+                    .get();
+                
+                const ordersList = document.getElementById('profile-orders-list');
+                if (ordersSnapshot.empty) {
+                    ordersList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">אין הזמנות עדיין</p>';
+                } else {
+                    ordersList.innerHTML = ordersSnapshot.docs.map(doc => {
+                        const order = doc.data();
+                        const date = order.orderDate ? order.orderDate.toDate().toLocaleDateString('he-IL') : 'לא ידוע';
+                        const status = order.completed ? '✓ הושלמה' : '⏳ בטיפול';
+                        return `<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <strong>הזמנה #${doc.id.substring(0, 8)}</strong>
+                                <span>${status}</span>
+                            </div>
+                            <div style="font-size: 0.9em; color: #666;">
+                                <div>${date}</div>
+                                <div>₪${order.totalAmount.toFixed(2)}</div>
+                                ${order.pointsEarned ? `<div style="color: #28a745;">⭐ +${order.pointsEarned} נקודות</div>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading orders:', error);
+            }
+        }
+
+        // Login Form
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const usersSnapshot = await db.collection('ClubMembers')
+                    .where('email', '==', email)
+                    .where('password', '==', password)
+                    .limit(1)
+                    .get();
+
+                if (usersSnapshot.empty) {
+                    alert('אימייל או סיסמה שגויים');
+                    return;
+                }
+
+                const userDoc = usersSnapshot.docs[0];
+                currentUser = { id: userDoc.id, ...userDoc.data() };
+                saveUserToStorage();
+                updateClubUI();
+                showProfileView();
+                alert(`ברוך הבא, ${currentUser.name}!`);
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('שגיאה בהתחברות, נסה שוב');
+            }
+        });
+
+        // Register Form
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            const password = document.getElementById('register-password').value;
+
+            try {
+                // Check if email exists
+                const existingUser = await db.collection('ClubMembers')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+
+                if (!existingUser.empty) {
+                    alert('האימייל כבר רשום במערכת');
+                    return;
+                }
+
+                const newMemberData = {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    password: password,
+                    points: 0,
+                    totalSpent: 0,
+                    ordersCount: 0,
+                    joinDate: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                const docRef = await db.collection('ClubMembers').add(newMemberData);
+                currentUser = { id: docRef.id, ...newMemberData, joinDate: new Date() };
+                saveUserToStorage();
+                updateClubUI();
+                document.getElementById('club-modal').style.display = 'none';
+                alert(`ברוך הבא למועדון VIP, ${name}!`);
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('שגיאה ברישום, נסה שוב');
+            }
+        });
+
+        // Profile Edit Form
+        document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const updatedData = {
+                name: document.getElementById('profile-edit-name').value.trim(),
+                phone: document.getElementById('profile-edit-phone').value.trim(),
+                address: {
+                    street: document.getElementById('profile-edit-street').value.trim(),
+                    house: document.getElementById('profile-edit-house').value.trim(),
+                    city: document.getElementById('profile-edit-city').value.trim(),
+                    zip: document.getElementById('profile-edit-zip').value.trim()
+                }
+            };
+
+            try {
+                await db.collection('ClubMembers').doc(currentUser.id).update(updatedData);
+                currentUser = { ...currentUser, ...updatedData };
+                saveUserToStorage();
+                updateClubUI();
+                alert('הפרטים עודכנו בהצלחה!');
+            } catch (error) {
+                console.error('Update error:', error);
+                alert('שגיאה בעדכון הפרטים');
+            }
+        });
+
+        // Logout
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            currentUser = null;
+            usedPoints = 0;
+            saveUserToStorage();
+            updateClubUI();
+            document.getElementById('club-modal').style.display = 'none';
+            updateCartDisplay();
+            alert('התנתקת בהצלחה');
+        });
+
+        // Join Club Checkbox
+        document.getElementById('join-club-checkbox').addEventListener('change', (e) => {
+            const fieldsDiv = document.getElementById('club-signup-fields');
+            fieldsDiv.style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        // Apply Points Button
+        document.getElementById('apply-points-btn').addEventListener('click', () => {
+            if (!currentUser) {
+                alert('יש להתחבר למועדון כדי להשתמש בנקודות');
+                return;
+            }
+
+            const pointsToUse = parseInt(document.getElementById('points-input').value);
+            const pointsMessage = document.getElementById('points-message');
+
+            if (!pointsToUse || pointsToUse < 10) {
+                pointsMessage.innerHTML = '<span style="color: red;">מינימום 10 נקודות</span>';
+                return;
+            }
+
+            if (pointsToUse > currentUser.points) {
+                pointsMessage.innerHTML = '<span style="color: red;">אין לך מספיק נקודות</span>';
+                return;
+            }
+
+            if (pointsToUse > subtotal) {
+                pointsMessage.innerHTML = '<span style="color: red;">לא ניתן להשתמש ביותר נקודות מסכום העגלה</span>';
+                return;
+            }
+
+            usedPoints = pointsToUse;
+            updateCartDisplay();
+            pointsMessage.innerHTML = `<span class="coupon-applied">✓ משתמש ב-${pointsToUse} נקודות!</span>`;
+            document.getElementById('points-input').disabled = true;
+            document.getElementById('apply-points-btn').disabled = true;
+        });
+      
+        // ===== LOAD CART FROM STORAGE =====
+        function loadCartFromStorage() {
+            const savedCart = localStorage.getItem('vipshirts_cart');
+            const savedCoupon = localStorage.getItem('vipshirts_coupon');
+
+            if (savedCart) {
+                try {
+                    cart = JSON.parse(savedCart);
+                } catch (e) {
+                    cart = [];
+                }
+            }
+
+            if (savedCoupon) {
+                try {
+                    const couponData = JSON.parse(savedCoupon);
+                    if (couponData.ExpiryDate) {
+                        const expiry = new Date(couponData.ExpiryDate);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (expiry >= today) {
+                            appliedCoupon = couponData;
+                            couponInput.value = couponData.Code;
+                            couponInput.disabled = true;
+                            applyCouponBtn.disabled = true;
+                            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+                        } else {
+                            localStorage.removeItem('vipshirts_coupon');
+                        }
+                    } else {
+                        appliedCoupon = couponData;
+                        couponInput.value = couponData.Code;
+                        couponInput.disabled = true;
+                        applyCouponBtn.disabled = true;
+                        couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+                    }
+                } catch (e) {
+                    appliedCoupon = null;
+                    localStorage.removeItem('vipshirts_coupon');
+                }
+            }
+        }
+
+        function saveCartToStorage() {
+            localStorage.setItem('vipshirts_cart', JSON.stringify(cart));
+            if (appliedCoupon) {
+                localStorage.setItem('vipshirts_coupon', JSON.stringify(appliedCoupon));
+            } else {
+                localStorage.removeItem('vipshirts_coupon');
+            }
+        }
+
+        async function loadAnnouncements() {
+            try {
+                const settingsDoc = await db.collection('Settings').doc('main').get();
+                if (settingsDoc.exists) {
+                    const data = settingsDoc.data();
+                    announcements = data.Announcements || [];
+                    if (data.Shipping && data.Shipping.FreeThreshold > 0) {
+                        announcements.push(`משלוח חינם על קניות מעל ${data.Shipping.FreeThreshold}₪!`);
+                    }
+                    if (announcements.length > 0) {
+                        showNextAnnouncement();
+                        setInterval(showNextAnnouncement, 5000);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading announcements:', error);
+            }
+        }
+
+        function showNextAnnouncement() {
+            if (announcements.length === 0) return;
+            announcementBar.textContent = announcements[currentAnnouncementIndex];
+            currentAnnouncementIndex = (currentAnnouncementIndex + 1) % announcements.length;
+        }
+
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+
+        function applyFilters() {
+            let filtered = [...products];
+
+            if (currentCategoryFilter !== 'all') {
+                filtered = filtered.filter(p => productInCategory(p, currentCategoryFilter));
+            }
+
+            const searchValue = searchInput.value.toLowerCase();
+            if (searchValue) {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchValue));
+            }
+
+            if (sortSelect.value === 'price-asc') {
+                filtered.sort((a, b) => getEffectivePrice(a) - getEffectivePrice(b));
+            } else if (sortSelect.value === 'price-desc') {
+                filtered.sort((a, b) => getEffectivePrice(b) - getEffectivePrice(a));
+            }
+
+            renderFilteredProducts(filtered);
+        }
+
+        function getEffectivePrice(product) {
+            if (product.salePrice && product.salePrice > 0) {
+                if (product.saleEndDate) {
+                    const endDate = new Date(product.saleEndDate);
+                    if (endDate >= new Date()) return product.salePrice;
+                } else {
+                    return product.salePrice;
+                }
+            }
+            return product.price;
+        }
+
+        function isProductOnSale(product) {
+            if (!product.salePrice || product.salePrice <= 0) return false;
+            if (product.saleEndDate) {
+                const endDate = new Date(product.saleEndDate);
+                return endDate >= new Date();
+            }
+            return true;
+        }
+
+        function renderFilteredProducts(list) {
+            productsContainer.innerHTML = '';
+            if (list.length === 0) {
+                productsContainer.innerHTML = '<p style="text-align: center; width: 100%; padding: 40px;">לא נמצאו מוצרים.</p>';
+                return;
+            }
+
+            const showBadges = (currentCategoryFilter === 'all');
+
+            list.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                const onSale = isProductOnSale(product);
+                const effectivePrice = getEffectivePrice(product);
+
+                let priceHTML = `<p class="price">${effectivePrice.toFixed(2)} ₪</p>`;
+                let saleBadge = '';
+
+                if (onSale) {
+                    const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
+                    saleBadge = `<div class="sale-badge">-${discount}%</div>`;
+                    priceHTML = `<p class="price on-sale">
+                        <span class="original-price">${product.price.toFixed(2)} ₪</span>
+                        <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
+                    </p>`;
+                }
+
+                const cats = getProductCategories(product);
+                let badgeHTML = '';
+                if (showBadges && cats.length === 1) {
+                    badgeHTML = `<div class="category-badge">${cats[0]}</div>`;
+                }
+
+                card.innerHTML = `
+                    ${saleBadge}
+                    <img src="${product.image}">
+                    ${badgeHTML}
+                    <h3>${product.name}</h3>
+                    ${priceHTML}
+                    <button onclick="openProductModal('${product.id}')">הוסף לעגלה</button>
+                `;
+                card.querySelector('img').addEventListener('click', () => openProductModal(product.id));
+                card.querySelector('h3').addEventListener('click', () => openProductModal(product.id));
+                productsContainer.appendChild(card);
+            });
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        sortSelect.addEventListener('change', applyFilters);
+
+        function updateCategoryFilter() {
+            const filterDiv = document.getElementById('category-filter');
+            filterDiv.innerHTML = '<button class="active" data-category="all">הכל</button>';
+
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                btn.addEventListener('click', () => filterByCategory(cat));
+                filterDiv.appendChild(btn);
+            });
+
+            filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => filterByCategory('all'));
+        }
+
+        function filterByCategory(category) {
+            currentCategoryFilter = category;
+            document.querySelectorAll('#category-filter button').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === category) btn.classList.add('active');
+            });
+            applyFilters();
+        }
+
+        async function loadSettings() {
+            try {
+                const settingsDoc = await db.collection('Settings').doc('main').get();
+                if (settingsDoc.exists) {
+                    settings = settingsDoc.data();
+                    categories = settings.Categories || [];
+                    updateCategoryFilter();
+                } else {
+                    settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [] };
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [] };
+            }
+        }
+
+        async function fetchProducts() {
+            try {
+                const productsSnapshot = await db.collection('soccer_shirts').get();
+                products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                applyFilters();
+            } catch (error) {
+                alert("שגיאה בטעינת חולצות.");
+            }
+        }
+
+        function calculateShipping() {
+            if (!settings || !settings.Shipping) { shippingCost = 0; return; }
+            const shipping = settings.Shipping;
+            if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
+                shippingCost = 0;
+                shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
+                return;
+            }
+            if (shipping.Method === 'percentage') {
+                shippingCost = (subtotal * shipping.Value) / 100;
+            } else if (shipping.Method === 'per_item') {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                shippingCost = shipping.Value * totalItems;
+            } else {
+                shippingCost = shipping.Value;
+            }
+            if (shipping.FreeThreshold > 0) {
+                const remaining = shipping.FreeThreshold - subtotal;
+                if (remaining > 0) {
+                    shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
+                }
+            } else {
+                shippingInfoElement.innerHTML = '';
+            }
+        }
+
+        function applyCouponDiscount() {
+            if (!appliedCoupon) return 0;
+            let discount = 0;
+            if (appliedCoupon.Type === 'free_shipping') {
+                discount = shippingCost;
+                shippingCost = 0;
+            } else if (appliedCoupon.Type === 'fixed_discount') {
+                discount = Math.min(appliedCoupon.Value, subtotal);
+            } else if (appliedCoupon.Type === 'percentage_discount') {
+                discount = (subtotal * appliedCoupon.Value) / 100;
+            }
+            return discount;
+        }
+
+function updateCartDisplay() {
+    cartItemsList.innerHTML = '';
+    subtotal = 0;
+
+    if (cart.length === 0) {
+        cartItemsList.innerHTML = `
+            <div class="empty-cart-message">
+                <div class="empty-icon">🛒</div>
+                <p>העגלה ריקה</p>
+                <p style="font-size: 0.9em; color: #999;">הוסף מוצרים כדי להמשיך</p>
+            </div>
+        `;
+        shippingInfoElement.innerHTML = '';
+    } else {
+        cart.forEach(item => {
+            const listItem = document.createElement('li');
+            let optionsText = '';
+            if (item.selectedOptions) {
+                Object.keys(item.selectedOptions).forEach(key => {
+                    if (item.selectedOptions[key]) {
+                        optionsText += `${key}: ${item.selectedOptions[key]} `;
+                    }
+                });
+            }
+            const freebieTag = item.isFreebie ? '<span class="freebie-badge">מתנה</span>' : '';
+
+            listItem.innerHTML = `
+                <div class="cart-item-details">
+                    <img src="${item.displayImage || item.image}" alt="${item.name}">
+                    <div class="cart-item-info">
+                        <span><strong>${freebieTag}${item.name}</strong></span>
+                        ${optionsText ? `<span style="font-size:0.85em;color:#666;">${optionsText}</span>` : ''}
+                        <span style="color:#28a745;font-weight:600;">${item.price.toFixed(2)} ₪</span>
+                    </div>
+                </div>
+                <div class="cart-item-quantity">
+                    <button class="decrease-quantity" data-cart-index="${cart.indexOf(item)}">-</button>
+                    <span>${item.quantity}</span>
+                    <button class="increase-quantity" data-cart-index="${cart.indexOf(item)}">+</button>
+                </div>
+                <button class="remove-from-cart" data-cart-index="${cart.indexOf(item)}" title="הסר">🗑</button>
+            `;
+            cartItemsList.appendChild(listItem);
+            subtotal += item.price * item.quantity;
+        });
+    }
+
+calculateShipping();
+    const discount = applyCouponDiscount();
+    const pointsDiscount = currentUser ? usedPoints : 0;
+    total = subtotal + shippingCost - discount - pointsDiscount;
+cartSubtotalElement.textContent = subtotal.toFixed(2);
+    shippingCostElement.textContent = shippingCost.toFixed(2);
+    
+    // Update totals display with points discount
+    const cartTotalsDiv = document.querySelector('.cart-totals');
+    const existingPointsRow = cartTotalsDiv.querySelector('.points-discount-row');
+    if (existingPointsRow) existingPointsRow.remove();
+    
+    if (usedPoints > 0) {
+        const pointsRow = document.createElement('div');
+        pointsRow.className = 'total-row points-discount-row';
+        pointsRow.innerHTML = `
+            <span>הנחת נקודות:</span>
+            <span style="color: #28a745;">-<span>${usedPoints.toFixed(2)}</span> ₪</span>
+        `;
+        cartTotalsDiv.insertBefore(pointsRow, cartTotalsDiv.querySelector('.grand-total'));
+    }
+    
+    cartTotalElement.textContent = total.toFixed(2);
+
+    updateCartButton();
+    saveCartToStorage();
+    
+    // ===== סנכרון PayPal =====
+    if (cartOpen) {
+        renderPayPalButton();
+    }
+}
+
+        function removeFromCart(cartIndex) {
+            cart.splice(cartIndex, 1);
+            updateCartDisplay();
+        }
+
+        function addToCart(productId, selectedOptions, displayImage, finalPrice, isFreebie = false) {
+            const productToAdd = products.find(p => p.id === productId);
+
+            const existingItemIndex = cart.findIndex(item => {
+                if (item.id !== productToAdd.id) return false;
+                if (item.isFreebie !== isFreebie) return false;
+                if (!item.selectedOptions && !selectedOptions) return true;
+                if (!item.selectedOptions || !selectedOptions) return false;
+                return JSON.stringify(item.selectedOptions) === JSON.stringify(selectedOptions);
+            });
+
+            if (existingItemIndex !== -1) {
+                cart[existingItemIndex].quantity++;
+            } else {
+                const originalPrice = isProductOnSale(productToAdd) && !isFreebie ? productToAdd.price : null;
+                cart.push({
+                    ...productToAdd,
+                    quantity: 1,
+                    price: finalPrice,
+                    originalPrice: originalPrice,
+                    selectedOptions: selectedOptions,
+                    displayImage: displayImage,
+                    isFreebie: isFreebie
+                });
+            }
+            updateCartDisplay();
+            openCart();
+        }
+
+        function changeQuantity(cartIndex, change) {
+            if (cart[cartIndex]) {
+                cart[cartIndex].quantity += change;
+                if (cart[cartIndex].quantity < 1) cart.splice(cartIndex, 1);
+                updateCartDisplay();
+            }
+        }
+
+        cartItemsList.addEventListener('click', (event) => {
+            const cartIndex = parseInt(event.target.dataset.cartIndex);
+            if (!isNaN(cartIndex)) {
+                if (event.target.classList.contains('increase-quantity')) changeQuantity(cartIndex, 1);
+                else if (event.target.classList.contains('decrease-quantity')) changeQuantity(cartIndex, -1);
+                else if (event.target.classList.contains('remove-from-cart')) removeFromCart(cartIndex);
+            }
+        });
+
+        applyCouponBtn.addEventListener('click', async () => {
+            const code = couponInput.value.trim();
+            if (!code) { couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>'; return; }
+            if (!settings || !settings.Coupons) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>'; return; }
+
+            const coupon = settings.Coupons.find(c => c.Code === code);
+            if (!coupon) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>'; return; }
+
+            if (coupon.ExpiryDate) {
+                const expiry = new Date(coupon.ExpiryDate);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (expiry < today) { couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>'; return; }
+            }
+
+            if (appliedCoupon) {
+                if (appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
+                    cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
+                }
+                couponMessage.innerHTML = '<span style="color: #ff9800;">הקופון הקודם הוחלף</span>';
+            }
+
+            appliedCoupon = coupon;
+
+            if (coupon.Type === 'free_product' && coupon.ProductId) {
+                const freeProduct = products.find(p => p.id === coupon.ProductId);
+                if (freeProduct) {
+                    const exists = cart.find(item => item.id === coupon.ProductId && item.isFreebie);
+                    if (!exists) {
+                        if (freeProduct.customFields && freeProduct.customFields.length > 0) {
+                            const hasUnfilledRequired = freeProduct.customFields.some(field => {
+                                if (!field.required) return false;
+                                if (coupon.SelectedOptions && coupon.SelectedOptions[field.name]) return false;
+                                return true;
+                            });
+                            const hasTextFields = freeProduct.customFields.some(field => field.type === 'text');
+
+                            if (hasUnfilledRequired || hasTextFields) {
+                                couponLockedOptions = coupon.SelectedOptions || {};
+                                isCouponProduct = true;
+                                openProductModal(coupon.ProductId, true);
+                                couponMessage.innerHTML = '<span style="color: #3498db;">אנא מלא את הפרטים החסרים למוצר המתנה</span>';
+                                return;
+                            }
+                        }
+                        addToCart(coupon.ProductId, coupon.SelectedOptions || {}, freeProduct.image, 0, true);
+                    }
+                }
+            }
+
+            updateCartDisplay();
+            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+            couponInput.disabled = true;
+            applyCouponBtn.disabled = true;
+        });
+
+        function openProductModal(productId, isCouponFreebie = false) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            modalProductImage.src = product.image;
+            modalProductImage.alt = product.name;
+            modalProductTitle.textContent = product.name;
+
+            const onSale = isProductOnSale(product);
+            const effectivePrice = getEffectivePrice(product);
+            currentProductPrice = isCouponFreebie ? 0 : effectivePrice;
+
+            if (isCouponFreebie) {
+                modalProductPrice.innerHTML = '<span style="color: #28a745; font-weight: 900;">מתנה - 0.00 ₪</span>';
+            } else if (onSale) {
+                modalProductPrice.innerHTML = `
+                    <span class="price on-sale">
+                        <span class="original-price">${product.price.toFixed(2)} ₪</span>
+                        <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
+                    </span>`;
+            } else {
+                modalProductPrice.textContent = `${currentProductPrice.toFixed(2)} ₪`;
+            }
+
+            modalProductDescription.textContent = product.description || '';
+            currentProductOptions = {};
+            customOptionsContainer.innerHTML = '';
+
+            if (product.customFields && product.customFields.length > 0) {
+                product.customFields.forEach((field, index) => {
+                    const optionGroup = document.createElement('div');
+                    optionGroup.className = 'option-group';
+
+                    const isLocked = isCouponFreebie && couponLockedOptions && couponLockedOptions[field.name];
+
+                    const label = document.createElement('label');
+                    label.textContent = field.name + (field.required ? ' *' : '') + ':';
+                    if (field.extraPrice && field.extraPrice > 0 && !isCouponFreebie) {
+                        const priceTag = document.createElement('span');
+                        priceTag.className = 'option-price-tag';
+                        priceTag.textContent = ` (+${field.extraPrice.toFixed(2)}₪)`;
+                        label.appendChild(priceTag);
+                    }
+                    optionGroup.appendChild(label);
+
+                    if (field.type === 'select') {
+                        const select = document.createElement('select');
+                        select.id = `custom-field-${index}`;
+                        select.dataset.fieldExtraPrice = (!isCouponFreebie && field.extraPrice) ? field.extraPrice : 0;
+                        select.innerHTML = '<option value="" data-extra-price="0">בחר ' + field.name + '</option>';
+
+                        field.options.forEach(option => {
+                            const opt = document.createElement('option');
+                            opt.value = option.value;
+                            const optionPrice = (!isCouponFreebie && option.extraPrice) ? option.extraPrice : 0;
+                            opt.textContent = option.value + (optionPrice > 0 ? ` (+${optionPrice.toFixed(2)}₪)` : '');
+                            opt.dataset.image = option.image || '';
+                            opt.dataset.extraPrice = optionPrice;
+                            if (isLocked && option.value === couponLockedOptions[field.name]) opt.selected = true;
+                            select.appendChild(opt);
+                        });
+
+                        if (isLocked) {
+                            select.disabled = true;
+                            select.classList.add('locked-option');
+                            currentProductOptions[field.name] = couponLockedOptions[field.name];
+                            const lockedOption = field.options.find(o => o.value === couponLockedOptions[field.name]);
+                            if (lockedOption && lockedOption.image) modalProductImage.src = lockedOption.image;
+                        }
+
+                        select.addEventListener('change', (e) => {
+                            currentProductOptions[field.name] = e.target.value;
+                            const selectedOption = field.options.find(o => o.value === e.target.value);
+                            if (selectedOption && selectedOption.image) modalProductImage.src = selectedOption.image;
+                            else modalProductImage.src = product.image;
+                            if (!isCouponFreebie) updateModalPrice();
+                        });
+                        optionGroup.appendChild(select);
+                    } else if (field.type === 'text') {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.id = `custom-field-${index}`;
+                        input.placeholder = 'הזן ' + field.name;
+                        input.dataset.fieldExtraPrice = (!isCouponFreebie && field.extraPrice) ? field.extraPrice : 0;
+                        input.addEventListener('input', (e) => {
+                            currentProductOptions[field.name] = e.target.value;
+                            if (!isCouponFreebie) updateModalPrice();
+                        });
+                        optionGroup.appendChild(input);
+                    }
+                    customOptionsContainer.appendChild(optionGroup);
+                });
+            }
+
+            productModal.style.display = 'flex';
+            currentModalProductId = product.id;
+                    window.history.replaceState(null, '', '#' + encodeURIComponent(product.name));
+
+        }
+
+        function updateModalPrice() {
+            const product = products.find(p => p.id === currentModalProductId);
+            if (!product) return;
+
+            const basePrice = getEffectivePrice(product);
+            let totalPrice = basePrice;
+
+            if (product.customFields) {
+                product.customFields.forEach((field, index) => {
+                    const fieldElement = document.getElementById(`custom-field-${index}`);
+                    if (!fieldElement) return;
+                    const fieldExtraPrice = parseFloat(field.extraPrice) || 0;
+                    if (field.type === 'select' && fieldElement.value) {
+                        totalPrice += fieldExtraPrice;
+                        const selectedOption = fieldElement.options[fieldElement.selectedIndex];
+                        const optionExtraPrice = parseFloat(selectedOption.dataset.extraPrice) || 0;
+                        totalPrice += optionExtraPrice;
+                    } else if (field.type === 'text' && fieldElement.value) {
+                        totalPrice += fieldExtraPrice;
+                    }
+                });
+            }
+
+            currentProductPrice = totalPrice;
+
+            const onSale = isProductOnSale(product);
+            if (onSale) {
+                const extraCost = totalPrice - basePrice;
+                const originalTotalPrice = product.price + extraCost;
+                modalProductPrice.innerHTML = `
+                    <span class="price on-sale">
+                        <span class="original-price">${originalTotalPrice.toFixed(2)} ₪</span>
+                        <span class="sale-price">${totalPrice.toFixed(2)} ₪</span>
+                    </span>`;
+            } else {
+                modalProductPrice.textContent = `${totalPrice.toFixed(2)} ₪`;
+            }
+        }
+
+        modalAddToCartBtn.addEventListener('click', function () {
+            const product = products.find(p => p.id === currentModalProductId);
+            if (!product) return;
+
+            if (product.customFields && product.customFields.length > 0) {
+                for (let i = 0; i < product.customFields.length; i++) {
+                    const field = product.customFields[i];
+                    if (field.required && !currentProductOptions[field.name]) {
+                        alert('אנא מלא את השדה: ' + field.name);
+                        return;
+                    }
+                }
+            }
+
+            const currentDisplayImage = modalProductImage.src;
+            addToCart(currentModalProductId, { ...currentProductOptions }, currentDisplayImage, currentProductPrice, isCouponProduct);
+
+            if (isCouponProduct) {
+                couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+                couponInput.disabled = true;
+                applyCouponBtn.disabled = true;
+                isCouponProduct = false;
+                couponLockedOptions = null;
+            }
+
+            productModal.style.display = 'none';
+            currentProductOptions = {};
+        });
+
+        function closeProductModal() {
+            productModal.style.display = 'none';
+            currentProductOptions = {};
+            isCouponProduct = false;
+            couponLockedOptions = null;
+                    window.history.replaceState(null, '', window.location.pathname);
+        }
+
+        closeProductModalBtn.addEventListener('click', closeProductModal);
+        productModal.addEventListener('mousedown', function (e) {
+            if (e.target === productModal) closeProductModal();
+        });
+
+        window.addEventListener('keydown', function (e) {
+            if (productModal.style.display === 'flex' && e.key === 'Escape') closeProductModal();
+        });
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const contactData = {
+                name: document.getElementById('contact-name').value,
+                phone: document.getElementById('contact-phone').value,
+                email: document.getElementById('contact-email').value,
+                message: document.getElementById('contact-message').value,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'open',
+                linkedOrderId: null
+            };
+            try {
+                const ordersSnapshot = await db.collection('orders')
+                    .where('customerPhone', '==', contactData.phone)
+                    .where('customerEmail', '==', contactData.email).get();
+                if (!ordersSnapshot.empty && ordersSnapshot.docs.length === 1) {
+                    contactData.linkedOrderId = ordersSnapshot.docs[0].id;
+                }
+                await db.collection('ContactLeads').add(contactData);
+                alert('הפנייה נשלחה בהצלחה! ניצור איתך קשר בהקדם.');
+                contactForm.reset();
+            } catch (error) {
+                console.error('Error submitting contact form:', error);
+                alert('אירעה שגיאה בשליחת הפנייה. אנא נסה שוב.');
+            }
+        });
+
+        function getFullAddress() {
+            const street = document.getElementById('address-street').value.trim();
+            const house = document.getElementById('address-house').value.trim();
+            const city = document.getElementById('address-city').value.trim();
+            const country = document.getElementById('address-country').value.trim();
+            const zip = document.getElementById('address-zip').value.trim();
+            return `${street} ${house}, ${city}, ${country} ${zip}`;
+        }
+
+        function renderPayPalButton() {
+            const container = document.getElementById('paypal-button-container');
+            if (!container) return;
+            
+            // Clear existing buttons
+            container.innerHTML = "";
+            
+            // Don't render if cart is empty
+            if (cart.length === 0) return;
+
+            paypal.Buttons({
+                style: { 
+                    color: 'blue', 
+                    shape: 'pill', 
+                    label: 'pay', 
+                    height: 45,
+                    layout: 'vertical'
+                },
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { value: total.toFixed(2), currency_code: 'ILS' },
+                            description: 'רכישת חולצות כדורגל'
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(async function (details) {
+                        try {
+                            const name = document.getElementById('name').value;
+                            const email = document.getElementById('email').value;
+                            const phone = document.getElementById('phone').value;
+                            const address = getFullAddress();
+// Handle club signup if checkbox checked
+                            let clubMemberId = currentUser ? currentUser.id : null;
+                            if (!currentUser && document.getElementById('join-club-checkbox').checked) {
+                                const clubPassword = document.getElementById('club-signup-password').value;
+                                if (clubPassword && clubPassword.length >= 6) {
+                                    try {
+                                        const newMemberData = {
+                                            name: name,
+                                            email: email,
+                                            phone: phone,
+                                            password: clubPassword,
+                                            points: 0,
+                                            totalSpent: 0,
+                                            ordersCount: 0,
+                                            joinDate: firebase.firestore.FieldValue.serverTimestamp()
+                                        };
+                                        const memberRef = await db.collection('ClubMembers').add(newMemberData);
+                                        clubMemberId = memberRef.id;
+                                        currentUser = { id: memberRef.id, ...newMemberData, joinDate: new Date() };
+                                        saveUserToStorage();
+                                    } catch (error) {
+                                        console.error('Error creating club member:', error);
+                                    }
+                                }
+                            }
+
+                            // Calculate points earned (2% of subtotal)
+                            const pointsEarned = clubMemberId ? Math.floor(subtotal * 0.02) : 0;
+
+                            const orderRef = await db.collection('orders').add({
+                                customerName: name,
+                                customerEmail: email,
+                                customerPhone: phone,
+                                customerAddress: address,
+                                items: cart.map(item => ({
+                                    productId: item.id,
+                                    productName: item.name,
+                                    name: item.name,
+                                    quantity: item.quantity,
+                                    price: item.price,
+                                    originalPrice: item.originalPrice || null,
+                                    selectedOptions: item.selectedOptions || null,
+                                    isFreebie: item.isFreebie || false
+                                })),
+                                subtotal: parseFloat(subtotal.toFixed(2)),
+                                shippingCost: parseFloat(shippingCost.toFixed(2)),
+                                totalAmount: parseFloat(total.toFixed(2)),
+                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                                couponDetails: appliedCoupon || null,
+                                clubMemberId: clubMemberId,
+                                pointsUsed: usedPoints,
+                                pointsEarned: pointsEarned,
+                                orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+                                status: 'completed',
+                                completed: false,
+                                paymentType: 'paypal',
+                                paypalOrderId: details.id
+                            });
+
+                            // Update club member points
+                            if (clubMemberId) {
+                                try {
+                                    const memberRef = db.collection('ClubMembers').doc(clubMemberId);
+                                    await memberRef.update({
+                                        points: firebase.firestore.FieldValue.increment(pointsEarned - usedPoints),
+                                        totalSpent: firebase.firestore.FieldValue.increment(total),
+                                        ordersCount: firebase.firestore.FieldValue.increment(1)
+                                    });
+                                    
+                                    if (currentUser) {
+                                        currentUser.points = (currentUser.points || 0) + pointsEarned - usedPoints;
+                                        saveUserToStorage();
+                                        updateClubUI();
+                                    }
+                                } catch (error) {
+                                    console.error('Error updating member points:', error);
+                                }
+                            }
+
+const emailSent = await sendReceiptEmail({
+    orderId: orderRef.id,
+    customerName: name,
+    customerEmail: email,
+    customerPhone: phone,
+    customerAddress: address,
+    items: cart,
+    subtotal: subtotal,
+    shippingCost: shippingCost,
+    totalAmount: total,
+    appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+    couponDetails: appliedCoupon,
+    pointsUsed: usedPoints,
+    pointsEarned: pointsEarned
+});
+
+                            if (emailSent) {
+                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
+                            } else {
+                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
+                            }
+
+                            cart = [];
+                            appliedCoupon = null;
+                          usedPoints = 0;
+                            document.getElementById('points-input').value = '';
+                            document.getElementById('points-input').disabled = false;
+                            document.getElementById('apply-points-btn').disabled = false;
+                            document.getElementById('points-message').innerHTML = '';
+                            couponInput.value = '';
+                            couponInput.disabled = false;
+                            applyCouponBtn.disabled = false;
+                            couponMessage.innerHTML = '';
+                            localStorage.removeItem('vipshirts_cart');
+                            localStorage.removeItem('vipshirts_coupon');
+                            updateCartDisplay();
+                            checkoutForm.reset();
+                            closeCart();
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
+                        }
+                    });
+                },
+                onCancel: function () { alert('התשלום בוטל.'); },
+                onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
+            }).render('#paypal-button-container');
+        }
+
+        const EMAILJS_SERVICE_ID = 'service_pypll0n';
+        const EMAILJS_TEMPLATE_ID = 'vipshirts';
+        const EMAILJS_PUBLIC_KEY = 'f-U3pdugkQiavzAvU';
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+<!-- רק החלק שצריך תיקון - שורות 1130-1180 בקוד המקורי -->
+async function sendReceiptEmail(orderData) {
+    try {
+        const productsListHTML = orderData.items.map(item => {
+            const finalName = item.productName || item.name || "מוצר VIP";
+            const optionsText = item.selectedOptions
+                ? Object.entries(item.selectedOptions).filter(([_, value]) => value).map(([key, value]) => `${key}: ${value}`).join(', ')
+                : '';
+            const freebieTag = item.isFreebie ? ' <strong style="color: #28a745;">(מתנה)</strong>' : '';
+            let priceDisplay = `₪${item.price.toFixed(2)}`;
+            if (item.originalPrice && item.originalPrice > item.price && !item.isFreebie) {
+                priceDisplay = `<span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₪${item.originalPrice.toFixed(2)}</span><br><span style="color: #e74c3c; font-weight: bold;">₪${item.price.toFixed(2)}</span>`;
+            }
+            const productDescription = `<div style="font-weight: bold; margin-bottom: 4px;">${finalName}${freebieTag}</div>${optionsText ? `<div style="font-size: 13px; color: #666;">(${optionsText})</div>` : ''}`;
+            return `<tr>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${productDescription}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${item.quantity}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${priceDisplay}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">₪${(item.price * item.quantity).toFixed(2)}</td>
+            </tr>`;
+        }).join('');
+
+        // חישוב הנחת קופון
+        let discountAmount = 0;
+        const coupon = orderData.couponDetails;
+        if (orderData.appliedCoupon && coupon) {
+            if (coupon.Type === 'fixed_discount') {
+                discountAmount = coupon.Value;
+            } else if (coupon.Type === 'percentage_discount') {
+                discountAmount = (orderData.subtotal * coupon.Value) / 100;
+            } else if (coupon.Type === 'free_shipping') {
+                discountAmount = orderData.shippingCost;
+            }
+        }
+
+        // ✅ תיקון: בניית HTML לקופון
+        let couponRowHTML = '';
+        if (orderData.appliedCoupon && discountAmount > 0) {
+            couponRowHTML = `
+                <div class="summary-row coupon-row">
+                    <span>קופון (${orderData.appliedCoupon}):</span>
+                    <span>-₪${discountAmount.toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        // HTML לנקודות שנוצלו
+        let pointsUsedHTML = '';
+        if (orderData.pointsUsed && orderData.pointsUsed > 0) {
+            pointsUsedHTML = `<p><strong>נקודות שנוצלו:</strong> ${orderData.pointsUsed} ⭐ (שווי: ₪${orderData.pointsUsed})</p>`;
+        }
+
+        // HTML לנקודות שנצברו
+        let pointsEarnedHTML = '';
+        if (orderData.pointsEarned && orderData.pointsEarned > 0) {
+            pointsEarnedHTML = `
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center; margin-top: 10px;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #28a745; margin-bottom: 5px;">
+                        🎉 צברת ${orderData.pointsEarned} נקודות חדשות!
+                    </div>
+                    <div style="font-size: 0.9em; color: #666;">
+                        הנקודות נוספו לחשבון המועדון שלך
+                    </div>
+                </div>
+            `;
+        }
+
+        const templateParams = {
+            to_email: orderData.customerEmail,
+            name: orderData.customerName,
+            email: orderData.customerEmail,
+            phone: orderData.customerPhone,
+            address: orderData.customerAddress,
+            order_id: orderData.orderId,
+            date: new Date().toLocaleString('he-IL'),
+            products_list: productsListHTML,
+            subtotal: orderData.subtotal.toFixed(2),
+            shipping_cost: orderData.shippingCost.toFixed(2),
+            total_amount: orderData.totalAmount.toFixed(2),
+            
+            // ✅ שימוש ב-HTML מוכן במקום שדות נפרדים
+            coupon_row_html: couponRowHTML,
+            
+            // שדות נקודות
+            points_used_html: pointsUsedHTML,
+            points_earned_html: pointsEarnedHTML
+        };
+
+        const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        console.log('Email sent successfully:', response);
+        return true;
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return false;
+    }
+}
+
+      document.addEventListener('DOMContentLoaded', async () => {
+            await loadSettings();
+            await loadAnnouncements();
+            await fetchProducts();
+            loadUserFromStorage();
+            loadCartFromStorage();
+            updateCartDisplay();
+        });
+
+        // ===== DEEP LINK SUPPORT =====
+        function handleDeepLink() {
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#')) {
+                const productName = decodeURIComponent(hash.substring(1));
+                
+                // חפש מוצר לפי שם
+                const product = products.find(p => p.name === productName);
+                if (product) {
+                    // המתן קצת שהכל ייטען
+                    setTimeout(() => {
+                        openProductModal(product.id);
+                    }, 500);
+                }
+            }
+        }
+
+        // האזן לשינויים ב-hash
+        window.addEventListener('hashchange', handleDeepLink);
+
+        // בדוק deep link בטעינה ראשונית
+        window.addEventListener('load', () => {
+            setTimeout(handleDeepLink, 1000);
+        });
+    </script>
+</body>
+</html>
