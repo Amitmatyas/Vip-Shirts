@@ -1161,7 +1161,7 @@ main#products-container {
     <div id="cart-container">
 <div class="cart-header">
     <h2 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
-        <button id="close-cart-btn" style="background: none; border: none; color: white; font-size: 1.8em; cursor: pointer; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1; order: -1;">&times;</button>
+        <button id="close-cart-btn" style="background: none; border: none; color: white; font-size: 1.8em; cursor: pointer; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">&times;</button>
         <span style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center;">
             <span>🛒</span>
             <span>עגלת הקניות שלי</span>
@@ -1550,32 +1550,29 @@ main#products-container {
             return getProductCategories(product).includes(cat);
         }
 
-        // ===== ENHANCED CART TOGGLE WITH BUTTON STATE CHANGE =====
-        function updateCartButton() {
-            const cartIcon = cartToggleButton.querySelector('.cart-icon');
-            const cartText = cartToggleButton.querySelector('.cart-text');
-            const closeIcon = '<span class="close-icon">✕</span>';
-            
-            if (cartOpen) {
-                cartToggleButton.classList.add('cart-open-state');
-                cartToggleButton.innerHTML = closeIcon;
-            } else {
-                cartToggleButton.classList.remove('cart-open-state');
-                const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-                
-                if (itemCount > 0) {
-                    cartToggleButton.innerHTML = `
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-count">${itemCount}</span>
-                    `;
-                } else {
-                    cartToggleButton.innerHTML = `
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-text">עגלת קניות</span>
-                    `;
-                }
-            }
+function updateCartButton() {
+    const closeIcon = '<span class="close-icon">✕</span>';
+    
+    if (cartOpen) {
+        cartToggleButton.classList.add('cart-open-state');
+        cartToggleButton.innerHTML = closeIcon;
+    } else {
+        cartToggleButton.classList.remove('cart-open-state');
+        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        if (itemCount > 0) {
+            cartToggleButton.innerHTML = `
+                <span class="cart-icon">🛒</span>
+                <span class="cart-count">${itemCount}</span>
+            `;
+        } else {
+            cartToggleButton.innerHTML = `
+                <span class="cart-icon">🛒</span>
+                <span class="cart-text">עגלת קניות</span>
+            `;
         }
+    }
+}
 
         function openCart() {
             if (cartOpen) return;
@@ -2133,31 +2130,41 @@ main#products-container {
             }
         }
 
-        function calculateShipping() {
-            if (!settings || !settings.Shipping) { shippingCost = 0; return; }
-            const shipping = settings.Shipping;
-            if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
-                shippingCost = 0;
-                shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
-                return;
-            }
-            if (shipping.Method === 'percentage') {
-                shippingCost = (subtotal * shipping.Value) / 100;
-            } else if (shipping.Method === 'per_item') {
-                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                shippingCost = shipping.Value * totalItems;
-            } else {
-                shippingCost = shipping.Value;
-            }
-            if (shipping.FreeThreshold > 0) {
-                const remaining = shipping.FreeThreshold - subtotal;
-                if (remaining > 0) {
-                    shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
-                }
-            } else {
-                shippingInfoElement.innerHTML = '';
-            }
+function calculateShipping() {
+    if (!settings || !settings.Shipping) { 
+        shippingCost = 0; 
+        shippingCostElement.textContent = '0.00'; // ✅ הוסף
+        return; 
+    }
+    const shipping = settings.Shipping;
+    if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
+        shippingCost = 0;
+        shippingCostElement.textContent = '0.00'; // ✅ הוסף
+        shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
+        return;
+    }
+    if (shipping.Method === 'percentage') {
+        shippingCost = (subtotal * shipping.Value) / 100;
+    } else if (shipping.Method === 'per_item') {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        shippingCost = shipping.Value * totalItems;
+    } else {
+        shippingCost = shipping.Value;
+    }
+    
+    shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף
+    
+    if (shipping.FreeThreshold > 0) {
+        const remaining = shipping.FreeThreshold - subtotal;
+        if (remaining > 0) {
+            shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
+        } else {
+            shippingInfoElement.innerHTML = '';
         }
+    } else {
+        shippingInfoElement.innerHTML = '';
+    }
+}
 
         function applyCouponDiscount() {
             if (!appliedCoupon) return 0;
@@ -2236,7 +2243,8 @@ if (appliedCoupon && discount > 0) {
 }
 
 cartSubtotalElement.textContent = subtotal.toFixed(2);
-
+shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף שורה זו
+    
     const cartTotalsDiv = document.querySelector('.cart-totals');
     const existingPointsRow = cartTotalsDiv.querySelector('.points-discount-row');
     if (existingPointsRow) existingPointsRow.remove();
