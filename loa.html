@@ -911,11 +911,24 @@ body.cart-open #club-btn {
                 left: calc(15px + 90vw);
             }
 
-            #club-btn {
-    top: 15px;
-    left: 75px;
-    padding: 10px 16px;
-    font-size: 1em;
+#club-btn {
+    position: fixed;
+    top: 20px;
+    left: 90px;
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    z-index: 999; /* ✅ שנה מ-1001 ל-999 */
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 body.cart-open #club-btn {
@@ -1037,15 +1050,15 @@ body.cart-open #club-btn {
     <!-- ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== -->
     <div id="cart-container">
 <div class="cart-header">
-    <h2 style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-        <span style="display: flex; align-items: center; gap: 10px;">
+    <h2 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
+        <button id="close-cart-btn" style="background: none; border: none; color: white; font-size: 1.8em; cursor: pointer; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1; order: -1;">&times;</button>
+        <span style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center;">
             <span>🛒</span>
             <span>עגלת הקניות שלי</span>
         </span>
-        <button id="close-cart-btn" style="background: none; border: none; color: white; font-size: 1.8em; cursor: pointer; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">&times;</button>
     </h2>
 </div>
-
+        
         <div class="cart-content">
             <!-- Cart Items Section -->
             <div class="cart-section">
