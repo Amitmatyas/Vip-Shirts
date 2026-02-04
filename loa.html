@@ -1600,24 +1600,100 @@ function updateCartButton() {
 
         document.getElementById('close-cart-btn').addEventListener('click', closeCart);
         
-        async function loadUserFromStorage() {
-    const savedUser = localStorage.getItem('vipshirts_user');
-    if (savedUser) {
+async function loadUserSession() {
+    const sessionToken = sessionStorage.getItem('vipshirts_session');
+    if (sessionToken) {
         try {
-            const userData = JSON.parse(savedUser);
-            // ✅ טען נקודות מעודכנות מהשרת
-            const userDoc = await db.collection('ClubMembers').doc(userData.id).get();
-            if (userDoc.exists) {
-                currentUser = { id: userDoc.id, ...userDoc.data() };
-                saveUserToStorage();
-                updateClubUI();
-            } else {
-                currentUser = null;
+            const sessionDoc = await db.collection('UserSessions').doc(sessionToken).get();
+            if (sessionDoc.exists) {
+                const sessionData = sessionDoc.data();
+                
+                // בדוק תוקף הסשן (24 שעות)
+                const now = new Date();
+                const sessionCreated = sessionData.createdAt.toDate();
+                const hoursDiff = (now - sessionCreated) / (1000 * 60 * 60);
+                
+                if (hoursDiff < 24) {
+                    // טען נתוני משתמש מהשרת
+                    const userDoc = await db.collection('ClubMembers').doc(sessionData.userId).get();
+                    if (userDoc.exists) {
+                        currentUser = { id: userDoc.id, ...userDoc.data() };
+                        delete currentUser.passwordHash; // ✅ הוסף שורה זו
+                        updateClubUI();
+                        
+                        // עדכן זמן גישה אחרון
+                        try {
+                            await db.collection('UserSessions').doc(sessionToken).update({
+                                lastAccess: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        } catch (updateError) {
+                            console.warn('Failed to update session access time:', updateError);
+                        }
+                        return;
+                    }
+                }
             }
+            // אם הגענו לכאן, הסשן לא תקף
+            await clearUserSession().catch(err => {
+                console.error('Failed to clear invalid session:', err);
+                sessionStorage.removeItem('vipshirts_session');
+            });
         } catch (e) {
-            currentUser = null;
+            console.error('Error loading session:', e);
+            try {
+                await clearUserSession();
+            } catch (clearError) {
+                console.error('Failed to clear session after error:', clearError);
+                sessionStorage.removeItem('vipshirts_session');
+            }
         }
     }
+    currentUser = null;
+    updateClubUI();
+}
+
+async function createUserSession(userId) {
+    try {
+        // מחק סשנים ישנים של המשתמש
+        const oldSessions = await db.collection('UserSessions')
+            .where('userId', '==', userId)
+            .get();
+        
+        const batch = db.batch();
+        oldSessions.docs.forEach(doc => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+        
+        // צור סשן חדש
+        const sessionRef = await db.collection('UserSessions').add({
+            userId: userId,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
+            userAgent: navigator.userAgent
+        });
+        
+        // שמור את מזהה הסשן בצד הלקוח
+        sessionStorage.setItem('vipshirts_session', sessionRef.id);
+        
+        return sessionRef.id;
+    } catch (error) {
+        console.error('Error creating session:', error);
+        return null;
+    }
+}
+
+async function clearUserSession() {
+    const sessionToken = sessionStorage.getItem('vipshirts_session');
+    if (sessionToken) {
+        try {
+            await db.collection('UserSessions').doc(sessionToken).delete();
+        } catch (e) {
+            console.error('Error clearing session:', e);
+        }
+        sessionStorage.removeItem('vipshirts_session');
+    }
+    currentUser = null;
 }
 
         function saveUserToStorage() {
@@ -1727,7 +1803,6 @@ function updateCartButton() {
             try {
                 const ordersSnapshot = await db.collection('orders')
                     .where('clubMemberId', '==', currentUser.id)
-                    .orderBy('orderDate', 'desc')
                     .limit(10)
                     .get();
                 
@@ -1757,117 +1832,188 @@ function updateCartButton() {
             }
         }
 
-        // Login Form
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
+// שורה 724 - גרסה מתוקנת
+// פונקציית עזר ל-hash סיסמאות (הוסף בתחילת הקוד)
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
-            try {
-                const usersSnapshot = await db.collection('ClubMembers')
-                    .where('email', '==', email)
-                    .where('password', '==', password)
-                    .limit(1)
-                    .get();
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
 
-                if (usersSnapshot.empty) {
-                    alert('אימייל או סיסמה שגויים');
-                    return;
-                }
+    try {
+        // Hash הסיסמה לפני השוואה
+        const passwordHash = await hashPassword(password);
+        
+        const usersSnapshot = await db.collection('ClubMembers')
+            .where('email', '==', email)
+            .where('passwordHash', '==', passwordHash)
+            .limit(1)
+            .get();
 
-                const userDoc = usersSnapshot.docs[0];
-                currentUser = { id: userDoc.id, ...userDoc.data() };
-                saveUserToStorage();
-                updateClubUI();
-                showProfileView();
-                alert(`ברוך הבא, ${currentUser.name}!`);
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('שגיאה בהתחברות, נסה שוב');
-            }
-        });
+        if (usersSnapshot.empty) {
+            alert('אימייל או סיסמה שגויים');
+            return;
+        }
 
-        // Register Form
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('register-name').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const phone = document.getElementById('register-phone').value.trim();
-            const password = document.getElementById('register-password').value;
+const userDoc = usersSnapshot.docs[0];
+const userData = userDoc.data();
+currentUser = { id: userDoc.id, ...userData };
+delete currentUser.passwordHash; // ✅ הוסף
+        
+        // צור סשן חדש
+        const sessionId = await createUserSession(currentUser.id);
+        if (!sessionId) {
+            alert('שגיאה ביצירת סשן');
+            return;
+        }
+        
+        updateClubUI();
+        showProfileView();
+        alert(`ברוך הבא, ${currentUser.name}!`);
+    } catch (error) {
+        console.error('Login error:', error);
+        alert('שגיאה בהתחברות, נסה שוב');
+    }
+});
+// שורה 748 - גרסה מתוקנת
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('register-name').value.trim();
+    const email = document.getElementById('register-email').value.trim();
+    const phone = document.getElementById('register-phone').value.trim();
+    const password = document.getElementById('register-password').value;
 
-            try {
-                // Check if email exists
-                const existingUser = await db.collection('ClubMembers')
-                    .where('email', '==', email)
-                    .limit(1)
-                    .get();
+    try {
+        // בדוק אם האימייל כבר קיים
+        const existingUser = await db.collection('ClubMembers')
+            .where('email', '==', email)
+            .limit(1)
+            .get();
 
-                if (!existingUser.empty) {
-                    alert('האימייל כבר רשום במערכת');
-                    return;
-                }
+        if (!existingUser.empty) {
+            alert('האימייל כבר רשום במערכת');
+            return;
+        }
 
-                const newMemberData = {
-                    name: name,
-                    email: email,
-                    phone: phone,
-                    password: password,
-                    points: 0,
-                    totalSpent: 0,
-                    ordersCount: 0,
-                    joinDate: firebase.firestore.FieldValue.serverTimestamp()
-                };
+        // Hash הסיסמה
+        const passwordHash = await hashPassword(password);
 
-                const docRef = await db.collection('ClubMembers').add(newMemberData);
-                currentUser = { id: docRef.id, ...newMemberData, joinDate: new Date() };
-                saveUserToStorage();
-                updateClubUI();
-                document.getElementById('club-modal').style.display = 'none';
-                alert(`ברוך הבא למועדון VIP, ${name}!`);
-            } catch (error) {
-                console.error('Registration error:', error);
-                alert('שגיאה ברישום, נסה שוב');
-            }
-        });
+        const newMemberData = {
+            name: name,
+            email: email,
+            phone: phone,
+            passwordHash: passwordHash,
+            points: 0,
+            totalSpent: 0,
+            ordersCount: 0,
+            joinDate: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-        // Profile Edit Form
-        document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentUser) return;
+        const docRef = await db.collection('ClubMembers').add(newMemberData);
+        
+        // צור נתונים מינימליים ללא הסיסמה
+        const userDataWithoutPassword = {
+            id: docRef.id,
+            name: name,
+            email: email,
+            phone: phone,
+            points: 0,
+            totalSpent: 0,
+            ordersCount: 0,
+            joinDate: new Date()
+        };
+        
+        currentUser = userDataWithoutPassword;
+        
+        // צור סשן חדש
+        await createUserSession(docRef.id);
+        
+        updateClubUI();
+        document.getElementById('club-modal').style.display = 'none';
+        alert(`ברוך הבא למועדון VIP, ${name}!`);
+    } catch (error) {
+        console.error('Registration error:', error);
+        alert('שגיאה ברישום, נסה שוב');
+    }
+});
+// הוסף בדיקה לשדה email:
+document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
 
-            const updatedData = {
-                name: document.getElementById('profile-edit-name').value.trim(),
-                phone: document.getElementById('profile-edit-phone').value.trim(),
-                address: {
-                    street: document.getElementById('profile-edit-street').value.trim(),
-                    house: document.getElementById('profile-edit-house').value.trim(),
-                    city: document.getElementById('profile-edit-city').value.trim(),
-                    zip: document.getElementById('profile-edit-zip').value.trim()
-                }
-            };
+    const newEmail = document.getElementById('profile-edit-email').value.trim();
+    
+    // בדוק אם האימייל שונה
+    if (newEmail !== currentUser.email) {
+        // ודא שהאימייל החדש לא קיים
+        const existingUser = await db.collection('ClubMembers')
+            .where('email', '==', newEmail)
+            .limit(1)
+            .get();
+        
+        if (!existingUser.empty) {
+            alert('האימייל כבר רשום במערכת');
+            return;
+        }
+    }
 
-            try {
-                await db.collection('ClubMembers').doc(currentUser.id).update(updatedData);
-                currentUser = { ...currentUser, ...updatedData };
-                saveUserToStorage();
-                updateClubUI();
-                alert('הפרטים עודכנו בהצלחה!');
-            } catch (error) {
-                console.error('Update error:', error);
-                alert('שגיאה בעדכון הפרטים');
-            }
-        });
+    const updatedData = {
+        name: document.getElementById('profile-edit-name').value.trim(),
+        email: newEmail,
+        phone: document.getElementById('profile-edit-phone').value.trim(),
+        address: {
+            street: document.getElementById('profile-edit-street').value.trim(),
+            house: document.getElementById('profile-edit-house').value.trim(),
+            city: document.getElementById('profile-edit-city').value.trim(),
+            zip: document.getElementById('profile-edit-zip').value.trim()
+        }
+    };
 
-        // Logout
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            currentUser = null;
-            usedPoints = 0;
-            saveUserToStorage();
-            updateClubUI();
-            document.getElementById('club-modal').style.display = 'none';
-            updateCartDisplay();
-            alert('התנתקת בהצלחה');
-        });
+    try {
+        await db.collection('ClubMembers').doc(currentUser.id).update(updatedData);
+        const updatedUserDoc = await db.collection('ClubMembers').doc(currentUser.id).get();
+        if (updatedUserDoc.exists) {
+            currentUser = { id: updatedUserDoc.id, ...updatedUserDoc.data() };
+            delete currentUser.passwordHash;
+        }
+        updateClubUI();
+        alert('הפרטים עודכנו בהצלחה!');
+    } catch (error) {
+        console.error('Update error:', error);
+        alert('שגיאה בעדכון הפרטים');
+    }
+});
+// שורה 814 - גרסה מתוקנת
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    try {
+        // מחק סשן מהשרת
+        await clearUserSession();
+        
+        currentUser = null;
+        usedPoints = 0;
+        
+        updateClubUI();
+        document.getElementById('club-modal').style.display = 'none';
+        updateCartDisplay();
+        alert('התנתקת בהצלחה');
+    } catch (error) {
+        console.error('Logout error:', error);
+        // גם אם יש שגיאה, נתק בצד הלקוח
+        currentUser = null;
+        usedPoints = 0;
+        sessionStorage.removeItem('vipshirts_session');
+        updateClubUI();
+        document.getElementById('club-modal').style.display = 'none';
+        updateCartDisplay();
+    }
+});
 
         // Join Club Checkbox
         document.getElementById('join-club-checkbox').addEventListener('change', (e) => {
@@ -2180,6 +2326,7 @@ function calculateShipping() {
             return discount;
         }
 
+// שורה 932 - גרסה מתוקנת
 function updateCartDisplay() {
     cartItemsList.innerHTML = '';
     subtotal = 0;
@@ -2227,23 +2374,40 @@ function updateCartDisplay() {
         });
     }
 
-calculateShipping();
-const discount = applyCouponDiscount();
-const pointsDiscount = currentUser ? usedPoints : 0;
-total = subtotal + shippingCost - discount - pointsDiscount;
+    // חשב משלוח
+    calculateShipping();
+    
+    // שמור את עלות המשלוח המקורית
+    const originalShippingCost = shippingCost;
+    
+    // חשב הנחה
+    let discount = 0;
+    if (appliedCoupon) {
+        if (appliedCoupon.Type === 'free_shipping') {
+            discount = originalShippingCost;
+            shippingCost = 0;
+        } else if (appliedCoupon.Type === 'fixed_discount') {
+            discount = Math.min(appliedCoupon.Value, subtotal);
+        } else if (appliedCoupon.Type === 'percentage_discount') {
+            discount = (subtotal * appliedCoupon.Value) / 100;
+        }
+    }
+    
+    const pointsDiscount = currentUser ? usedPoints : 0;
+    total = subtotal + shippingCost - discount - pointsDiscount;
 
-// ✅ הצג הנחת קופון
-const couponDiscountRow = document.getElementById('coupon-discount-row');
-if (appliedCoupon && discount > 0) {
-    couponDiscountRow.style.display = 'flex';
-    document.getElementById('coupon-code-display').textContent = appliedCoupon.Code;
-    document.getElementById('coupon-discount-amount').textContent = discount.toFixed(2);
-} else {
-    couponDiscountRow.style.display = 'none';
-}
+    // הצג הנחת קופון
+    const couponDiscountRow = document.getElementById('coupon-discount-row');
+    if (appliedCoupon && discount > 0) {
+        couponDiscountRow.style.display = 'flex';
+        document.getElementById('coupon-code-display').textContent = appliedCoupon.Code;
+        document.getElementById('coupon-discount-amount').textContent = discount.toFixed(2);
+    } else {
+        couponDiscountRow.style.display = 'none';
+    }
 
-cartSubtotalElement.textContent = subtotal.toFixed(2);
-shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף שורה זו
+    cartSubtotalElement.textContent = subtotal.toFixed(2);
+    shippingCostElement.textContent = shippingCost.toFixed(2);
     
     const cartTotalsDiv = document.querySelector('.cart-totals');
     const existingPointsRow = cartTotalsDiv.querySelector('.points-discount-row');
@@ -2264,7 +2428,6 @@ shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף שו�
     updateCartButton();
     saveCartToStorage();
     
-    // ===== סנכרון PayPal =====
     if (cartOpen) {
         renderPayPalButton();
     }
@@ -2631,31 +2794,47 @@ shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף שו�
                             const email = document.getElementById('email').value;
                             const phone = document.getElementById('phone').value;
                             const address = getFullAddress();
-// Handle club signup if checkbox checked
-                            let clubMemberId = currentUser ? currentUser.id : null;
-                            if (!currentUser && document.getElementById('join-club-checkbox').checked) {
-                                const clubPassword = document.getElementById('club-signup-password').value;
-                                if (clubPassword && clubPassword.length >= 6) {
-                                    try {
-                                        const newMemberData = {
-                                            name: name,
-                                            email: email,
-                                            phone: phone,
-                                            password: clubPassword,
-                                            points: 0,
-                                            totalSpent: 0,
-                                            ordersCount: 0,
-                                            joinDate: firebase.firestore.FieldValue.serverTimestamp()
-                                        };
-                                        const memberRef = await db.collection('ClubMembers').add(newMemberData);
-                                        clubMemberId = memberRef.id;
-                                        currentUser = { id: memberRef.id, ...newMemberData, joinDate: new Date() };
-                                        saveUserToStorage();
-                                    } catch (error) {
-                                        console.error('Error creating club member:', error);
-                                    }
-                                }
-                            }
+// שורה 1018 - גרסה מתוקנת (בתוך onApprove של PayPal)
+let clubMemberId = currentUser ? currentUser.id : null;
+if (!currentUser && document.getElementById('join-club-checkbox').checked) {
+    const clubPassword = document.getElementById('club-signup-password').value;
+    if (clubPassword && clubPassword.length >= 6) {
+        try {
+            // Hash הסיסמה
+            const passwordHash = await hashPassword(clubPassword);
+            
+            const newMemberData = {
+                name: name,
+                email: email,
+                phone: phone,
+                passwordHash: passwordHash,
+                points: 0,
+                totalSpent: 0,
+                ordersCount: 0,
+                joinDate: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            const memberRef = await db.collection('ClubMembers').add(newMemberData);
+            clubMemberId = memberRef.id;
+            
+            // נתונים ללא סיסמה
+            currentUser = { 
+                id: memberRef.id,
+                name: name,
+                email: email,
+                phone: phone,
+                points: 0,
+                totalSpent: 0,
+                ordersCount: 0,
+                joinDate: new Date() 
+            };
+            
+            // צור סשן חדש
+            await createUserSession(memberRef.id);
+        } catch (error) {
+            console.error('Error creating club member:', error);
+        }
+    }
+}
 
                             // Calculate points earned (2% of subtotal)
                             const pointsEarned = clubMemberId ? Math.floor(subtotal * 0.02) : 0;
@@ -2690,25 +2869,32 @@ shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף שו�
                                 paypalOrderId: details.id
                             });
 
-                            // Update club member points
-                            if (clubMemberId) {
-                                try {
-                                    const memberRef = db.collection('ClubMembers').doc(clubMemberId);
-                                    await memberRef.update({
-                                        points: firebase.firestore.FieldValue.increment(pointsEarned - usedPoints),
-                                        totalSpent: firebase.firestore.FieldValue.increment(total),
-                                        ordersCount: firebase.firestore.FieldValue.increment(1)
-                                    });
-                                    
-                                    if (currentUser) {
-                                        currentUser.points = (currentUser.points || 0) + pointsEarned - usedPoints;
-                                        saveUserToStorage();
-                                        updateClubUI();
-                                    }
-                                } catch (error) {
-                                    console.error('Error updating member points:', error);
-                                }
-                            }
+// שורה 1063 - גרסה מתוקנת
+if (clubMemberId) {
+    try {
+        const memberRef = db.collection('ClubMembers').doc(clubMemberId);
+        await memberRef.update({
+            points: firebase.firestore.FieldValue.increment(pointsEarned - usedPoints),
+            totalSpent: firebase.firestore.FieldValue.increment(total),
+            ordersCount: firebase.firestore.FieldValue.increment(1),
+            lastOrderDate: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // טען נקודות מעודכנות מהשרת
+        if (currentUser) {
+            const updatedUserDoc = await db.collection('ClubMembers').doc(clubMemberId).get();
+            if (updatedUserDoc.exists) {
+                const userData = updatedUserDoc.data();
+                currentUser.points = userData.points || 0;
+                currentUser.totalSpent = userData.totalSpent || 0;
+                currentUser.ordersCount = userData.ordersCount || 0;
+                updateClubUI();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating member points:', error);
+    }
+}
 
 const emailSent = await sendReceiptEmail({
     orderId: orderRef.id,
@@ -2879,13 +3065,24 @@ document.getElementById('clear-cart-btn').addEventListener('click', () => {
     }
 });
 
+// שורה 1233 - גרסה מתוקנת
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadSettings();
-    await loadAnnouncements();
-    await fetchProducts();
-    await loadUserFromStorage();  // ✅ עכשיו async
-    loadCartFromStorage();
-    updateCartDisplay();
+    try {
+        // טען הגדרות ומשתמש במקביל
+        await Promise.all([
+            loadSettings(),
+            loadAnnouncements(),
+            loadUserSession()  // ✅ שונה מ-loadUserFromStorage
+        ]);
+        
+        // טען מוצרים ועגלה
+        await fetchProducts();
+        loadCartFromStorage();
+        updateCartDisplay();
+    } catch (error) {
+        console.error('Initialization error:', error);
+        alert('שגיאה בטעינת האתר, אנא רענן את הדף');
+    }
 });
 
         // ===== DEEP LINK SUPPORT =====
