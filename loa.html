@@ -1695,15 +1695,7 @@ async function clearUserSession() {
     }
     currentUser = null;
 }
-
-        function saveUserToStorage() {
-            if (currentUser) {
-                localStorage.setItem('vipshirts_user', JSON.stringify(currentUser));
-            } else {
-                localStorage.removeItem('vipshirts_user');
-            }
-        }
-
+        
         function updateClubUI() {
             const clubBtn = document.getElementById('club-btn');
             const clubBtnText = document.getElementById('club-btn-text');
