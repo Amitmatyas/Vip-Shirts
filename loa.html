@@ -2894,167 +2894,167 @@ function updateCartDisplay() {
             return `${street} ${house}, ${city}, ${country} ${zip}`;
         }
 
-        function renderPayPalButton() {
-            const container = document.getElementById('paypal-button-container');
-            if (!container) return;
-            
-            // Clear existing buttons
-            container.innerHTML = "";
-            
-            // Don't render if cart is empty
-            if (cart.length === 0) return;
+function renderPayPalButton() {
+    const container = document.getElementById('paypal-button-container');
+    if (!container) return;
+    
+    container.innerHTML = "";
+    
+    if (cart.length === 0) return;
 
-            paypal.Buttons({
-                style: { 
-                    color: 'blue', 
-                    shape: 'pill', 
-                    label: 'pay', 
-                    height: 45,
-                    layout: 'vertical'
-                },
-                createOrder: function (data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: { value: total.toFixed(2), currency_code: 'ILS' },
-                            description: 'רכישת חולצות כדורגל'
-                        }]
+    paypal.Buttons({
+        style: { 
+            color: 'blue', 
+            shape: 'pill', 
+            label: 'pay', 
+            height: 45,
+            layout: 'vertical'
+        },
+        createOrder: function (data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: { value: total.toFixed(2), currency_code: 'ILS' },
+                    description: 'רכישת חולצות כדורגל'
+                }]
+            });
+        },
+        onApprove: function (data, actions) {
+            return actions.order.capture().then(async function (details) {
+                try {
+                    const name = document.getElementById('name').value;
+                    const email = document.getElementById('email').value;
+                    const phone = document.getElementById('phone').value;
+                    const address = getFullAddress();
+
+                    // Check if should create club member
+                    let clubMemberId = currentClubMember ? currentClubMember.id : null;
+                    const joinClubChecked = document.getElementById('join-club-checkbox').checked;
+
+                    if (!currentClubMember && joinClubChecked) {
+                        const clubPassword = document.getElementById('club-password').value;
+                        if (clubPassword && clubPassword.length >= 6) {
+                            try {
+                                const newMember = {
+                                    name: name,
+                                    email: email,
+                                    phone: phone,
+                                    password: clubPassword,
+                                    points: 0,
+                                    address: address,
+                                    joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                                    totalSpent: 0,
+                                    orderCount: 0
+                                };
+                                
+                                const memberRef = await db.collection('ClubMembers').add(newMember);
+                                clubMemberId = memberRef.id;
+                                currentClubMember = { id: memberRef.id, ...newMember };
+                                saveClubMember();
+                                updateClubButton();
+                            } catch (error) {
+                                console.error('Error creating club member:', error);
+                            }
+                        }
+                    }
+
+                    // Calculate points earned (2% of total)
+                    const pointsEarned = Math.floor(total * 0.02);
+
+                    // Create the order
+                    const orderRef = await db.collection('orders').add({
+                        customerName: name,
+                        customerEmail: email,
+                        customerPhone: phone,
+                        customerAddress: address,
+                        items: cart.map(item => ({
+                            productId: item.id,
+                            productName: item.name,
+                            name: item.name,
+                            quantity: item.quantity,
+                            price: item.price,
+                            originalPrice: item.originalPrice || null,
+                            selectedOptions: item.selectedOptions || null,
+                            isFreebie: item.isFreebie || false
+                        })),
+                        subtotal: parseFloat(subtotal.toFixed(2)),
+                        shippingCost: parseFloat(shippingCost.toFixed(2)),
+                        totalAmount: parseFloat(total.toFixed(2)),
+                        appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                        couponDetails: appliedCoupon || null,
+                        clubMemberId: clubMemberId,
+                        pointsUsed: pointsToUse,
+                        pointsEarned: pointsEarned,
+                        orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        status: 'completed',
+                        completed: false,
+                        paymentType: 'paypal',
+                        paypalOrderId: details.id
                     });
-                },
-                onApprove: function (data, actions) {
-                    return actions.order.capture().then(async function (details) {
+                    
+                    // Update club member points
+                    if (clubMemberId) {
                         try {
-                            const name = document.getElementById('name').value;
-                            const email = document.getElementById('email').value;
-                            const phone = document.getElementById('phone').value;
-                            const address = getFullAddress();
-
-                            const orderRef = await db.collection('orders').add({
-let clubMemberId = currentClubMember ? currentClubMember.id : null;
-const joinClubChecked = document.getElementById('join-club-checkbox').checked;
-
-if (!currentClubMember && joinClubChecked) {
-    const clubPassword = document.getElementById('club-password').value;
-    if (clubPassword && clubPassword.length >= 6) {
-        try {
-            const newMember = {
-                name: name,
-                email: email,
-                phone: phone,
-                password: clubPassword,
-                points: 0,
-                address: address,
-                joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-                totalSpent: 0,
-                orderCount: 0
-            };
-            
-            const memberRef = await db.collection('ClubMembers').add(newMember);
-            clubMemberId = memberRef.id;
-            currentClubMember = { id: memberRef.id, ...newMember };
-            saveClubMember();
-            updateClubButton();
-        } catch (error) {
-            console.error('Error creating club member:', error);
-        }
-    }
-}
-
-const pointsEarned = Math.floor(total * 0.02);
-
-const orderRef = await db.collection('orders').add({
-    customerName: name,
-    customerEmail: email,
-                                customerPhone: phone,
-                                customerAddress: address,
-                                items: cart.map(item => ({
-                                    productId: item.id,
-                                    productName: item.name,
-                                    name: item.name,
-                                    quantity: item.quantity,
-                                    price: item.price,
-                                    originalPrice: item.originalPrice || null,
-                                    selectedOptions: item.selectedOptions || null,
-                                    isFreebie: item.isFreebie || false
-                                })),
-                                subtotal: parseFloat(subtotal.toFixed(2)),
-                                shippingCost: parseFloat(shippingCost.toFixed(2)),
-                                totalAmount: parseFloat(total.toFixed(2)),
-                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                                couponDetails: appliedCoupon || null,
-                                clubMemberId: clubMemberId,
-                                pointsUsed: pointsToUse,
-                                pointsEarned: pointsEarned,
-                                orderDate: firebase.firestore.FieldValue.serverTimestamp(),
-                                status: 'completed',
-                                completed: false,
-                                paymentType: 'paypal',
-                                paypalOrderId: details.id
+                            await db.collection('ClubMembers').doc(clubMemberId).update({
+                                points: firebase.firestore.FieldValue.increment(pointsEarned - pointsToUse),
+                                totalSpent: firebase.firestore.FieldValue.increment(total),
+                                orderCount: firebase.firestore.FieldValue.increment(1)
                             });
                             
-                            // Update club member points
-                            if (clubMemberId) {
-                                try {
-                                    await db.collection('ClubMembers').doc(clubMemberId).update({
-                                        points: firebase.firestore.FieldValue.increment(pointsEarned - pointsToUse),
-                                        totalSpent: firebase.firestore.FieldValue.increment(total),
-                                        orderCount: firebase.firestore.FieldValue.increment(1)
-                                    });
-                                    
-                                    if (currentClubMember) {
-                                        currentClubMember.points = (currentClubMember.points || 0) + pointsEarned - pointsToUse;
-                                        currentClubMember.totalSpent = (currentClubMember.totalSpent || 0) + total;
-                                        currentClubMember.orderCount = (currentClubMember.orderCount || 0) + 1;
-                                        saveClubMember();
-                                    }
-                                } catch (error) {
-                                    console.error('Error updating club points:', error);
-                                }
+                            if (currentClubMember) {
+                                currentClubMember.points = (currentClubMember.points || 0) + pointsEarned - pointsToUse;
+                                currentClubMember.totalSpent = (currentClubMember.totalSpent || 0) + total;
+                                currentClubMember.orderCount = (currentClubMember.orderCount || 0) + 1;
+                                saveClubMember();
                             }
-
-                            const emailSent = await sendReceiptEmail({
-                                orderId: orderRef.id,
-                                customerName: name,
-                                customerEmail: email,
-                                customerPhone: phone,
-                                customerAddress: address,
-                                items: cart,
-                                subtotal: subtotal,
-                                shippingCost: shippingCost,
-                                totalAmount: total,
-                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                                couponDetails: appliedCoupon
-                            });
-
-                            if (emailSent) {
-                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
-                            } else {
-                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
-                            }
-
-cart = [];
-                            appliedCoupon = null;
-                            pointsToUse = 0;
-                            pointsDiscount = 0;
-                            couponInput.value = '';
-                            couponInput.disabled = false;
-                            applyCouponBtn.disabled = false;
-                            couponMessage.innerHTML = '';
-                            localStorage.removeItem('vipshirts_cart');
-                            localStorage.removeItem('vipshirts_coupon');
-                            updateCartDisplay();
-                            updateClubModal();
-                            checkoutForm.reset();
-                            closeCart();
                         } catch (error) {
-                            console.error('Error:', error);
-                            alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
+                            console.error('Error updating club points:', error);
                         }
+                    }
+
+                    const emailSent = await sendReceiptEmail({
+                        orderId: orderRef.id,
+                        customerName: name,
+                        customerEmail: email,
+                        customerPhone: phone,
+                        customerAddress: address,
+                        items: cart,
+                        subtotal: subtotal,
+                        shippingCost: shippingCost,
+                        totalAmount: total,
+                        appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                        couponDetails: appliedCoupon
                     });
-                },
-                onCancel: function () { alert('התשלום בוטל.'); },
-                onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
-            }).render('#paypal-button-container');
-        }
+
+                    if (emailSent) {
+                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
+                    } else {
+                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
+                    }
+
+                    cart = [];
+                    appliedCoupon = null;
+                    pointsToUse = 0;
+                    pointsDiscount = 0;
+                    couponInput.value = '';
+                    couponInput.disabled = false;
+                    applyCouponBtn.disabled = false;
+                    couponMessage.innerHTML = '';
+                    localStorage.removeItem('vipshirts_cart');
+                    localStorage.removeItem('vipshirts_coupon');
+                    updateCartDisplay();
+                    updateClubModal();
+                    checkoutForm.reset();
+                    closeCart();
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
+                }
+            });
+        },
+        onCancel: function () { alert('התשלום בוטל.'); },
+        onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
+    }).render('#paypal-button-container');
+}
 
         const EMAILJS_SERVICE_ID = 'service_pypll0n';
         const EMAILJS_TEMPLATE_ID = 'vipshirts';
