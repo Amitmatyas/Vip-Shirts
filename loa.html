@@ -7,1112 +7,1370 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
     <link href="https://fonts.googleapis.com/css?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Heebo', Arial, sans-serif;
-    margin: 0;
-    background: #f4f4f4;
-    color: #333;
-    direction: rtl;
-    overflow-x: hidden;
-    transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-body.cart-open {
-    margin-right: min(450px, 90vw);
-}
-
-#announcement-bar {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    color: white;
-    padding: 12px 20px;
-    text-align: center;
-    font-weight: 500;
-    font-size: 1.05em;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    position: relative;
-    overflow: hidden;
-    min-height: 20px;
-}
-
-.announcement-text {
-    animation: fadeInOut 0.5s ease-in-out;
-}
-
-@keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-
-header {
-    background: #222;
-    color: #fff;
-    padding: 45px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    font-size: 2.1em;
-    letter-spacing: 3px;
-    border-bottom-left-radius: 16% 8%;
-    border-bottom-right-radius: 16% 8%;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-}
-
-header img {
-    width: 150px;
-    height: auto;
-    margin: 0;
-}
-
-header h1 {
-    margin: 0;
-    line-height: 1.1;
-}
-
-/* ===== ENHANCED CART TOGGLE BUTTON ===== */
-#cart-toggle-button {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    background: #dc3545;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
-    z-index: 1001;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 50px;
-    justify-content: center;
-}
-
-#cart-toggle-button:hover {
-    background: #c82333;
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.5);
-}
-
-#cart-toggle-button.cart-open-state {
-    background: #333;
-    padding: 12px;
-    border-radius: 50%;
-    min-width: 48px;
-    height: 48px;
-}
-
-#cart-toggle-button.cart-open-state:hover {
-    background: #444;
-}
-
-body.cart-open #cart-toggle-button {
-    left: calc(20px + min(450px, 90vw));
-}
-
-/* ===== CLUB BUTTON ===== */
-#club-btn {
-    position: fixed;
-    top: 80px;
-    left: 20px;
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 50px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-    z-index: 999;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-#club-btn:hover {
-    background: #218838;
-    transform: scale(1.05);
-    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.5);
-}
-
-body.cart-open #club-btn {
-    left: calc(20px + min(450px, 90vw));
-}
-
-.cart-icon {
-    font-size: 1.3em;
-}
-
-.cart-count {
-    background: white;
-    color: #dc3545;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 0.75em;
-    font-weight: 900;
-    min-width: 20px;
-    text-align: center;
-}
-
-.close-icon {
-    font-size: 1.5em;
-    line-height: 1;
-}
-
-#filters {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin: 30px 20px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-#filters input, #filters select {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-    width: 200px;
-}
-
-.category-filter {
-    margin: 30px auto;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    max-width: 1200px;
-    padding: 0 20px;
-}
-
-.category-filter button {
-    padding: 10px 20px;
-    border: none;
-    background: white;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 1em;
-    font-weight: 700;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.category-filter button:hover {
-    background: #f0f0f0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.category-filter button.active {
-    background: #dc3545;
-    color: white;
-}
-
-main#products-container {
-    padding: 40px 6vw 0 6vw;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 32px;
-}
-
-.product-card {
-    background: #fff;
-    border-radius: 24px 24px 14px 14px;
-    box-shadow: 0 3px 12px 0 rgba(52, 52, 90, 0.13);
-    padding: 20px 10px 15px 10px;
-    text-align: center;
-    transition: transform 0.18s, box-shadow 0.18s;
-    border: 1.5px solid #e1e1e1;
-    position: relative;
-}
-
-.product-card:hover {
-    transform: scale(1.03) rotate(-1deg);
-    box-shadow: 0 8px 28px 0 rgba(52,52,90,0.16);
-    border-color: #dc3545;
-}
-
-.sale-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #e74c3c;
-    color: white;
-    padding: 8px 15px;
-    font-weight: 900;
-    font-size: 0.9em;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    z-index: 10;
-    text-transform: uppercase;
-}
-
-.product-card img {
-    max-width: 98%;
-    height: 180px;
-    object-fit: cover;
-    border-radius: 22px;
-    margin-bottom: 13px;
-    border: 3px solid #f1f1f1;
-    box-shadow: 0 1px 8px 0 rgba(90,90,130,0.09);
-    transition: filter 0.2s;
-    cursor: pointer;
-}
-
-.product-card img:hover {
-    filter: brightness(1.09) saturate(1.05) drop-shadow(0 2px 7px #dc354533);
-}
-
-.product-card .category-badge {
-    display: inline-block;
-    background: #dc3545;
-    color: #fff;
-    padding: 5px 10px;
-    font-size: 0.85em;
-    margin: 10px 0;
-    border-radius: 6px;
-    font-weight: 700;
-}
-
-.product-card h3 {
-    margin: 0 0 5px 0;
-    font-size: 1.3em;
-    color: #dc3545;
-    cursor: pointer;
-}
-
-.product-card .price {
-    font-weight: bold;
-    color: #c82333;
-    margin-bottom: 9px;
-    font-size: 1.12em;
-}
-
-.product-card .price.on-sale {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.product-card .price.on-sale .original-price {
-    text-decoration: line-through;
-    color: #999;
-    font-size: 0.8em;
-}
-
-.product-card .price.on-sale .sale-price {
-    color: #e74c3c;
-    font-weight: 900;
-}
-
-.product-card button {
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 10px 22px;
-    border-radius: 16px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    box-shadow: 0 1px 4px 0 rgba(52,52,90,0.08);
-    transition: background 0.18s, transform 0.13s;
-}
-
-.product-card button:hover {
-    background: #c82333;
-    transform: scale(1.05);
-}
-
-/* ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== */
-#cart-container {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: min(450px, 90vw);
-    height: 100vh;
-    background: #fff;
-    border-left: 2px solid #ffdddd;
-    box-shadow: -4px 0 20px 0 rgba(0,0,0,0.13);
-    overflow-y: auto;
-    overflow-x: hidden;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 0;
-}
-
-#cart-container.open {
-    transform: translateX(0);
-}
-
-/* Cart Header */
-.cart-header {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    color: white;
-    padding: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.cart-header h2 {
-    margin: 0;
-    font-size: 1.5em;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Cart Content */
-.cart-content {
-    padding: 20px;
-}
-
-.cart-section {
-    margin-bottom: 25px;
-}
-
-.cart-section-title {
-    font-size: 1.1em;
-    font-weight: 700;
-    color: #dc3545;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid #ffe5e5;
-}
-
-#cart ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-#cart li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
-    font-size: 0.95em;
-    gap: 8px;
-}
-
-#cart li:last-child {
-    border-bottom: none;
-}
-
-.cart-item-details {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    flex: 1;
-}
-
-.cart-item-details img {
-    width: 50px;
-    height: 50px;
-    margin-left: 12px;
-    border-radius: 12px;
-    border: 2px solid #ffe5e5;
-    object-fit: cover;
-    box-shadow: 0 1px 6px 0 #dc354522;
-    flex-shrink: 0;
-}
-
-.cart-item-info {
-    flex-grow: 1;
-    text-align: right;
-    font-size: 0.95em;
-    min-width: 0;
-}
-
-.cart-item-info span {
-    display: block;
-    margin-bottom: 4px;
-    word-break: break-word;
-}
-
-.cart-item-quantity {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.cart-item-quantity button {
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 4px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1em;
-    transition: background 0.17s;
-    min-width: 30px;
-}
-
-.cart-item-quantity button:hover {
-    background: #c82333;
-}
-
-.cart-item-quantity span {
-    min-width: 25px;
-    text-align: center;
-    font-weight: 600;
-}
-
-.remove-from-cart {
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.1em;
-    transition: background 0.17s;
-    flex-shrink: 0;
-}
-
-.remove-from-cart:hover {
-    background: #bd2130;
-}
-
-.shipping-info {
-    background: #f8f9fa;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.95em;
-    text-align: center;
-    margin: 15px 0;
-    border: 1px solid #e9ecef;
-}
-
-.coupon-section {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-}
-
-.coupon-section input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 0.95em;
-    margin-bottom: 10px;
-}
-
-.coupon-section button {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    width: 100%;
-    transition: background 0.2s;
-}
-
-.coupon-section button:hover {
-    background: #218838;
-}
-
-.coupon-applied {
-    color: #28a745;
-    font-weight: bold;
-    margin-top: 8px;
-    display: block;
-    text-align: center;
-}
-
-.cart-totals {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 12px;
-    margin: 20px 0;
-}
-
-.total-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    font-size: 1em;
-}
-
-.total-row.grand-total {
-    font-size: 1.3em;
-    font-weight: 900;
-    color: #dc3545;
-    border-top: 2px solid #dc3545;
-    padding-top: 12px;
-    margin-top: 8px;
-}
-
-/* ===== INTEGRATED CHECKOUT SECTION ===== */
-.checkout-section {
-    background: white;
-    border: 2px solid #dc3545;
-    border-radius: 16px;
-    padding: 20px;
-    margin-top: 20px;
-}
-
-.checkout-section-title {
-    font-size: 1.3em;
-    font-weight: 700;
-    color: #dc3545;
-    margin-bottom: 15px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: 600;
-    color: #555;
-    font-size: 0.95em;
-}
-
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="tel"] {
-    width: 100%;
-    padding: 10px;
-    border: 1.5px solid #d0d0d0;
-    border-radius: 8px;
-    font-size: 0.95em;
-    background: #fffafa;
-    color: #232323;
-    transition: border 0.15s;
-}
-
-.form-group input:focus {
-    border: 1.5px solid #dc3545;
-    outline: none;
-}
-
-.address-row {
-    display: flex;
-    gap: 10px;
-}
-
-.address-row .form-group {
-    flex: 1;
-    min-width: 0;
-}
-
-.address-row .form-group.small {
-    flex: 0 0 90px;
-}
-
-.terms-agreement {
-    background: #fff8e1;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 0.9em;
-    text-align: center;
-    margin: 15px 0;
-    border: 1px solid #ffd54f;
-}
-
-#paypal-button-container {
-    margin-top: 15px;
-}
-
-.freebie-badge {
-    display: inline-block;
-    background: #28a745;
-    color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 0.75em;
-    font-weight: 900;
-    margin-left: 5px;
-}
-
-.locked-option {
-    background: #f0f0f0 !important;
-    cursor: not-allowed !important;
-}
-
-.option-price-tag {
-    color: #28a745;
-    font-weight: 900;
-    font-size: 0.9em;
-}
-
-#clear-cart-btn:hover {
-    background: #5a6268;
-}
-
-/* ===== PRODUCT MODAL ===== */
-#product-modal {
-    display: none;
-    position: fixed;
-    top: 0; right: 0; left: 0; bottom: 0;
-    background: rgba(56, 56, 80, 0.22);
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(2px);
-    overflow-y: auto;
-    padding: 20px;
-}
-
-#product-modal .modal-content {
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 4px 32px 0 #dc354522;
-    display: flex;
-    flex-direction: row;
-    max-width: 520px;
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-#product-modal .modal-image {
-    flex: 1.2;
-    background: #fffafa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    padding: 20px;
-}
-
-#product-modal .modal-image img {
-    max-width: 100%;
-    max-height: 320px;
-    border-radius: 12px;
-    object-fit: contain;
-}
-
-#product-modal .modal-details {
-    flex: 2.2;
-    padding: 24px 16px 18px 16px;
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-
-#product-modal .close-product-modal {
-    position: absolute;
-    top: 11px;
-    left: 11px;
-    background: white;
-    border: none;
-    font-size: 1.8em;
-    color: #dc3545;
-    cursor: pointer;
-    z-index: 5;
-    transition: color 0.14s;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-#product-modal .close-product-modal:hover {
-    color: #c82333;
-    background: #f0f0f0;
-}
-
-#product-modal .modal-details h2 {
-    margin: 0 0 7px 0;
-    color: #dc3545;
-    font-size: 1.32em;
-    white-space: pre-line;
-}
-
-#product-modal .modal-details .price {
-    color: #c82333;
-    font-weight: bold;
-    font-size: 1.08em;
-    margin-bottom: 8px;
-}
-
-#product-modal .modal-details .price.on-sale {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#product-modal .modal-details .price.on-sale .original-price {
-    text-decoration: line-through;
-    color: #999;
-    font-size: 0.8em;
-}
-
-#product-modal .modal-details .price.on-sale .sale-price {
-    color: #e74c3c;
-    font-weight: 900;
-}
-
-#product-modal .modal-details .description {
-    color: #333;
-    font-size: 1.05em;
-    margin-bottom: 0;
-    white-space: pre-line;
-}
-
-.option-group {
-    margin: 10px 0;
-}
-
-.option-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
-}
-
-.option-group select, .option-group input[type="text"] {
-    width: 100%;
-    padding: 8px;
-    border: 1.5px solid #d0d0d0;
-    border-radius: 6px;
-    font-size: 1em;
-    background: #fffafa;
-    color: #232323;
-    transition: border 0.15s;
-}
-
-.option-group select:focus, .option-group input[type="text"]:focus {
-    border: 1.5px solid #dc3545;
-    outline: none;
-}
-
-.option-group select:disabled,
-.option-group input[type="text"]:disabled {
-    background: #f0f0f0;
-    cursor: not-allowed;
-}
-
-#modal-add-to-cart {
-    margin-top: 18px;
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 12px 22px;
-    border-radius: 16px;
-    cursor: pointer;
-    font-size: 1.05em;
-    font-weight: bold;
-    transition: all 0.2s;
-}
-
-#modal-add-to-cart:hover {
-    background: #c82333;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
-}
-
-.contact-section {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 30px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 3px 12px rgba(52, 52, 90, 0.13);
-}
-
-.contact-section h2 {
-    text-align: center;
-    color: #dc3545;
-    margin-bottom: 20px;
-}
-
-.my-about-card {
-    display: flex;
-    align-items: center;
-    background: #1a1a1a;
-    padding: 30px;
-    border-radius: 20px;
-    direction: rtl;
-    max-width: 800px;
-    margin: 50px auto;
-    width: calc(100% - 40px);
-    border: 1px solid #333;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    overflow: hidden;
-}
-
-.my-about-card:hover {
-    transform: translateY(-5px);
-    border-color: #00d2ff;
-    box-shadow: 0 15px 40px rgba(0, 210, 255, 0.15);
-}
-
-.my-about-logo {
-    width: 110px;
-    height: 110px;
-    object-fit: contain;
-    margin-left: 25px;
-    transition: transform 0.5s ease;
-    flex-shrink: 0;
-}
-
-.my-about-card:hover .my-about-logo {
-    transform: rotate(-5deg) scale(1.1);
-}
-
-.my-about-content {
-    flex: 1;
-}
-
-.my-about-title {
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: #00d2ff;
-    margin: 0 0 10px 0;
-    display: inline-block;
-    position: relative;
-}
-
-.my-about-text {
-    font-size: 1.05rem;
-    color: #e0e0e0;
-    line-height: 1.6;
-    margin: 0;
-}
-
-.terms-section {
-    text-align: center;
-    padding: 20px 0;
-}
-
-.terms-section a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-}
-
-@keyframes logoPulse {
-    0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
-    50% { filter: drop-shadow(0 0 10px rgba(0,210,255,0.5)); }
-    100% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
-}
-
-.my-about-card:hover .my-about-logo {
-    animation: logoPulse 1.5s infinite;
-}
-
-/* Empty cart message */
-.empty-cart-message {
-    text-align: center;
-    padding: 40px 20px;
-    color: #999;
-}
-
-.empty-cart-message .empty-icon {
-    font-size: 4em;
-    margin-bottom: 15px;
-}
-
-/* ===== MOBILE RESPONSIVE ===== */
-@media (max-width: 768px) {
-    body.cart-open {
-        margin-right: 0;
-        overflow: hidden;
-    }
-
-    header {
-        padding: 30px 20px;
-        font-size: 1.5em;
-        gap: 15px;
-    }
-
-    header img {
-        width: 100px;
-    }
-
-    main#products-container {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        padding: 20px 10px 0 10px;
-        gap: 15px;
-    }
-
-    .product-card {
-        padding: 12px 8px 10px 8px;
-    }
-
-    .product-card img {
-        height: 140px;
-    }
-
-    .product-card h3 {
-        font-size: 1.1em;
-    }
-
-    .product-card .price {
-        font-size: 1em;
-    }
-
-    .product-card button {
-        padding: 8px 16px;
-        font-size: 0.9em;
-    }
-
-    /* ===== FULL SCREEN CART ON MOBILE ===== */
-    #cart-container {
-        width: 100vw;
-        border-left: none;
-    }
-
-    #cart-container.open {
-        transform: translateX(0);
-    }
-
-    #cart-toggle-button {
-        top: 15px;
-        left: 15px;
-        padding: 10px 16px;
-        font-size: 1em;
-        z-index: 1002;
-    }
-
-    #cart-toggle-button.cart-open-state {
-        padding: 10px;
-        min-width: 42px;
-        height: 42px;
-    }
-
-    body.cart-open #cart-toggle-button {
-        left: 15px;
-    }
-
-    #club-btn {
-        top: 70px;
-        left: 15px;
-        padding: 10px 16px;
-        font-size: 1em;
-        z-index: 1002;
-    }
-
-    body.cart-open #club-btn {
-        left: 15px;
-    }
-
-    .cart-content {
-        padding: 15px;
-    }
-
-    .checkout-section {
-        padding: 15px;
-    }
-
-    .address-row {
-        flex-direction: column;
-        gap: 0;
-    }
-
-    .address-row .form-group.small {
-        flex: 1;
-    }
-
-    #product-modal .modal-content {
-        flex-direction: column;
-        max-width: 95vw;
-    }
-
-    #product-modal .modal-image {
-        padding: 15px;
-    }
-
-    #product-modal .modal-image img {
-        max-height: 200px;
-    }
-
-    .my-about-card {
-        flex-direction: column;
-        text-align: center;
-        padding: 25px 15px;
-        margin: 30px auto;
-    }
-
-    .my-about-logo {
-        margin-left: 0;
-        margin-bottom: 15px;
-        width: 90px;
-        height: 90px;
-    }
-
-    #filters {
-        flex-direction: column;
-        gap: 10px;
-        margin: 20px 10px;
-    }
-
-    #filters input,
-    #filters select {
-        width: 100%;
-        max-width: 300px;
-    }
-
-    .category-filter {
-        padding: 0 10px;
-        gap: 8px;
-    }
-
-    .category-filter button {
-        padding: 8px 15px;
-        font-size: 0.9em;
-    }
-
-    .cart-item-details img {
-        width: 40px;
-        height: 40px;
-    }
-
-    .cart-item-info {
-        font-size: 0.85em;
-    }
-
-    .cart-item-quantity button {
-        padding: 3px 8px;
-        font-size: 0.9em;
-        min-width: 25px;
-    }
-
-    .remove-from-cart {
-        padding: 5px 8px;
-        font-size: 1em;
-    }
-}
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Heebo', Arial, sans-serif;
+            margin: 0;
+            background: #f4f4f4;
+            color: #333;
+            direction: rtl;
+            overflow-x: hidden;
+            transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body.cart-open {
+            margin-right: min(450px, 90vw);
+        }
+
+        #announcement-bar {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.05em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 20px;
+        }
+
+        .announcement-text {
+            animation: fadeInOut 0.5s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            background: #222;
+            color: #fff;
+            padding: 45px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            font-size: 2.1em;
+            letter-spacing: 3px;
+            border-bottom-left-radius: 16% 8%;
+            border-bottom-right-radius: 16% 8%;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        }
+
+        header img {
+            width: 150px;
+            height: auto;
+            margin: 0;
+        }
+
+        header h1 {
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        /* ===== ENHANCED CART TOGGLE BUTTON ===== */
+        #cart-toggle-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+            z-index: 1001;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 50px;
+            justify-content: center;
+        }
+
+        #cart-toggle-button:hover {
+            background: #c82333;
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(220, 53, 69, 0.5);
+        }
+
+        #cart-toggle-button.cart-open-state {
+            background: #333;
+            padding: 12px;
+            border-radius: 50%;
+            min-width: 48px;
+            height: 48px;
+        }
+
+        #cart-toggle-button.cart-open-state:hover {
+            background: #444;
+        }
+
+        body.cart-open #cart-toggle-button {
+            left: calc(20px + min(450px, 90vw));
+        }
+
+        .cart-icon {
+            font-size: 1.3em;
+        }
+
+        .cart-count {
+            background: white;
+            color: #dc3545;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.75em;
+            font-weight: 900;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .close-icon {
+            font-size: 1.5em;
+            line-height: 1;
+        }
+
+        #filters {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        #filters input, #filters select {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+            width: 200px;
+        }
+
+        .category-filter {
+            margin: 30px auto;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+            padding: 0 20px;
+        }
+
+        .category-filter button {
+            padding: 10px 20px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1em;
+            font-weight: 700;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .category-filter button:hover {
+            background: #f0f0f0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .category-filter button.active {
+            background: #dc3545;
+            color: white;
+        }
+
+        main#products-container {
+            padding: 40px 6vw 0 6vw;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 32px;
+        }
+
+        .product-card {
+            background: #fff;
+            border-radius: 24px 24px 14px 14px;
+            box-shadow: 0 3px 12px 0 rgba(52, 52, 90, 0.13);
+            padding: 20px 10px 15px 10px;
+            text-align: center;
+            transition: transform 0.18s, box-shadow 0.18s;
+            border: 1.5px solid #e1e1e1;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: scale(1.03) rotate(-1deg);
+            box-shadow: 0 8px 28px 0 rgba(52,52,90,0.16);
+            border-color: #dc3545;
+        }
+
+        .sale-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            font-weight: 900;
+            font-size: 0.9em;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            text-transform: uppercase;
+        }
+
+        .product-card img {
+            max-width: 98%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 22px;
+            margin-bottom: 13px;
+            border: 3px solid #f1f1f1;
+            box-shadow: 0 1px 8px 0 rgba(90,90,130,0.09);
+            transition: filter 0.2s;
+            cursor: pointer;
+        }
+        .product-card img:hover {
+            filter: brightness(1.09) saturate(1.05) drop-shadow(0 2px 7px #dc354533);
+        }
+
+        .product-card .category-badge {
+            display: inline-block;
+            background: #dc3545;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 0.85em;
+            margin: 10px 0;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .product-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.3em;
+            color: #dc3545;
+            cursor: pointer;
+        }
+        .product-card .price {
+            font-weight: bold;
+            color: #c82333;
+            margin-bottom: 9px;
+            font-size: 1.12em;
+        }
+
+        .product-card .price.on-sale {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .product-card .price.on-sale .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        .product-card .price.on-sale .sale-price {
+            color: #e74c3c;
+            font-weight: 900;
+        }
+
+        .product-card button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            box-shadow: 0 1px 4px 0 rgba(52,52,90,0.08);
+            transition: background 0.18s, transform 0.13s;
+        }
+        .product-card button:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        /* ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== */
+        #cart-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: min(450px, 90vw);
+            height: 100vh;
+            background: #fff;
+            border-left: 2px solid #ffdddd;
+            box-shadow: -4px 0 20px 0 rgba(0,0,0,0.13);
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0;
+        }
+
+        #cart-container.open {
+            transform: translateX(0);
+        }
+
+        /* Cart Header */
+        .cart-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .cart-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Cart Content */
+        .cart-content {
+            padding: 20px;
+        }
+
+        .cart-section {
+            margin-bottom: 25px;
+        }
+
+        .cart-section-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #dc3545;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ffe5e5;
+        }
+
+        #cart ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #cart li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95em;
+            gap: 8px;
+        }
+        #cart li:last-child {
+            border-bottom: none;
+        }
+        .cart-item-details {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+            flex: 1;
+        }
+        .cart-item-details img {
+            width: 50px;
+            height: 50px;
+            margin-left: 12px;
+            border-radius: 12px;
+            border: 2px solid #ffe5e5;
+            object-fit: cover;
+            box-shadow: 0 1px 6px 0 #dc354522;
+            flex-shrink: 0;
+        }
+        .cart-item-info {
+            flex-grow: 1;
+            text-align: right;
+            font-size: 0.95em;
+            min-width: 0;
+        }
+        .cart-item-info span {
+            display: block;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .cart-item-quantity button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background 0.17s;
+            min-width: 30px;
+        }
+        .cart-item-quantity button:hover {
+            background: #c82333;
+        }
+        .cart-item-quantity span {
+            min-width: 25px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .remove-from-cart {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+            transition: background 0.17s;
+            flex-shrink: 0;
+        }
+        .remove-from-cart:hover {
+            background: #bd2130;
+        }
+
+        .shipping-info {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            text-align: center;
+            margin: 15px 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .coupon-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+        .coupon-section input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95em;
+            margin-bottom: 10px;
+        }
+        .coupon-section button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .coupon-section button:hover {
+            background: #218838;
+        }
+        .coupon-applied {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 8px;
+            display: block;
+            text-align: center;
+        }
+
+        .cart-totals {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 1em;
+        }
+
+        .total-row.grand-total {
+            font-size: 1.3em;
+            font-weight: 900;
+            color: #dc3545;
+            border-top: 2px solid #dc3545;
+            padding-top: 12px;
+            margin-top: 8px;
+        }
+
+        /* ===== INTEGRATED CHECKOUT SECTION ===== */
+        .checkout-section {
+            background: white;
+            border: 2px solid #dc3545;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .checkout-section-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #dc3545;
+            margin-bottom: 15px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95em;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 0.95em;
+            background: #fffafa;
+            color: #232323;
+            transition: border 0.15s;
+        }
+        .form-group input:focus {
+            border: 1.5px solid #dc3545;
+            outline: none;
+        }
+
+        .address-row {
+            display: flex;
+            gap: 10px;
+        }
+        .address-row .form-group {
+            flex: 1;
+            min-width: 0;
+        }
+        .address-row .form-group.small {
+            flex: 0 0 90px;
+        }
+
+        .terms-agreement {
+            background: #fff8e1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            text-align: center;
+            margin: 15px 0;
+            border: 1px solid #ffd54f;
+        }
+
+        #paypal-button-container {
+            margin-top: 15px;
+        }
+
+        .freebie-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 900;
+            margin-left: 5px;
+        }
+
+        .locked-option {
+            background: #f0f0f0 !important;
+            cursor: not-allowed !important;
+        }
+
+        .option-price-tag {
+            color: #28a745;
+            font-weight: 900;
+            font-size: 0.9em;
+        }
+
+        /* ===== PRODUCT MODAL ===== */
+        #product-modal {
+            display: none;
+            position: fixed;
+            top: 0; right: 0; left: 0; bottom: 0;
+            background: rgba(56, 56, 80, 0.22);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(2px);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        #product-modal .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 32px 0 #dc354522;
+            display: flex;
+            flex-direction: row;
+            max-width: 520px;
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #product-modal .modal-image {
+            flex: 1.2;
+            background: #fffafa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            padding: 20px;
+        }
+        #product-modal .modal-image img {
+            max-width: 100%;
+            max-height: 320px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+        #product-modal .modal-details {
+            flex: 2.2;
+            padding: 24px 16px 18px 16px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        #product-modal .close-product-modal {
+            position: absolute;
+            top: 11px;
+            left: 11px;
+            background: white;
+            border: none;
+            font-size: 1.8em;
+            color: #dc3545;
+            cursor: pointer;
+            z-index: 5;
+            transition: color 0.14s;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        #product-modal .close-product-modal:hover {
+            color: #c82333;
+            background: #f0f0f0;
+        }
+        #product-modal .modal-details h2 {
+            margin: 0 0 7px 0;
+            color: #dc3545;
+            font-size: 1.32em;
+            white-space: pre-line;
+        }
+        #product-modal .modal-details .price {
+            color: #c82333;
+            font-weight: bold;
+            font-size: 1.08em;
+            margin-bottom: 8px;
+        }
+
+        #product-modal .modal-details .price.on-sale {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #product-modal .modal-details .price.on-sale .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        #product-modal .modal-details .price.on-sale .sale-price {
+            color: #e74c3c;
+            font-weight: 900;
+        }
+
+        #product-modal .modal-details .description {
+            color: #333;
+            font-size: 1.05em;
+            margin-bottom: 0;
+            white-space: pre-line;
+        }
+        .option-group {
+            margin: 10px 0;
+        }
+        .option-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .option-group select, .option-group input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 6px;
+            font-size: 1em;
+            background: #fffafa;
+            color: #232323;
+            transition: border 0.15s;
+        }
+        .option-group select:focus, .option-group input[type="text"]:focus {
+            border: 1.5px solid #dc3545;
+            outline: none;
+        }
+
+        .option-group select:disabled,
+        .option-group input[type="text"]:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        #modal-add-to-cart {
+            margin-top: 18px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        #modal-add-to-cart:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .contact-section {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 3px 12px rgba(52, 52, 90, 0.13);
+        }
+        .contact-section h2 {
+            text-align: center;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+
+        .my-about-card {
+            display: flex;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 20px;
+            direction: rtl;
+            max-width: 800px;
+            margin: 50px auto;
+            width: calc(100% - 40px);
+            border: 1px solid #333;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        .my-about-card:hover {
+            transform: translateY(-5px);
+            border-color: #00d2ff;
+            box-shadow: 0 15px 40px rgba(0, 210, 255, 0.15);
+        }
+        .my-about-logo {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            margin-left: 25px;
+            transition: transform 0.5s ease;
+            flex-shrink: 0;
+        }
+        .my-about-card:hover .my-about-logo {
+            transform: rotate(-5deg) scale(1.1);
+        }
+        .my-about-content {
+            flex: 1;
+        }
+        .my-about-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #00d2ff;
+            margin: 0 0 10px 0;
+            display: inline-block;
+            position: relative;
+        }
+        .my-about-text {
+            font-size: 1.05rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .terms-section {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .terms-section a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+
+        /* ===== CLUB SYSTEM STYLES ===== */
+        #club-toggle-button {
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+            z-index: 1001;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #club-toggle-button:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+
+        .club-icon {
+            font-size: 1.2em;
+        }
+
+        #club-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(3px);
+        }
+
+        #club-modal.active {
+            display: flex;
+        }
+
+        .club-modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .club-modal-header {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+        }
+
+        .club-modal-header h2 {
+            margin: 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-club-modal {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .close-club-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .club-modal-body {
+            padding: 25px;
+        }
+
+        .club-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .club-tab {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.2s;
+        }
+
+        .club-tab.active {
+            color: #28a745;
+            border-bottom-color: #28a745;
+        }
+
+        .club-tab-content {
+            display: none;
+        }
+
+        .club-tab-content.active {
+            display: block;
+        }
+
+        .club-form-group {
+            margin-bottom: 15px;
+        }
+
+        .club-form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .club-form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border 0.2s;
+        }
+
+        .club-form-group input:focus {
+            border-color: #28a745;
+            outline: none;
+        }
+
+        .club-submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .club-submit-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .club-submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .club-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .club-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .club-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .club-points-display {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .club-points-display .points-amount {
+            font-size: 2.5em;
+            font-weight: 900;
+            margin: 10px 0;
+        }
+
+        .club-points-display .points-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .club-points-display .points-value {
+            font-size: 1.2em;
+            margin-top: 5px;
+            opacity: 0.95;
+        }
+
+        .club-orders-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .club-order-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .club-order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .club-order-date {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .club-order-total {
+            color: #28a745;
+            font-size: 1.1em;
+        }
+
+        .club-order-items {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .club-order-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .club-order-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .club-order-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .club-logout-btn {
+            width: 100%;
+            padding: 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        .club-logout-btn:hover {
+            background: #c82333;
+        }
+
+        .points-usage-section {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid #ffd54f;
+        }
+
+        .points-usage-section h4 {
+            margin: 0 0 10px 0;
+            color: #f57f17;
+        }
+
+        .points-slider-container {
+            margin: 15px 0;
+        }
+
+        .points-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .points-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #28a745;
+            cursor: pointer;
+        }
+
+        .points-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #28a745;
+            cursor: pointer;
+            border: none;
+        }
+
+        .points-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+
+        .join-club-checkbox {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #28a745;
+        }
+
+        .join-club-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .join-club-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            #club-toggle-button {
+                top: 70px;
+                left: 15px;
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+
+            .club-modal-content {
+                max-width: 95vw;
+            }
+
+            .club-points-display .points-amount {
+                font-size: 2em;
+            }
+
+            body.cart-open {
+                margin-right: 100vw;
+            }
+
+            #cart-container {
+                width: 100vw;
+            }
+
+            body.cart-open #cart-toggle-button {
+                left: calc(15px + 100vw);
+            }
+        }
+        
+        @keyframes logoPulse {
+            0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
+            50% { filter: drop-shadow(0 0 10px rgba(0,210,255,0.5)); }
+            100% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
+        }
+        .my-about-card:hover .my-about-logo {
+            animation: logoPulse 1.5s infinite;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            header {
+                padding: 30px 20px;
+                font-size: 1.5em;
+                gap: 15px;
+            }
+
+            header img {
+                width: 100px;
+            }
+
+            main#products-container {
+                grid-template-columns: 1fr;
+                padding: 24px 4vw 0 4vw;
+                gap: 20px;
+            }
+
+            #cart-container {
+                width: 90vw;
+            }
+
+            body.cart-open {
+                margin-right: 90vw;
+            }
+
+            body.cart-open #cart-toggle-button {
+                left: calc(20px + 90vw);
+            }
+
+            #cart-toggle-button {
+                top: 15px;
+                left: 15px;
+                padding: 10px 16px;
+                font-size: 1em;
+            }
+
+            #cart-toggle-button.cart-open-state {
+                padding: 10px;
+                min-width: 42px;
+                height: 42px;
+            }
+
+            body.cart-open #cart-toggle-button {
+                left: calc(15px + 90vw);
+            }
+
+            .cart-content {
+                padding: 15px;
+            }
+
+            .checkout-section {
+                padding: 15px;
+            }
+
+            .address-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .address-row .form-group.small {
+                flex: 1;
+            }
+
+            #product-modal .modal-content {
+                flex-direction: column;
+                max-width: 95vw;
+            }
+
+            #product-modal .modal-image {
+                padding: 15px;
+            }
+
+            #product-modal .modal-image img {
+                max-height: 200px;
+            }
+
+            .my-about-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 25px 15px;
+                margin: 30px auto;
+            }
+
+            .my-about-logo {
+                margin-left: 0;
+                margin-bottom: 15px;
+                width: 90px;
+                height: 90px;
+            }
+
+            #filters {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            #filters input,
+            #filters select {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Empty cart message */
+        .empty-cart-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-cart-message .empty-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -1124,7 +1382,7 @@ main#products-container {
         <div class="announcement-text"></div>
     </div>
 
-<header>
+    <header>
         <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
         <h1>VIP Shirts</h1>
     </header>
@@ -1136,11 +1394,133 @@ main#products-container {
         <span class="cart-count" style="display: none;">0</span>
     </button>
 
-<button id="club-btn">
-    <span style="font-size: 1.3em;">👤</span>
-    <span id="club-btn-text">מועדון VIP</span>
-    <span id="club-btn-points" style="background: white; color: #28a745; padding: 2px 8px; border-radius: 20px; font-size: 0.85em; display: none;"></span>
-</button>
+    <!-- CLUB TOGGLE BUTTON -->
+    <button id="club-toggle-button">
+        <span class="club-icon">⭐</span>
+        <span class="club-text">מועדון VIP</span>
+    </button>
+
+    <!-- CLUB MODAL -->
+    <div id="club-modal">
+        <div class="club-modal-content">
+            <div class="club-modal-header">
+                <button class="close-club-modal" type="button">&times;</button>
+                <h2>
+                    <span>⭐</span>
+                    <span id="club-modal-title">מועדון VIP</span>
+                </h2>
+            </div>
+            <div class="club-modal-body">
+                <!-- Message Area -->
+                <div id="club-message" style="display: none;"></div>
+
+                <!-- Guest View -->
+                <div id="club-guest-view">
+                    <div class="club-tabs">
+                        <button class="club-tab active" data-tab="login">התחברות</button>
+                        <button class="club-tab" data-tab="register">הרשמה</button>
+                    </div>
+
+                    <!-- Login Tab -->
+                    <div id="login-tab" class="club-tab-content active">
+                        <form id="club-login-form">
+                            <div class="club-form-group">
+                                <label>אימייל:</label>
+                                <input type="email" id="login-email" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>סיסמה:</label>
+                                <input type="password" id="login-password" required>
+                            </div>
+                            <button type="submit" class="club-submit-btn">התחבר</button>
+                        </form>
+                    </div>
+
+                    <!-- Register Tab -->
+                    <div id="register-tab" class="club-tab-content">
+                        <form id="club-register-form">
+                            <div class="club-form-group">
+                                <label>שם מלא:</label>
+                                <input type="text" id="register-name" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>אימייל:</label>
+                                <input type="email" id="register-email" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>טלפון:</label>
+                                <input type="tel" id="register-phone" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>סיסמה:</label>
+                                <input type="password" id="register-password" required minlength="6">
+                            </div>
+                            <div class="club-form-group">
+                                <label>אימות סיסמה:</label>
+                                <input type="password" id="register-password-confirm" required minlength="6">
+                            </div>
+                            <button type="submit" class="club-submit-btn">הירשם למועדון</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Member View -->
+                <div id="club-member-view" style="display: none;">
+                    <div class="club-tabs">
+                        <button class="club-tab active" data-tab="dashboard">לוח בקרה</button>
+                        <button class="club-tab" data-tab="orders">הזמנות</button>
+                        <button class="club-tab" data-tab="profile">פרטים אישיים</button>
+                    </div>
+
+                    <!-- Dashboard Tab -->
+                    <div id="dashboard-tab" class="club-tab-content active">
+                        <div class="club-points-display">
+                            <div class="points-label">יתרת הנקודות שלך</div>
+                            <div class="points-amount" id="member-points">0</div>
+                            <div class="points-value">שווי: <span id="member-points-value">0.00</span> ₪</div>
+                        </div>
+                        <div style="text-align: center; color: #666; font-size: 0.95em;">
+                            <p>🎁 צבור 2% נקודות מכל קנייה</p>
+                            <p>💰 כל נקודה שווה 1₪</p>
+                            <p>✨ מינימום שימוש: 10 נקודות</p>
+                        </div>
+                    </div>
+
+                    <!-- Orders Tab -->
+                    <div id="orders-tab" class="club-tab-content">
+                        <h3 style="margin-top: 0;">ההזמנות שלי</h3>
+                        <div class="club-orders-list" id="member-orders-list">
+                            <p style="text-align: center; color: #999;">טוען הזמנות...</p>
+                        </div>
+                    </div>
+
+                    <!-- Profile Tab -->
+                    <div id="profile-tab" class="club-tab-content">
+                        <form id="club-profile-form">
+                            <div class="club-form-group">
+                                <label>שם מלא:</label>
+                                <input type="text" id="profile-name" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>אימייל:</label>
+                                <input type="email" id="profile-email" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>טלפון:</label>
+                                <input type="tel" id="profile-phone" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>כתובת (אופציונלי):</label>
+                                <input type="text" id="profile-address">
+                            </div>
+                            <button type="submit" class="club-submit-btn">עדכן פרטים</button>
+                        </form>
+                        <button class="club-logout-btn" id="club-logout-btn">התנתק</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div id="filters">
         <input type="text" id="search-input" placeholder="חפש מוצר..." />
@@ -1159,16 +1539,13 @@ main#products-container {
 
     <!-- ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== -->
     <div id="cart-container">
-<div class="cart-header">
-    <h2 style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 0;">
-        <button id="close-cart-btn" style="background: none; border: none; color: white; font-size: 1.8em; cursor: pointer; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">&times;</button>
-        <span style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: center;">
-            <span>🛒</span>
-            <span>עגלת הקניות שלי</span>
-        </span>
-    </h2>
-</div>
-        
+        <div class="cart-header">
+            <h2>
+                <span>🛒</span>
+                <span>עגלת הקניות שלי</span>
+            </h2>
+        </div>
+
         <div class="cart-content">
             <!-- Cart Items Section -->
             <div class="cart-section">
@@ -1188,46 +1565,37 @@ main#products-container {
                     <div id="coupon-message"></div>
                 </div>
             </div>
-          
-<!-- Club Points Section -->
-            <div class="cart-section" id="club-points-section" style="display: none;">
-                <div class="cart-section-title">נקודות מועדון</div>
-                <div class="coupon-section">
-                    <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: center;">
-                        <div style="font-size: 1.3em; font-weight: 900; color: #28a745; margin-bottom: 5px;">
-                            ⭐ <span id="available-points-display">0</span> נקודות זמינות
+
+            <!-- Points Usage Section (only for logged-in members) -->
+            <div class="cart-section" id="points-usage-container" style="display: none;">
+                <div class="cart-section-title">שימוש בנקודות מועדון</div>
+                <div class="points-usage-section">
+                    <h4>יתרה: <span id="cart-available-points">0</span> נקודות (<span id="cart-points-value">0.00</span>₪)</h4>
+                    <div class="points-slider-container">
+                        <input type="range" min="0" max="0" value="0" class="points-slider" id="points-slider">
+                        <div class="points-info">
+                            <span>נקודות לשימוש: <strong id="points-to-use">0</strong></span>
+                            <span>הנחה: <strong id="points-discount">0.00</strong>₪</span>
                         </div>
-                        <div style="font-size: 0.85em; color: #666;">כל נקודה = 1₪ הנחה</div>
                     </div>
-                    <input type="number" id="points-input" placeholder="כמה נקודות לנצל?" min="10" step="1">
-                    <button id="apply-points-btn">השתמש בנקודות</button>
-                    <div id="points-message"></div>
                 </div>
             </div>
-          
-<!-- Cart Totals -->
-<div class="cart-totals">
-    <div class="total-row">
-        <span>סה"כ מוצרים:</span>
-        <span><span id="cart-subtotal">0.00</span> ₪</span>
-    </div>
-    
-    <!-- ✅ הנחת קופון -->
-    <div class="total-row" id="coupon-discount-row" style="display: none; color: #28a745; font-weight: 600;">
-        <span>הנחת קופון (<span id="coupon-code-display"></span>):</span>
-        <span>-<span id="coupon-discount-amount">0.00</span> ₪</span>
-    </div>
-    
-    <div class="total-row">
-        <span>דמי משלוח:</span>
-        <span><span id="shipping-cost">0.00</span> ₪</span>
-    </div>
-    
-    <div class="total-row grand-total">
-        <span>סה"כ לתשלום:</span>
-        <span><span id="cart-total">0.00</span> ₪</span>
-    </div>
-</div>
+            
+            <!-- Cart Totals -->
+            <div class="cart-totals">
+                <div class="total-row">
+                    <span>סה"כ מוצרים:</span>
+                    <span><span id="cart-subtotal">0.00</span> ₪</span>
+                </div>
+                <div class="total-row">
+                    <span>דמי משלוח:</span>
+                    <span><span id="shipping-cost">0.00</span> ₪</span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>סה"כ לתשלום:</span>
+                    <span><span id="cart-total">0.00</span> ₪</span>
+                </div>
+            </div>
 
             <!-- ===== INTEGRATED CHECKOUT SECTION ===== -->
             <div class="checkout-section" id="checkout-section">
@@ -1278,145 +1646,34 @@ main#products-container {
                         <label for="address-country">מדינה *</label>
                         <input type="text" id="address-country" name="address-country" required value="ישראל">
                     </div>
-                  
-<div id="join-club-checkbox-container" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #ffc107; display: none;">
-                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
-                            <input type="checkbox" id="join-club-checkbox" style="width: 20px; height: 20px; cursor: pointer;">
-                            <span>⭐ הצטרף למועדון VIP וקבל 2% החזר נקודות על קנייה זו!</span>
-                        </label>
-                        <div id="club-signup-fields" style="margin-top: 10px; display: none;">
+
+                    <!-- Join Club Checkbox (only for non-members) -->
+                    <div id="join-club-section" style="display: none;">
+                        <div class="join-club-checkbox">
+                            <label>
+                                <input type="checkbox" id="join-club-checkbox">
+                                <span>⭐ הצטרף למועדון VIP וקבל 2% נקודות מההזמנה!</span>
+                            </label>
+                        </div>
+                        <div id="club-registration-fields" style="display: none;">
                             <div class="form-group">
-                                <label for="club-signup-password">בחר סיסמה למועדון *</label>
-                                <input type="password" id="club-signup-password" minlength="6" placeholder="לפחות 6 תווים">
+                                <label for="club-password">סיסמה למועדון (לפחות 6 תווים) *</label>
+                                <input type="password" id="club-password" minlength="6">
                             </div>
                         </div>
                     </div>
-                  
+                    
                     <div class="terms-agreement">
                         ⏱️ זמן משלוח מוערך: 3 שבועות<br>
                         📋 בביצוע התשלום אני מאשר/ת את <a href="terms.html" target="_blank" style="color: #dc3545; font-weight: bold;">התקנון</a>
                     </div>
 
                     <div id="paypal-button-container"></div>
-                    <!-- ✅ כפתור מחיקה -->
-<button id="clear-cart-btn" style="background: #6c757d; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; transition: background 0.2s;">
-    🗑️ רוקן עגלה
-</button>
                 </form>
             </div>
         </div>
     </div>
-<!-- ===== CLUB MODAL (Login/Register) ===== -->
-    <div id="club-modal" style="display: none; position: fixed; top: 0; right: 0; left: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2001; justify-content: center; align-items: center; padding: 20px;">
-        <div style="background: white; border-radius: 20px; max-width: 450px; width: 100%; padding: 30px; position: relative; max-height: 90vh; overflow-y: auto;">
-            <button id="close-club-modal" style="position: absolute; top: 15px; left: 15px; background: white; border: none; font-size: 1.8em; color: #dc3545; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">&times;</button>
-            
-            <div id="club-login-view">
-                <h2 style="text-align: center; color: #dc3545; margin-bottom: 20px;">התחברות למועדון VIP</h2>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email">אימייל *</label>
-                        <input type="email" id="login-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="login-password">סיסמה *</label>
-                        <input type="password" id="login-password" required>
-                    </div>
-                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; margin-top: 10px;">התחבר</button>
-                </form>
-                <p style="text-align: center; margin-top: 15px;">
-                    עדיין לא חבר? 
-                    <a href="#" id="show-register" style="color: #dc3545; font-weight: bold; text-decoration: none;">הצטרף עכשיו</a>
-                </p>
-            </div>
 
-            <div id="club-register-view" style="display: none;">
-                <h2 style="text-align: center; color: #dc3545; margin-bottom: 20px;">הצטרפות למועדון VIP</h2>
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="register-name">שם מלא *</label>
-                        <input type="text" id="register-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-email">אימייל *</label>
-                        <input type="email" id="register-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-phone">טלפון *</label>
-                        <input type="tel" id="register-phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-password">סיסמה *</label>
-                        <input type="password" id="register-password" required minlength="6">
-                    </div>
-                    <button type="submit" style="background: #dc3545; color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-size: 1.1em; font-weight: bold; width: 100%; margin-top: 10px;">הצטרף למועדון</button>
-                </form>
-                <p style="text-align: center; margin-top: 15px;">
-                    כבר חבר? 
-                    <a href="#" id="show-login" style="color: #dc3545; font-weight: bold; text-decoration: none;">התחבר</a>
-                </p>
-            </div>
-
-            <div id="club-profile-view" style="display: none;">
-                <h2 style="text-align: center; color: #dc3545; margin-bottom: 20px;">האזור האישי שלי</h2>
-                
-                <div style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 1.3em;">שלום, <span id="profile-name"></span>!</h3>
-                    <div style="font-size: 2em; font-weight: 900; margin: 10px 0;">
-                        ⭐ <span id="profile-points">0</span> נקודות
-                    </div>
-                    <p style="margin: 5px 0; font-size: 0.95em; opacity: 0.9;">כל נקודה = 1₪ הנחה</p>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <h3 style="color: #dc3545; margin-bottom: 10px;">פרטים אישיים</h3>
-                    <form id="profile-edit-form">
-                        <div class="form-group">
-                            <label>שם מלא *</label>
-                            <input type="text" id="profile-edit-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label>אימייל *</label>
-                            <input type="email" id="profile-edit-email" required>
-                        </div>
-                        <div class="form-group">
-                            <label>טלפון *</label>
-                            <input type="tel" id="profile-edit-phone" required>
-                        </div>
-                        <div class="address-row">
-                            <div class="form-group">
-                                <label>רחוב</label>
-                                <input type="text" id="profile-edit-street">
-                            </div>
-                            <div class="form-group small">
-                                <label>מספר</label>
-                                <input type="text" id="profile-edit-house">
-                            </div>
-                        </div>
-                        <div class="address-row">
-                            <div class="form-group">
-                                <label>עיר</label>
-                                <input type="text" id="profile-edit-city">
-                            </div>
-                            <div class="form-group small">
-                                <label>מיקוד</label>
-                                <input type="text" id="profile-edit-zip">
-                            </div>
-                        </div>
-                        <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">עדכן פרטים</button>
-                    </form>
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <h3 style="color: #dc3545; margin-bottom: 10px;">היסטוריית הזמנות</h3>
-                    <div id="profile-orders-list" style="max-height: 200px; overflow-y: auto;"></div>
-                </div>
-
-                <button id="logout-btn" style="background: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">התנתק</button>
-            </div>
-        </div>
-    </div>
-  
     <!-- ===== PRODUCT MODAL ===== -->
     <div id="product-modal">
         <div class="modal-content">
@@ -1518,8 +1775,6 @@ main#products-container {
         let cart = [];
         let products = [];
         let categories = [];
-      let currentUser = null;
-        let usedPoints = 0;
         let settings = null;
         let appliedCoupon = null;
         let currentModalProductId = null;
@@ -1534,8 +1789,11 @@ main#products-container {
         let couponLockedOptions = null;
         let isCouponProduct = false;
         let cartOpen = false;
+        let currentClubMember = null;
+        let clubModalOpen = false;
+        let pointsToUse = 0;
+        let pointsDiscount = 0;
 
-        // ===== HELPER: get product categories =====
         function getProductCategories(product) {
             if (Array.isArray(product.categories) && product.categories.length > 0) {
                 return product.categories;
@@ -1550,29 +1808,32 @@ main#products-container {
             return getProductCategories(product).includes(cat);
         }
 
-function updateCartButton() {
-    const closeIcon = '<span class="close-icon">✕</span>';
-    
-    if (cartOpen) {
-        cartToggleButton.classList.add('cart-open-state');
-        cartToggleButton.innerHTML = closeIcon;
-    } else {
-        cartToggleButton.classList.remove('cart-open-state');
-        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-        
-        if (itemCount > 0) {
-            cartToggleButton.innerHTML = `
-                <span class="cart-icon">🛒</span>
-                <span class="cart-count">${itemCount}</span>
-            `;
-        } else {
-            cartToggleButton.innerHTML = `
-                <span class="cart-icon">🛒</span>
-                <span class="cart-text">עגלת קניות</span>
-            `;
+        // ===== ENHANCED CART TOGGLE WITH BUTTON STATE CHANGE =====
+        function updateCartButton() {
+            const cartIcon = cartToggleButton.querySelector('.cart-icon');
+            const cartText = cartToggleButton.querySelector('.cart-text');
+            const closeIcon = '<span class="close-icon">✕</span>';
+            
+            if (cartOpen) {
+                cartToggleButton.classList.add('cart-open-state');
+                cartToggleButton.innerHTML = closeIcon;
+            } else {
+                cartToggleButton.classList.remove('cart-open-state');
+                const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+                
+                if (itemCount > 0) {
+                    cartToggleButton.innerHTML = `
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-count">${itemCount}</span>
+                    `;
+                } else {
+                    cartToggleButton.innerHTML = `
+                        <span class="cart-icon">🛒</span>
+                        <span class="cart-text">עגלת קניות</span>
+                    `;
+                }
+            }
         }
-    }
-}
 
         function openCart() {
             if (cartOpen) return;
@@ -1597,454 +1858,383 @@ function updateCartButton() {
         }
 
         cartToggleButton.addEventListener('click', toggleCart);
-
-        document.getElementById('close-cart-btn').addEventListener('click', closeCart);
         
-async function loadUserSession() {
-    const sessionToken = sessionStorage.getItem('vipshirts_session');
-    if (sessionToken) {
-        try {
-            const sessionDoc = await db.collection('UserSessions').doc(sessionToken).get();
-            if (sessionDoc.exists) {
-                const sessionData = sessionDoc.data();
-                
-                // בדוק תוקף הסשן (24 שעות)
-                const now = new Date();
-                const sessionCreated = sessionData.createdAt.toDate();
-                const hoursDiff = (now - sessionCreated) / (1000 * 60 * 60);
-                
-                if (hoursDiff < 24) {
-                    // טען נתוני משתמש מהשרת
-                    const userDoc = await db.collection('ClubMembers').doc(sessionData.userId).get();
-                    if (userDoc.exists) {
-                        currentUser = { id: userDoc.id, ...userDoc.data() };
-                        delete currentUser.passwordHash; // ✅ הוסף שורה זו
-                        updateClubUI();
-                        
-                        // עדכן זמן גישה אחרון
-                        try {
-                            await db.collection('UserSessions').doc(sessionToken).update({
-                                lastAccess: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                        } catch (updateError) {
-                            console.warn('Failed to update session access time:', updateError);
-                        }
-                        return;
+        async function loadClubMember() {
+            const memberData = localStorage.getItem('vipshirts_club_member');
+            if (memberData) {
+                try {
+                    const member = JSON.parse(memberData);
+                    // Verify member still exists in database
+                    const memberDoc = await db.collection('ClubMembers').doc(member.id).get();
+                    if (memberDoc.exists) {
+                        currentClubMember = { id: memberDoc.id, ...memberDoc.data() };
+                        updateClubButton();
+                        updateClubModal();
+                        return true;
+                    } else {
+                        localStorage.removeItem('vipshirts_club_member');
                     }
+                } catch (e) {
+                    localStorage.removeItem('vipshirts_club_member');
                 }
             }
-            // אם הגענו לכאן, הסשן לא תקף
-            await clearUserSession().catch(err => {
-                console.error('Failed to clear invalid session:', err);
-                sessionStorage.removeItem('vipshirts_session');
-            });
-        } catch (e) {
-            console.error('Error loading session:', e);
-            try {
-                await clearUserSession();
-            } catch (clearError) {
-                console.error('Failed to clear session after error:', clearError);
-                sessionStorage.removeItem('vipshirts_session');
-            }
+            return false;
         }
-    }
-    currentUser = null;
-    updateClubUI();
-}
 
-async function createUserSession(userId) {
-    try {
-        // מחק סשנים ישנים של המשתמש
-        const oldSessions = await db.collection('UserSessions')
-            .where('userId', '==', userId)
-            .get();
-        
-        const batch = db.batch();
-        oldSessions.docs.forEach(doc => {
-            batch.delete(doc.ref);
-        });
-        await batch.commit();
-        
-        // צור סשן חדש
-        const sessionRef = await db.collection('UserSessions').add({
-            userId: userId,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            lastAccess: firebase.firestore.FieldValue.serverTimestamp(),
-            userAgent: navigator.userAgent
-        });
-        
-        // שמור את מזהה הסשן בצד הלקוח
-        sessionStorage.setItem('vipshirts_session', sessionRef.id);
-        
-        return sessionRef.id;
-    } catch (error) {
-        console.error('Error creating session:', error);
-        return null;
-    }
-}
-
-async function clearUserSession() {
-    const sessionToken = sessionStorage.getItem('vipshirts_session');
-    if (sessionToken) {
-        try {
-            await db.collection('UserSessions').doc(sessionToken).delete();
-        } catch (e) {
-            console.error('Error clearing session:', e);
-        }
-        sessionStorage.removeItem('vipshirts_session');
-    }
-    currentUser = null;
-}
-        
-        function updateClubUI() {
-            const clubBtn = document.getElementById('club-btn');
-            const clubBtnText = document.getElementById('club-btn-text');
-            const clubBtnPoints = document.getElementById('club-btn-points');
-            const clubPointsSection = document.getElementById('club-points-section');
-            const joinClubCheckbox = document.getElementById('join-club-checkbox-container');
-
-            if (currentUser) {
-                clubBtnText.textContent = currentUser.name.split(' ')[0];
-                clubBtnPoints.textContent = `${currentUser.points || 0} ⭐`;
-                clubBtnPoints.style.display = 'inline-block';
-                clubPointsSection.style.display = 'block';
-                joinClubCheckbox.style.display = 'none';
-                document.getElementById('available-points-display').textContent = currentUser.points || 0;
-                prefillCheckoutForm();
+        function saveClubMember() {
+            if (currentClubMember) {
+                localStorage.setItem('vipshirts_club_member', JSON.stringify(currentClubMember));
             } else {
-                clubBtnText.textContent = 'מועדון VIP';
-                clubBtnPoints.style.display = 'none';
-                clubPointsSection.style.display = 'none';
-                joinClubCheckbox.style.display = 'block';
+                localStorage.removeItem('vipshirts_club_member');
             }
         }
 
-        function prefillCheckoutForm() {
-            if (!currentUser) return;
-            document.getElementById('name').value = currentUser.name || '';
-            document.getElementById('email').value = currentUser.email || '';
-            document.getElementById('phone').value = currentUser.phone || '';
-            if (currentUser.address) {
-                document.getElementById('address-street').value = currentUser.address.street || '';
-                document.getElementById('address-house').value = currentUser.address.house || '';
-                document.getElementById('address-city').value = currentUser.address.city || '';
-                document.getElementById('address-zip').value = currentUser.address.zip || '';
-            }
-        }
-
-        // Club Modal Controls
-        document.getElementById('club-btn').addEventListener('click', () => {
-            if (currentUser) {
-                showProfileView();
+        function updateClubButton() {
+            const clubButton = document.getElementById('club-toggle-button');
+            if (currentClubMember) {
+                clubButton.innerHTML = `
+                    <span class="club-icon">⭐</span>
+                    <span class="club-text">${currentClubMember.name.split(' ')[0]}</span>
+                `;
             } else {
-                showLoginView();
+                clubButton.innerHTML = `
+                    <span class="club-icon">⭐</span>
+                    <span class="club-text">מועדון VIP</span>
+                `;
             }
-            document.getElementById('club-modal').style.display = 'flex';
-        });
-
-        document.getElementById('close-club-modal').addEventListener('click', () => {
-            document.getElementById('club-modal').style.display = 'none';
-        });
-
-        document.getElementById('show-register').addEventListener('click', (e) => {
-            e.preventDefault();
-            showRegisterView();
-        });
-
-        document.getElementById('show-login').addEventListener('click', (e) => {
-            e.preventDefault();
-            showLoginView();
-        });
-
-        function showLoginView() {
-            document.getElementById('club-login-view').style.display = 'block';
-            document.getElementById('club-register-view').style.display = 'none';
-            document.getElementById('club-profile-view').style.display = 'none';
         }
 
-        function showRegisterView() {
-            document.getElementById('club-login-view').style.display = 'none';
-            document.getElementById('club-register-view').style.display = 'block';
-            document.getElementById('club-profile-view').style.display = 'none';
-        }
+        function updateClubModal() {
+            const guestView = document.getElementById('club-guest-view');
+            const memberView = document.getElementById('club-member-view');
+            const modalTitle = document.getElementById('club-modal-title');
 
-        function showProfileView() {
-            document.getElementById('club-login-view').style.display = 'none';
-            document.getElementById('club-register-view').style.display = 'none';
-            document.getElementById('club-profile-view').style.display = 'block';
-            loadProfileData();
-        }
-
-        async function loadProfileData() {
-            if (!currentUser) return;
-            
-            document.getElementById('profile-name').textContent = currentUser.name;
-            document.getElementById('profile-points').textContent = currentUser.points || 0;
-            document.getElementById('profile-edit-name').value = currentUser.name || '';
-            document.getElementById('profile-edit-email').value = currentUser.email || '';
-            document.getElementById('profile-edit-phone').value = currentUser.phone || '';
-            
-            if (currentUser.address) {
-                document.getElementById('profile-edit-street').value = currentUser.address.street || '';
-                document.getElementById('profile-edit-house').value = currentUser.address.house || '';
-                document.getElementById('profile-edit-city').value = currentUser.address.city || '';
-                document.getElementById('profile-edit-zip').value = currentUser.address.zip || '';
+            if (currentClubMember) {
+                guestView.style.display = 'none';
+                memberView.style.display = 'block';
+                modalTitle.textContent = `שלום ${currentClubMember.name.split(' ')[0]}!`;
+                
+                // Update points display
+                document.getElementById('member-points').textContent = currentClubMember.points || 0;
+                document.getElementById('member-points-value').textContent = (currentClubMember.points || 0).toFixed(2);
+                
+                // Update profile form
+                document.getElementById('profile-name').value = currentClubMember.name || '';
+                document.getElementById('profile-email').value = currentClubMember.email || '';
+                document.getElementById('profile-phone').value = currentClubMember.phone || '';
+                document.getElementById('profile-address').value = currentClubMember.address || '';
+                
+                // Load orders
+                loadMemberOrders();
+            } else {
+                guestView.style.display = 'block';
+                memberView.style.display = 'none';
+                modalTitle.textContent = 'מועדון VIP';
             }
+            
+            updateCheckoutForm();
+            updatePointsUsage();
+        }
 
-            // Load orders
+        async function loadMemberOrders() {
+            const ordersList = document.getElementById('member-orders-list');
+            if (!currentClubMember) return;
+            
             try {
+                ordersList.innerHTML = '<p style="text-align: center; color: #999;">טוען הזמנות...</p>';
+                
                 const ordersSnapshot = await db.collection('orders')
-                    .where('clubMemberId', '==', currentUser.id)
-                    .limit(10)
+                    .where('clubMemberId', '==', currentClubMember.id)
+                    .orderBy('orderDate', 'desc')
+                    .limit(20)
                     .get();
                 
-                const ordersList = document.getElementById('profile-orders-list');
                 if (ordersSnapshot.empty) {
-                    ordersList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">אין הזמנות עדיין</p>';
-                } else {
-                    ordersList.innerHTML = ordersSnapshot.docs.map(doc => {
-                        const order = doc.data();
-                        const date = order.orderDate ? order.orderDate.toDate().toLocaleDateString('he-IL') : 'לא ידוע';
-                        const status = order.completed ? '✓ הושלמה' : '⏳ בטיפול';
-                        return `<div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <strong>הזמנה #${doc.id.substring(0, 8)}</strong>
-                                <span>${status}</span>
-                            </div>
-                            <div style="font-size: 0.9em; color: #666;">
-                                <div>${date}</div>
-                                <div>₪${order.totalAmount.toFixed(2)}</div>
-                                ${order.pointsEarned ? `<div style="color: #28a745;">⭐ +${order.pointsEarned} נקודות</div>` : ''}
-                            </div>
-                        </div>`;
-                    }).join('');
+                    ordersList.innerHTML = '<p style="text-align: center; color: #999;">אין הזמנות עדיין</p>';
+                    return;
                 }
+                
+                ordersList.innerHTML = '';
+                ordersSnapshot.forEach(doc => {
+                    const order = doc.data();
+                    const orderDate = order.orderDate ? new Date(order.orderDate.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                    const statusClass = order.completed ? 'completed' : 'pending';
+                    const statusText = order.completed ? 'הושלם' : 'בטיפול';
+                    
+                    const itemsText = order.items.map(item => 
+                        `${item.quantity}x ${item.productName || item.name}`
+                    ).join(', ');
+                    
+                    const orderHTML = `
+                        <div class="club-order-item">
+                            <div class="club-order-header">
+                                <span class="club-order-date">📅 ${orderDate}</span>
+                                <span class="club-order-total">₪${order.totalAmount.toFixed(2)}</span>
+                            </div>
+                            <div class="club-order-items">${itemsText}</div>
+                            <span class="club-order-status ${statusClass}">${statusText}</span>
+                        </div>
+                    `;
+                    ordersList.innerHTML += orderHTML;
+                });
             } catch (error) {
                 console.error('Error loading orders:', error);
+                ordersList.innerHTML = '<p style="text-align: center; color: #dc3545;">שגיאה בטעינת הזמנות</p>';
             }
         }
 
-// שורה 724 - גרסה מתוקנת
-// פונקציית עזר ל-hash סיסמאות (הוסף בתחילת הקוד)
-async function hashPassword(password) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-
-    try {
-        // Hash הסיסמה לפני השוואה
-        const passwordHash = await hashPassword(password);
-        
-        const usersSnapshot = await db.collection('ClubMembers')
-            .where('email', '==', email)
-            .where('passwordHash', '==', passwordHash)
-            .limit(1)
-            .get();
-
-        if (usersSnapshot.empty) {
-            alert('אימייל או סיסמה שגויים');
-            return;
+        function updateCheckoutForm() {
+            const joinClubSection = document.getElementById('join-club-section');
+            
+            if (currentClubMember) {
+                // Auto-fill checkout form
+                document.getElementById('name').value = currentClubMember.name || '';
+                document.getElementById('email').value = currentClubMember.email || '';
+                document.getElementById('phone').value = currentClubMember.phone || '';
+                
+                if (currentClubMember.address) {
+                    const addressParts = currentClubMember.address.split(',');
+                    if (addressParts.length >= 3) {
+                        const streetHouse = addressParts[0].trim().split(' ');
+                        document.getElementById('address-house').value = streetHouse.pop() || '';
+                        document.getElementById('address-street').value = streetHouse.join(' ') || '';
+                        document.getElementById('address-city').value = addressParts[1].trim() || '';
+                    }
+                }
+                
+                joinClubSection.style.display = 'none';
+            } else {
+                joinClubSection.style.display = 'block';
+            }
         }
 
-const userDoc = usersSnapshot.docs[0];
-const userData = userDoc.data();
-currentUser = { id: userDoc.id, ...userData };
-delete currentUser.passwordHash; // ✅ הוסף
-        
-        // צור סשן חדש
-        const sessionId = await createUserSession(currentUser.id);
-        if (!sessionId) {
-            alert('שגיאה ביצירת סשן');
-            return;
-        }
-        
-        updateClubUI();
-        showProfileView();
-        alert(`ברוך הבא, ${currentUser.name}!`);
-    } catch (error) {
-        console.error('Login error:', error);
-        alert('שגיאה בהתחברות, נסה שוב');
-    }
-});
-// שורה 748 - גרסה מתוקנת
-document.getElementById('register-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = document.getElementById('register-name').value.trim();
-    const email = document.getElementById('register-email').value.trim();
-    const phone = document.getElementById('register-phone').value.trim();
-    const password = document.getElementById('register-password').value;
-
-    try {
-        // בדוק אם האימייל כבר קיים
-        const existingUser = await db.collection('ClubMembers')
-            .where('email', '==', email)
-            .limit(1)
-            .get();
-
-        if (!existingUser.empty) {
-            alert('האימייל כבר רשום במערכת');
-            return;
+        function updatePointsUsage() {
+            const pointsContainer = document.getElementById('points-usage-container');
+            const slider = document.getElementById('points-slider');
+            
+            if (currentClubMember && currentClubMember.points >= 10) {
+                pointsContainer.style.display = 'block';
+                
+                const maxPoints = Math.min(currentClubMember.points, Math.floor(subtotal));
+                slider.max = maxPoints;
+                slider.value = Math.min(pointsToUse, maxPoints);
+                
+                document.getElementById('cart-available-points').textContent = currentClubMember.points;
+                document.getElementById('cart-points-value').textContent = currentClubMember.points.toFixed(2);
+                
+                updatePointsDisplay();
+            } else {
+                pointsContainer.style.display = 'none';
+                pointsToUse = 0;
+                pointsDiscount = 0;
+            }
         }
 
-        // Hash הסיסמה
-        const passwordHash = await hashPassword(password);
-
-        const newMemberData = {
-            name: name,
-            email: email,
-            phone: phone,
-            passwordHash: passwordHash,
-            points: 0,
-            totalSpent: 0,
-            ordersCount: 0,
-            joinDate: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        const docRef = await db.collection('ClubMembers').add(newMemberData);
-        
-        // צור נתונים מינימליים ללא הסיסמה
-        const userDataWithoutPassword = {
-            id: docRef.id,
-            name: name,
-            email: email,
-            phone: phone,
-            points: 0,
-            totalSpent: 0,
-            ordersCount: 0,
-            joinDate: new Date()
-        };
-        
-        currentUser = userDataWithoutPassword;
-        
-        // צור סשן חדש
-        await createUserSession(docRef.id);
-        
-        updateClubUI();
-        document.getElementById('club-modal').style.display = 'none';
-        alert(`ברוך הבא למועדון VIP, ${name}!`);
-    } catch (error) {
-        console.error('Registration error:', error);
-        alert('שגיאה ברישום, נסה שוב');
-    }
-});
-// הוסף בדיקה לשדה email:
-document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!currentUser) return;
-
-    const newEmail = document.getElementById('profile-edit-email').value.trim();
-    
-    // בדוק אם האימייל שונה
-    if (newEmail !== currentUser.email) {
-        // ודא שהאימייל החדש לא קיים
-        const existingUser = await db.collection('ClubMembers')
-            .where('email', '==', newEmail)
-            .limit(1)
-            .get();
-        
-        if (!existingUser.empty) {
-            alert('האימייל כבר רשום במערכת');
-            return;
+        function updatePointsDisplay() {
+            document.getElementById('points-to-use').textContent = pointsToUse;
+            document.getElementById('points-discount').textContent = pointsDiscount.toFixed(2);
         }
-    }
 
-    const updatedData = {
-        name: document.getElementById('profile-edit-name').value.trim(),
-        email: newEmail,
-        phone: document.getElementById('profile-edit-phone').value.trim(),
-        address: {
-            street: document.getElementById('profile-edit-street').value.trim(),
-            house: document.getElementById('profile-edit-house').value.trim(),
-            city: document.getElementById('profile-edit-city').value.trim(),
-            zip: document.getElementById('profile-edit-zip').value.trim()
+        function showClubMessage(message, type = 'success') {
+            const messageDiv = document.getElementById('club-message');
+            messageDiv.className = `club-message ${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
         }
-    };
 
-    try {
-        await db.collection('ClubMembers').doc(currentUser.id).update(updatedData);
-        const updatedUserDoc = await db.collection('ClubMembers').doc(currentUser.id).get();
-        if (updatedUserDoc.exists) {
-            currentUser = { id: updatedUserDoc.id, ...updatedUserDoc.data() };
-            delete currentUser.passwordHash;
+        function openClubModal() {
+            if (clubModalOpen) return;
+            clubModalOpen = true;
+            document.getElementById('club-modal').classList.add('active');
+            updateClubModal();
         }
-        updateClubUI();
-        alert('הפרטים עודכנו בהצלחה!');
-    } catch (error) {
-        console.error('Update error:', error);
-        alert('שגיאה בעדכון הפרטים');
-    }
-});
-// שורה 814 - גרסה מתוקנת
-document.getElementById('logout-btn').addEventListener('click', async () => {
-    try {
-        // מחק סשן מהשרת
-        await clearUserSession();
+
+        function closeClubModal() {
+            if (!clubModalOpen) return;
+            clubModalOpen = false;
+            document.getElementById('club-modal').classList.remove('active');
+            document.getElementById('club-message').style.display = 'none';
+        }
+
+        // Club Modal Event Listeners
+        document.getElementById('club-toggle-button').addEventListener('click', openClubModal);
+        document.querySelector('.close-club-modal').addEventListener('click', closeClubModal);
         
-        currentUser = null;
-        usedPoints = 0;
-        
-        updateClubUI();
-        document.getElementById('club-modal').style.display = 'none';
-        updateCartDisplay();
-        alert('התנתקת בהצלחה');
-    } catch (error) {
-        console.error('Logout error:', error);
-        // גם אם יש שגיאה, נתק בצד הלקוח
-        currentUser = null;
-        usedPoints = 0;
-        sessionStorage.removeItem('vipshirts_session');
-        updateClubUI();
-        document.getElementById('club-modal').style.display = 'none';
-        updateCartDisplay();
-    }
-});
+        document.getElementById('club-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'club-modal') closeClubModal();
+        });
+
+        // Club Tabs
+        document.querySelectorAll('.club-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.dataset.tab;
+                const isGuestView = document.getElementById('club-guest-view').style.display !== 'none';
+                
+                // Update active tab
+                tab.parentElement.querySelectorAll('.club-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show corresponding content
+                const contentContainer = isGuestView ? 'club-guest-view' : 'club-member-view';
+                document.querySelectorAll(`#${contentContainer} .club-tab-content`).forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
+            });
+        });
+
+        // Login Form
+        document.getElementById('club-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const membersSnapshot = await db.collection('ClubMembers')
+                    .where('email', '==', email)
+                    .where('password', '==', password)
+                    .limit(1)
+                    .get();
+                
+                if (membersSnapshot.empty) {
+                    showClubMessage('אימייל או סיסמה שגויים', 'error');
+                    return;
+                }
+                
+                const memberDoc = membersSnapshot.docs[0];
+                currentClubMember = { id: memberDoc.id, ...memberDoc.data() };
+                saveClubMember();
+                updateClubButton();
+                updateClubModal();
+                showClubMessage('התחברת בהצלחה!');
+                
+                document.getElementById('club-login-form').reset();
+            } catch (error) {
+                console.error('Login error:', error);
+                showClubMessage('שגיאה בהתחברות', 'error');
+            }
+        });
+
+        // Register Form
+        document.getElementById('club-register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('register-name').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const phone = document.getElementById('register-phone').value.trim();
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+            
+            if (password !== passwordConfirm) {
+                showClubMessage('הסיסמאות אינן תואמות', 'error');
+                return;
+            }
+            
+            try {
+                // Check if email already exists
+                const existingSnapshot = await db.collection('ClubMembers')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+                
+                if (!existingSnapshot.empty) {
+                    showClubMessage('האימייל כבר רשום במערכת', 'error');
+                    return;
+                }
+                
+                // Create new member
+                const newMember = {
+                    name: name,
+                    email: email,
+                    phone: phone,
+                    password: password,
+                    points: 0,
+                    address: '',
+                    joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    totalSpent: 0,
+                    orderCount: 0
+                };
+                
+                const memberRef = await db.collection('ClubMembers').add(newMember);
+                currentClubMember = { id: memberRef.id, ...newMember };
+                saveClubMember();
+                updateClubButton();
+                updateClubModal();
+                showClubMessage('נרשמת בהצלחה למועדון VIP!');
+                
+                document.getElementById('club-register-form').reset();
+            } catch (error) {
+                console.error('Registration error:', error);
+                showClubMessage('שגיאה ברישום', 'error');
+            }
+        });
+
+        // Profile Update Form
+        document.getElementById('club-profile-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentClubMember) return;
+            
+            const name = document.getElementById('profile-name').value.trim();
+            const phone = document.getElementById('profile-phone').value.trim();
+            const address = document.getElementById('profile-address').value.trim();
+            
+            try {
+                await db.collection('ClubMembers').doc(currentClubMember.id).update({
+                    name: name,
+                    phone: phone,
+                    address: address
+                });
+                
+                currentClubMember.name = name;
+                currentClubMember.phone = phone;
+                currentClubMember.address = address;
+                saveClubMember();
+                updateClubButton();
+                showClubMessage('הפרטים עודכנו בהצלחה!');
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showClubMessage('שגיאה בעדכון פרטים', 'error');
+            }
+        });
+
+        // Logout
+        document.getElementById('club-logout-btn').addEventListener('click', () => {
+            currentClubMember = null;
+            pointsToUse = 0;
+            pointsDiscount = 0;
+            saveClubMember();
+            updateClubButton();
+            updateClubModal();
+            updateCartDisplay();
+            showClubMessage('התנתקת בהצלחה');
+        });
+
+        // Points Slider
+        document.getElementById('points-slider').addEventListener('input', (e) => {
+            pointsToUse = parseInt(e.target.value) || 0;
+            if (pointsToUse < 10) pointsToUse = 0;
+            pointsDiscount = pointsToUse;
+            updatePointsDisplay();
+            updateCartDisplay();
+        });
 
         // Join Club Checkbox
         document.getElementById('join-club-checkbox').addEventListener('change', (e) => {
-            const fieldsDiv = document.getElementById('club-signup-fields');
-            fieldsDiv.style.display = e.target.checked ? 'block' : 'none';
+            const registrationFields = document.getElementById('club-registration-fields');
+            const passwordField = document.getElementById('club-password');
+            
+            if (e.target.checked) {
+                registrationFields.style.display = 'block';
+                passwordField.required = true;
+            } else {
+                registrationFields.style.display = 'none';
+                passwordField.required = false;
+            }
         });
-
-        // Apply Points Button
-        document.getElementById('apply-points-btn').addEventListener('click', () => {
-            if (!currentUser) {
-                alert('יש להתחבר למועדון כדי להשתמש בנקודות');
-                return;
-            }
-
-            const pointsToUse = parseInt(document.getElementById('points-input').value);
-            const pointsMessage = document.getElementById('points-message');
-
-            if (!pointsToUse || pointsToUse < 10) {
-                pointsMessage.innerHTML = '<span style="color: red;">מינימום 10 נקודות</span>';
-                return;
-            }
-
-            if (pointsToUse > currentUser.points) {
-                pointsMessage.innerHTML = '<span style="color: red;">אין לך מספיק נקודות</span>';
-                return;
-            }
-
-            if (pointsToUse > subtotal) {
-                pointsMessage.innerHTML = '<span style="color: red;">לא ניתן להשתמש ביותר נקודות מסכום העגלה</span>';
-                return;
-            }
-
-            usedPoints = pointsToUse;
-            updateCartDisplay();
-            pointsMessage.innerHTML = `<span class="coupon-applied">✓ משתמש ב-${pointsToUse} נקודות!</span>`;
-            document.getElementById('points-input').disabled = true;
-            document.getElementById('apply-points-btn').disabled = true;
-        });
-      
+        
         // ===== LOAD CART FROM STORAGE =====
         function loadCartFromStorage() {
             const savedCart = localStorage.getItem('vipshirts_cart');
@@ -2268,41 +2458,31 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
             }
         }
 
-function calculateShipping() {
-    if (!settings || !settings.Shipping) { 
-        shippingCost = 0; 
-        shippingCostElement.textContent = '0.00'; // ✅ הוסף
-        return; 
-    }
-    const shipping = settings.Shipping;
-    if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
-        shippingCost = 0;
-        shippingCostElement.textContent = '0.00'; // ✅ הוסף
-        shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
-        return;
-    }
-    if (shipping.Method === 'percentage') {
-        shippingCost = (subtotal * shipping.Value) / 100;
-    } else if (shipping.Method === 'per_item') {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        shippingCost = shipping.Value * totalItems;
-    } else {
-        shippingCost = shipping.Value;
-    }
-    
-    shippingCostElement.textContent = shippingCost.toFixed(2); // ✅ הוסף
-    
-    if (shipping.FreeThreshold > 0) {
-        const remaining = shipping.FreeThreshold - subtotal;
-        if (remaining > 0) {
-            shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
-        } else {
-            shippingInfoElement.innerHTML = '';
+        function calculateShipping() {
+            if (!settings || !settings.Shipping) { shippingCost = 0; return; }
+            const shipping = settings.Shipping;
+            if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
+                shippingCost = 0;
+                shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
+                return;
+            }
+            if (shipping.Method === 'percentage') {
+                shippingCost = (subtotal * shipping.Value) / 100;
+            } else if (shipping.Method === 'per_item') {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                shippingCost = shipping.Value * totalItems;
+            } else {
+                shippingCost = shipping.Value;
+            }
+            if (shipping.FreeThreshold > 0) {
+                const remaining = shipping.FreeThreshold - subtotal;
+                if (remaining > 0) {
+                    shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
+                }
+            } else {
+                shippingInfoElement.innerHTML = '';
+            }
         }
-    } else {
-        shippingInfoElement.innerHTML = '';
-    }
-}
 
         function applyCouponDiscount() {
             if (!appliedCoupon) return 0;
@@ -2318,7 +2498,6 @@ function calculateShipping() {
             return discount;
         }
 
-// שורה 932 - גרסה מתוקנת
 function updateCartDisplay() {
     cartItemsList.innerHTML = '';
     subtotal = 0;
@@ -2366,55 +2545,17 @@ function updateCartDisplay() {
         });
     }
 
-    // חשב משלוח
     calculateShipping();
+    const couponDiscount = applyCouponDiscount();
     
-    // שמור את עלות המשלוח המקורית
-    const originalShippingCost = shippingCost;
+    // Update points usage limits
+    updatePointsUsage();
     
-    // חשב הנחה
-    let discount = 0;
-    if (appliedCoupon) {
-        if (appliedCoupon.Type === 'free_shipping') {
-            discount = originalShippingCost;
-            shippingCost = 0;
-        } else if (appliedCoupon.Type === 'fixed_discount') {
-            discount = Math.min(appliedCoupon.Value, subtotal);
-        } else if (appliedCoupon.Type === 'percentage_discount') {
-            discount = (subtotal * appliedCoupon.Value) / 100;
-        }
-    }
-    
-    const pointsDiscount = currentUser ? usedPoints : 0;
-    total = subtotal + shippingCost - discount - pointsDiscount;
-
-    // הצג הנחת קופון
-    const couponDiscountRow = document.getElementById('coupon-discount-row');
-    if (appliedCoupon && discount > 0) {
-        couponDiscountRow.style.display = 'flex';
-        document.getElementById('coupon-code-display').textContent = appliedCoupon.Code;
-        document.getElementById('coupon-discount-amount').textContent = discount.toFixed(2);
-    } else {
-        couponDiscountRow.style.display = 'none';
-    }
+    total = subtotal + shippingCost - couponDiscount - pointsDiscount;
+    if (total < 0) total = 0;
 
     cartSubtotalElement.textContent = subtotal.toFixed(2);
     shippingCostElement.textContent = shippingCost.toFixed(2);
-    
-    const cartTotalsDiv = document.querySelector('.cart-totals');
-    const existingPointsRow = cartTotalsDiv.querySelector('.points-discount-row');
-    if (existingPointsRow) existingPointsRow.remove();
-    
-    if (usedPoints > 0) {
-        const pointsRow = document.createElement('div');
-        pointsRow.className = 'total-row points-discount-row';
-        pointsRow.innerHTML = `
-            <span>הנחת נקודות:</span>
-            <span style="color: #28a745;">-<span>${usedPoints.toFixed(2)}</span> ₪</span>
-        `;
-        cartTotalsDiv.insertBefore(pointsRow, cartTotalsDiv.querySelector('.grand-total'));
-    }
-    
     cartTotalElement.textContent = total.toFixed(2);
 
     updateCartButton();
@@ -2786,54 +2927,43 @@ function updateCartDisplay() {
                             const email = document.getElementById('email').value;
                             const phone = document.getElementById('phone').value;
                             const address = getFullAddress();
-// שורה 1018 - גרסה מתוקנת (בתוך onApprove של PayPal)
-let clubMemberId = currentUser ? currentUser.id : null;
-if (!currentUser && document.getElementById('join-club-checkbox').checked) {
-    const clubPassword = document.getElementById('club-signup-password').value;
+
+                            const orderRef = await db.collection('orders').add({
+let clubMemberId = currentClubMember ? currentClubMember.id : null;
+const joinClubChecked = document.getElementById('join-club-checkbox').checked;
+
+if (!currentClubMember && joinClubChecked) {
+    const clubPassword = document.getElementById('club-password').value;
     if (clubPassword && clubPassword.length >= 6) {
         try {
-            // Hash הסיסמה
-            const passwordHash = await hashPassword(clubPassword);
-            
-            const newMemberData = {
+            const newMember = {
                 name: name,
                 email: email,
                 phone: phone,
-                passwordHash: passwordHash,
+                password: clubPassword,
                 points: 0,
+                address: address,
+                joinDate: firebase.firestore.FieldValue.serverTimestamp(),
                 totalSpent: 0,
-                ordersCount: 0,
-                joinDate: firebase.firestore.FieldValue.serverTimestamp()
+                orderCount: 0
             };
-            const memberRef = await db.collection('ClubMembers').add(newMemberData);
+            
+            const memberRef = await db.collection('ClubMembers').add(newMember);
             clubMemberId = memberRef.id;
-            
-            // נתונים ללא סיסמה
-            currentUser = { 
-                id: memberRef.id,
-                name: name,
-                email: email,
-                phone: phone,
-                points: 0,
-                totalSpent: 0,
-                ordersCount: 0,
-                joinDate: new Date() 
-            };
-            
-            // צור סשן חדש
-            await createUserSession(memberRef.id);
+            currentClubMember = { id: memberRef.id, ...newMember };
+            saveClubMember();
+            updateClubButton();
         } catch (error) {
             console.error('Error creating club member:', error);
         }
     }
 }
 
-                            // Calculate points earned (2% of subtotal)
-                            const pointsEarned = clubMemberId ? Math.floor(subtotal * 0.02) : 0;
+const pointsEarned = Math.floor(total * 0.02);
 
-                            const orderRef = await db.collection('orders').add({
-                                customerName: name,
-                                customerEmail: email,
+const orderRef = await db.collection('orders').add({
+    customerName: name,
+    customerEmail: email,
                                 customerPhone: phone,
                                 customerAddress: address,
                                 items: cart.map(item => ({
@@ -2852,7 +2982,7 @@ if (!currentUser && document.getElementById('join-club-checkbox').checked) {
                                 appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
                                 couponDetails: appliedCoupon || null,
                                 clubMemberId: clubMemberId,
-                                pointsUsed: usedPoints,
+                                pointsUsed: pointsToUse,
                                 pointsEarned: pointsEarned,
                                 orderDate: firebase.firestore.FieldValue.serverTimestamp(),
                                 status: 'completed',
@@ -2860,49 +2990,40 @@ if (!currentUser && document.getElementById('join-club-checkbox').checked) {
                                 paymentType: 'paypal',
                                 paypalOrderId: details.id
                             });
+                            
+                            // Update club member points
+                            if (clubMemberId) {
+                                try {
+                                    await db.collection('ClubMembers').doc(clubMemberId).update({
+                                        points: firebase.firestore.FieldValue.increment(pointsEarned - pointsToUse),
+                                        totalSpent: firebase.firestore.FieldValue.increment(total),
+                                        orderCount: firebase.firestore.FieldValue.increment(1)
+                                    });
+                                    
+                                    if (currentClubMember) {
+                                        currentClubMember.points = (currentClubMember.points || 0) + pointsEarned - pointsToUse;
+                                        currentClubMember.totalSpent = (currentClubMember.totalSpent || 0) + total;
+                                        currentClubMember.orderCount = (currentClubMember.orderCount || 0) + 1;
+                                        saveClubMember();
+                                    }
+                                } catch (error) {
+                                    console.error('Error updating club points:', error);
+                                }
+                            }
 
-// שורה 1063 - גרסה מתוקנת
-if (clubMemberId) {
-    try {
-        const memberRef = db.collection('ClubMembers').doc(clubMemberId);
-        await memberRef.update({
-            points: firebase.firestore.FieldValue.increment(pointsEarned - usedPoints),
-            totalSpent: firebase.firestore.FieldValue.increment(total),
-            ordersCount: firebase.firestore.FieldValue.increment(1),
-            lastOrderDate: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        // טען נקודות מעודכנות מהשרת
-        if (currentUser) {
-            const updatedUserDoc = await db.collection('ClubMembers').doc(clubMemberId).get();
-            if (updatedUserDoc.exists) {
-                const userData = updatedUserDoc.data();
-                currentUser.points = userData.points || 0;
-                currentUser.totalSpent = userData.totalSpent || 0;
-                currentUser.ordersCount = userData.ordersCount || 0;
-                updateClubUI();
-            }
-        }
-    } catch (error) {
-        console.error('Error updating member points:', error);
-    }
-}
-
-const emailSent = await sendReceiptEmail({
-    orderId: orderRef.id,
-    customerName: name,
-    customerEmail: email,
-    customerPhone: phone,
-    customerAddress: address,
-    items: cart,
-    subtotal: subtotal,
-    shippingCost: shippingCost,
-    totalAmount: total,
-    appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-    couponDetails: appliedCoupon,
-    pointsUsed: usedPoints,
-    pointsEarned: pointsEarned
-});
+                            const emailSent = await sendReceiptEmail({
+                                orderId: orderRef.id,
+                                customerName: name,
+                                customerEmail: email,
+                                customerPhone: phone,
+                                customerAddress: address,
+                                items: cart,
+                                subtotal: subtotal,
+                                shippingCost: shippingCost,
+                                totalAmount: total,
+                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                                couponDetails: appliedCoupon
+                            });
 
                             if (emailSent) {
                                 alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
@@ -2910,13 +3031,10 @@ const emailSent = await sendReceiptEmail({
                                 alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
                             }
 
-                            cart = [];
+cart = [];
                             appliedCoupon = null;
-                          usedPoints = 0;
-                            document.getElementById('points-input').value = '';
-                            document.getElementById('points-input').disabled = false;
-                            document.getElementById('apply-points-btn').disabled = false;
-                            document.getElementById('points-message').innerHTML = '';
+                            pointsToUse = 0;
+                            pointsDiscount = 0;
                             couponInput.value = '';
                             couponInput.disabled = false;
                             applyCouponBtn.disabled = false;
@@ -2924,6 +3042,7 @@ const emailSent = await sendReceiptEmail({
                             localStorage.removeItem('vipshirts_cart');
                             localStorage.removeItem('vipshirts_coupon');
                             updateCartDisplay();
+                            updateClubModal();
                             checkoutForm.reset();
                             closeCart();
                         } catch (error) {
@@ -2941,141 +3060,69 @@ const emailSent = await sendReceiptEmail({
         const EMAILJS_TEMPLATE_ID = 'vipshirts';
         const EMAILJS_PUBLIC_KEY = 'f-U3pdugkQiavzAvU';
         emailjs.init(EMAILJS_PUBLIC_KEY);
-<!-- רק החלק שצריך תיקון - שורות 1130-1180 בקוד המקורי -->
-async function sendReceiptEmail(orderData) {
-    try {
-        const productsListHTML = orderData.items.map(item => {
-            const finalName = item.productName || item.name || "מוצר VIP";
-            const optionsText = item.selectedOptions
-                ? Object.entries(item.selectedOptions).filter(([_, value]) => value).map(([key, value]) => `${key}: ${value}`).join(', ')
-                : '';
-            const freebieTag = item.isFreebie ? ' <strong style="color: #28a745;">(מתנה)</strong>' : '';
-            let priceDisplay = `₪${item.price.toFixed(2)}`;
-            if (item.originalPrice && item.originalPrice > item.price && !item.isFreebie) {
-                priceDisplay = `<span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₪${item.originalPrice.toFixed(2)}</span><br><span style="color: #e74c3c; font-weight: bold;">₪${item.price.toFixed(2)}</span>`;
+
+        async function sendReceiptEmail(orderData) {
+            try {
+                const productsListHTML = orderData.items.map(item => {
+                    const finalName = item.productName || item.name || "מוצר VIP";
+                    const optionsText = item.selectedOptions
+                        ? Object.entries(item.selectedOptions).filter(([_, value]) => value).map(([key, value]) => `${key}: ${value}`).join(', ')
+                        : '';
+                    const freebieTag = item.isFreebie ? ' <strong style="color: #28a745;">(מתנה)</strong>' : '';
+                    let priceDisplay = `₪${item.price.toFixed(2)}`;
+                    if (item.originalPrice && item.originalPrice > item.price && !item.isFreebie) {
+                        priceDisplay = `<span style="text-decoration: line-through; color: #999; font-size: 0.9em;">₪${item.originalPrice.toFixed(2)}</span><br><span style="color: #e74c3c; font-weight: bold;">₪${item.price.toFixed(2)}</span>`;
+                    }
+                    const productDescription = `<div style="font-weight: bold; margin-bottom: 4px;">${finalName}${freebieTag}</div>${optionsText ? `<div style="font-size: 13px; color: #666;">(${optionsText})</div>` : ''}`;
+                    return `<tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${productDescription}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${item.quantity}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${priceDisplay}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">₪${(item.price * item.quantity).toFixed(2)}</td>
+                    </tr>`;
+                }).join('');
+
+                let discountAmount = 0;
+                const coupon = orderData.couponDetails;
+                if (orderData.appliedCoupon && coupon) {
+                    if (coupon.Type === 'fixed_discount') discountAmount = coupon.Value;
+                    else if (coupon.Type === 'percentage_discount') discountAmount = (orderData.subtotal * coupon.Value) / 100;
+                }
+
+                const templateParams = {
+                    to_email: orderData.customerEmail,
+                    to_name: orderData.customerName,
+                    name: orderData.customerName,
+                    email: orderData.customerEmail,
+                    phone: orderData.customerPhone,
+                    address: orderData.customerAddress,
+                    order_id: orderData.orderId,
+                    date: new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+                    products_list: productsListHTML,
+                    subtotal: orderData.subtotal.toFixed(2),
+                    coupon_code: orderData.appliedCoupon || '',
+                    discount_amount: discountAmount.toFixed(2),
+                    shipping_cost: orderData.shippingCost.toFixed(2),
+                    total_amount: orderData.totalAmount.toFixed(2)
+                };
+
+                const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+                console.log('Email sent successfully:', response);
+                return true;
+            } catch (error) {
+                console.error('Error sending email:', error);
+                return false;
             }
-            const productDescription = `<div style="font-weight: bold; margin-bottom: 4px;">${finalName}${freebieTag}</div>${optionsText ? `<div style="font-size: 13px; color: #666;">(${optionsText})</div>` : ''}`;
-            return `<tr>
-                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${productDescription}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${item.quantity}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">${priceDisplay}</td>
-                <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; vertical-align: top;">₪${(item.price * item.quantity).toFixed(2)}</td>
-            </tr>`;
-        }).join('');
-
-        // חישוב הנחת קופון
-        let discountAmount = 0;
-        const coupon = orderData.couponDetails;
-        if (orderData.appliedCoupon && coupon) {
-            if (coupon.Type === 'fixed_discount') {
-                discountAmount = coupon.Value;
-            } else if (coupon.Type === 'percentage_discount') {
-                discountAmount = (orderData.subtotal * coupon.Value) / 100;
-            } else if (coupon.Type === 'free_shipping') {
-                discountAmount = orderData.shippingCost;
-            }
         }
 
-        // ✅ תיקון: בניית HTML לקופון
-        let couponRowHTML = '';
-        if (orderData.appliedCoupon && discountAmount > 0) {
-            couponRowHTML = `
-                <div class="summary-row coupon-row">
-                    <span>קופון (${orderData.appliedCoupon}):</span>
-                    <span>-₪${discountAmount.toFixed(2)}</span>
-                </div>
-            `;
-        }
-
-        // HTML לנקודות שנוצלו
-        let pointsUsedHTML = '';
-        if (orderData.pointsUsed && orderData.pointsUsed > 0) {
-            pointsUsedHTML = `<p><strong>נקודות שנוצלו:</strong> ${orderData.pointsUsed} ⭐ (שווי: ₪${orderData.pointsUsed})</p>`;
-        }
-
-        // HTML לנקודות שנצברו
-        let pointsEarnedHTML = '';
-        if (orderData.pointsEarned && orderData.pointsEarned > 0) {
-            pointsEarnedHTML = `
-                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center; margin-top: 10px;">
-                    <div style="font-size: 1.2em; font-weight: bold; color: #28a745; margin-bottom: 5px;">
-                        🎉 צברת ${orderData.pointsEarned} נקודות חדשות!
-                    </div>
-                    <div style="font-size: 0.9em; color: #666;">
-                        הנקודות נוספו לחשבון המועדון שלך
-                    </div>
-                </div>
-            `;
-        }
-
-        const templateParams = {
-            to_email: orderData.customerEmail,
-            name: orderData.customerName,
-            email: orderData.customerEmail,
-            phone: orderData.customerPhone,
-            address: orderData.customerAddress,
-            order_id: orderData.orderId,
-            date: new Date().toLocaleString('he-IL'),
-            products_list: productsListHTML,
-            subtotal: orderData.subtotal.toFixed(2),
-            shipping_cost: orderData.shippingCost.toFixed(2),
-            total_amount: orderData.totalAmount.toFixed(2),
-            
-            // ✅ שימוש ב-HTML מוכן במקום שדות נפרדים
-            coupon_row_html: couponRowHTML,
-            
-            // שדות נקודות
-            points_used_html: pointsUsedHTML,
-            points_earned_html: pointsEarnedHTML
-        };
-
-        const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-        console.log('Email sent successfully:', response);
-        return true;
-    } catch (error) {
-        console.error('Error sending email:', error);
-        return false;
-    }
-}
-// ✅ מחיקת עגלה
-document.getElementById('clear-cart-btn').addEventListener('click', () => {
-    if (confirm('האם אתה בטוח שברצונך לרוקן את העגלה?')) {
-        cart = [];
-        appliedCoupon = null;
-        usedPoints = 0;
-        document.getElementById('points-input').value = '';
-        document.getElementById('points-input').disabled = false;
-        document.getElementById('apply-points-btn').disabled = false;
-        document.getElementById('points-message').innerHTML = '';
-        couponInput.value = '';
-        couponInput.disabled = false;
-        applyCouponBtn.disabled = false;
-        couponMessage.innerHTML = '';
-        localStorage.removeItem('vipshirts_cart');
-        localStorage.removeItem('vipshirts_coupon');
-        updateCartDisplay();
-    }
-});
-
-// שורה 1233 - גרסה מתוקנת
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // טען הגדרות ומשתמש במקביל
-        await Promise.all([
-            loadSettings(),
-            loadAnnouncements(),
-            loadUserSession()  // ✅ שונה מ-loadUserFromStorage
-        ]);
-        
-        // טען מוצרים ועגלה
-        await fetchProducts();
-        loadCartFromStorage();
-        updateCartDisplay();
-    } catch (error) {
-        console.error('Initialization error:', error);
-        alert('שגיאה בטעינת האתר, אנא רענן את הדף');
-    }
-});
+            await loadSettings();
+            await loadAnnouncements();
+            await fetchProducts();
+            await loadClubMember();
+            loadCartFromStorage();
+            updateCartDisplay();
+        });
 
         // ===== DEEP LINK SUPPORT =====
         function handleDeepLink() {
