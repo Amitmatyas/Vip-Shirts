@@ -13,7 +13,6 @@
             --border-color: #e1e1e1;
             --text-main: #2d3436;
             --text-muted: #636e72;
-            --accent: #0984e3;
             --success: #27ae60;
         }
 
@@ -46,7 +45,6 @@
         h1 { font-weight: 800; font-size: 1.7rem; text-align: center; margin-bottom: 5px; }
         .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 30px; }
 
-        /* Form Styles */
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
         .form-group input {
@@ -56,7 +54,6 @@
         .form-group input:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }
 
         .address-section { border-top: 1px solid #eee; margin-top: 25px; padding-top: 20px; }
-        .address-section h3 { font-size: 1rem; margin-bottom: 15px; }
         .address-row { display: flex; gap: 12px; }
 
         .btn-primary {
@@ -64,7 +61,6 @@
             border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1.1rem; margin-top: 10px;
         }
 
-        /* Info & Orders Section */
         .info-section { margin-top: 40px; border-top: 2px solid #eee; padding-top: 30px; }
         .stat-card { 
             background: #f8f9fa; padding: 15px; border-radius: 12px; 
@@ -72,25 +68,15 @@
         }
         .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--primary-color); }
 
-        .list-title { font-weight: 800; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-        
-        /* Order Item Styling */
         .order-box {
             background: white; border: 1px solid #eee; border-radius: 10px;
-            margin-bottom: 12px; overflow: hidden; transition: 0.3s;
+            margin-bottom: 12px; overflow: hidden;
         }
-        .order-summary {
-            padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-        }
-        .order-summary:hover { background: #fdfdfd; }
-        .order-details {
-            padding: 0 15px; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: #fafafa;
-        }
+        .order-summary { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .order-details { padding: 0 15px; max-height: 0; overflow: hidden; transition: 0.3s ease-out; background: #fafafa; }
         .order-box.active .order-details { max-height: 500px; padding: 15px; border-top: 1px solid #eee; }
         
         .items-list { list-style: none; padding-right: 15px; margin: 10px 0; border-right: 2px solid #ddd; }
-        .items-list li { font-size: 0.9rem; margin-bottom: 5px; color: #444; }
-
         .tag { padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
         .tag-success { background: #eafff2; color: #27ae60; }
         .tag-pending { background: #fff5e6; color: #d35400; }
@@ -110,12 +96,11 @@
     </div>
 
     <div id="status-msg"></div>
-
     <div id="loading-state" style="text-align:center; padding: 20px;">טוען נתונים...</div>
 
     <div id="main-content" style="display:none;">
         <h1>שלום, <span id="user-greeting">...</span></h1>
-        <p class="subtitle">עדכון פרטי חשבון וצפייה בהזמנות</p>
+        <p class="subtitle">עדכון פרטים וצפייה בהזמנות</p>
 
         <form id="update-form">
             <div class="form-group">
@@ -127,12 +112,11 @@
                 <input type="tel" id="field-phone" required>
             </div>
             <div class="form-group">
-                <label>סיסמה חדשה (השאר ריק אם אין שינוי)</label>
+                <label>סיסמה חדשה (אופציונלי)</label>
                 <input type="password" id="field-pass" minlength="6">
             </div>
 
             <div class="address-section">
-                <h3>כתובת למשלוח</h3>
                 <div class="address-row">
                     <div class="form-group" style="flex:3">
                         <label>רחוב</label>
@@ -154,19 +138,19 @@
                     </div>
                 </div>
             </div>
-            <button type="submit" class="btn-primary" id="save-btn">עדכן את כל הפרטים</button>
+            <button type="submit" class="btn-primary" id="save-btn">עדכן פרטים</button>
         </form>
 
         <div class="info-section">
             <div class="stat-card">
-                <div style="font-size: 0.9rem; color: var(--text-muted);">נקודות במועדון</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted);">נקודות VIP</div>
                 <div class="stat-value" id="stat-points">0</div>
             </div>
 
-            <div class="list-title">🛍️ הזמנות אחרונות (לחץ לפרטים)</div>
+            <h3 style="margin-bottom:15px">🛍️ הזמנות אחרונות</h3>
             <div id="orders-container"></div>
 
-            <div class="list-title" style="margin-top:25px;">💬 פניות לשירות</div>
+            <h3 style="margin-top:25px; margin-bottom:15px">💬 פניות שירות</h3>
             <div id="leads-container"></div>
         </div>
     </div>
@@ -207,27 +191,37 @@
         try {
             const snap = await db.collection('ClubMembers').where('email', '==', email).limit(1).get();
             if (snap.empty) {
-                document.getElementById('loading-state').innerHTML = '<div class="message error">לקוח לא קיים</div>';
+                document.getElementById('loading-state').innerHTML = '<div class="message error">לקוח לא נמצא</div>';
                 return;
             }
 
             userData = { id: snap.docs[0].id, ...snap.docs[0].data() };
             
-            // מילוי שדות
-            document.getElementById('user-greeting').textContent = userData.name || 'לקוח';
+            document.getElementById('user-greeting').textContent = userData.name || '';
             document.getElementById('field-name').value = userData.name || '';
             document.getElementById('field-phone').value = userData.phone || '';
             document.getElementById('stat-points').textContent = userData.points || 0;
 
-            // פירוק כתובת (לוגיקה חכמה לפי המחרוזת שנשמרת)
+            // פירוק כתובת מעודכן
             if (userData.address) {
-                const addr = userData.address.split(',');
-                document.getElementById('field-city').value = addr[1]?.trim() || '';
-                const streetInfo = addr[0]?.trim().split(' ');
-                if (streetInfo) {
-                    const house = streetInfo.pop();
-                    document.getElementById('field-house').value = house || '';
-                    document.getElementById('field-street').value = streetInfo.join(' ') || '';
+                const parts = userData.address.split(',').map(p => p.trim());
+                // רחוב ומספר (חלק ראשון)
+                const streetPart = parts[0] || '';
+                const streetMatch = streetPart.match(/(.*?)\s+(\d+[א-ת]?)$/);
+                if (streetMatch) {
+                    document.getElementById('field-street').value = streetMatch[1];
+                    document.getElementById('field-house').value = streetMatch[2];
+                } else {
+                    document.getElementById('field-street').value = streetPart;
+                }
+                
+                // עיר (חלק שני)
+                document.getElementById('field-city').value = parts[1] || '';
+                
+                // מיקוד (חלק שלישי)
+                if (parts[2]) {
+                    const zipMatch = parts[2].match(/\d+$/);
+                    if (zipMatch) document.getElementById('field-zip').value = zipMatch[0];
                 }
             }
             
@@ -238,7 +232,7 @@
             loadLeads(userData.email);
 
         } catch (e) {
-            showStatus("שגיאת טעינה", "error");
+            showStatus("שגיאה בטעינת נתונים", "error");
         }
     }
 
@@ -247,39 +241,31 @@
         try {
             const snap = await db.collection('orders').where('clubMemberId', '==', memberId).get();
             if (snap.empty) {
-                container.innerHTML = '<p style="color:#999; font-size:0.9rem;">אין הזמנות קודמות.</p>';
+                container.innerHTML = '<p style="color:#999; font-size:0.9rem;">אין הזמנות.</p>';
                 return;
             }
 
             const orders = snap.docs.map(doc => ({id: doc.id, ...doc.data()}))
                 .sort((a,b) => (b.orderDate?.toDate() || 0) - (a.orderDate?.toDate() || 0));
 
-            container.innerHTML = orders.map(order => {
-                const date = order.orderDate ? order.orderDate.toDate().toLocaleDateString('he-IL') : '---';
-                const itemsHtml = order.items ? order.items.map(i => `<li>${i.quantity}x ${i.productName || i.name}</li>`).join('') : 'אין פירוט';
-                
-                return `
-                    <div class="order-box" onclick="this.classList.toggle('active')">
-                        <div class="order-summary">
-                            <div>
-                                <strong>#${order.id.substring(0,6)}</strong>
-                                <div style="font-size:0.8rem; color:#666;">${date}</div>
-                            </div>
-                            <div style="text-align:left">
-                                <div style="font-weight:800">₪${(order.totalAmount || 0).toFixed(2)}</div>
-                                <span class="tag ${order.completed ? 'tag-success' : 'tag-pending'}">
-                                    ${order.completed ? 'בוצע' : 'בטיפול'}
-                                </span>
-                            </div>
+            container.innerHTML = orders.map(order => `
+                <div class="order-box" onclick="this.classList.toggle('active')">
+                    <div class="order-summary">
+                        <div>
+                            <strong>#${order.id.substring(0,6)}</strong>
+                            <div style="font-size:0.8rem; color:#666;">${order.orderDate ? order.orderDate.toDate().toLocaleDateString('he-IL') : '---'}</div>
                         </div>
-                        <div class="order-details">
-                            <div style="font-weight:700; font-size:0.85rem; margin-bottom:5px;">פירוט מוצרים:</div>
-                            <ul class="items-list">${itemsHtml}</ul>
+                        <div style="text-align:left">
+                            <div style="font-weight:800">₪${(order.totalAmount || 0).toFixed(2)}</div>
+                            <span class="tag ${order.completed ? 'tag-success' : 'tag-pending'}">${order.completed ? 'הושלם' : 'בטיפול'}</span>
                         </div>
                     </div>
-                `;
-            }).join('');
-        } catch (e) { container.innerHTML = 'שגיאה בטעינת הזמנות'; }
+                    <div class="order-details">
+                        <ul class="items-list">${(order.items || []).map(i => `<li>${i.quantity}x ${i.productName || i.name}</li>`).join('')}</ul>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) { container.innerHTML = 'שגיאה'; }
     }
 
     async function loadLeads(email) {
@@ -287,7 +273,7 @@
         try {
             const snap = await db.collection('ContactLeads').where('email', '==', email).get();
             if (snap.empty) {
-                container.innerHTML = '<p style="color:#999; font-size:0.9rem;">אין פניות פתוחות.</p>';
+                container.innerHTML = '<p style="color:#999; font-size:0.9rem;">אין פניות.</p>';
                 return;
             }
 
@@ -296,11 +282,11 @@
 
             container.innerHTML = leads.map(lead => `
                 <div style="background:#fff; border:1px solid #eee; padding:12px; border-radius:10px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
-                        <strong>פנייה משנת ${lead.createdAt ? lead.createdAt.toDate().toLocaleDateString('he-IL') : ''}</strong>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666; margin-bottom:5px;">
+                        <span>פנייה מיום ${lead.createdAt ? lead.createdAt.toDate().toLocaleDateString('he-IL') : 'לא ידוע'}</span>
                         <span style="color:${lead.status === 'closed' ? 'green' : '#e67e22'}">${lead.status === 'closed' ? 'סגור' : 'בטיפול'}</span>
                     </div>
-                    <div style="font-size:0.9rem; margin-top:5px;">${lead.message || ''}</div>
+                    <div style="font-size:0.95rem;">${lead.message || ''}</div>
                 </div>
             `).join('');
         } catch (e) { container.innerHTML = 'שגיאה'; }
@@ -310,10 +296,15 @@
         e.preventDefault();
         const btn = document.getElementById('save-btn');
         btn.disabled = true;
-        btn.textContent = "שומר...";
+        btn.textContent = "מעדכן...";
 
         try {
-            const fullAddress = `${document.getElementById('field-street').value} ${document.getElementById('field-house').value}, ${document.getElementById('field-city').value}`;
+            const street = document.getElementById('field-street').value;
+            const house = document.getElementById('field-house').value;
+            const city = document.getElementById('field-city').value;
+            const zip = document.getElementById('field-zip').value;
+            
+            const fullAddress = `${street} ${house}, ${city}, ${zip}`;
             
             const upData = {
                 name: document.getElementById('field-name').value,
@@ -325,12 +316,12 @@
             if (pass.length >= 6) upData.password = pass;
 
             await db.collection('ClubMembers').doc(userData.id).update(upData);
-            showStatus("הפרטים עודכנו בהצלחה!", "success");
+            showStatus("הפרטים עודכנו!", "success");
         } catch (e) {
             showStatus("שגיאה בעדכון", "error");
         } finally {
             btn.disabled = false;
-            btn.textContent = "עדכן את כל הפרטים";
+            btn.textContent = "עדכן פרטים";
         }
     };
 
