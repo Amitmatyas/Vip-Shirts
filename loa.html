@@ -1026,13 +1026,14 @@
             transform: none;
         }
 
-        .club-message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: 600;
-        }
+.club-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.95em; /* ← הוסף */
+}
 
         .club-message.success {
             background: #d4edda;
@@ -1495,32 +1496,56 @@
                     </div>
 
                     <!-- Profile Tab -->
-                    <div id="profile-tab" class="club-tab-content">
-                        <form id="club-profile-form">
-                            <div class="club-form-group">
-                                <label>שם מלא:</label>
-                                <input type="text" id="profile-name" required>
-                            </div>
-                            <div class="club-form-group">
-                                <label>אימייל:</label>
-                                <input type="email" id="profile-email" required>
-                            </div>
-                            <div class="club-form-group">
-                                <label>טלפון:</label>
-                                <input type="tel" id="profile-phone" required>
-                            </div>
-                            <div class="club-form-group">
-                                <label>כתובת (אופציונלי):</label>
-                                <input type="text" id="profile-address">
-                            </div>
-                            <button type="submit" class="club-submit-btn">עדכן פרטים</button>
-                        </form>
-                        <button class="club-logout-btn" id="club-logout-btn">התנתק</button>
-                    </div>
-                </div>
+<!-- Profile Tab -->
+<div id="profile-tab" class="club-tab-content">
+    <form id="club-profile-form">
+        <div class="club-form-group">
+            <label>שם מלא:</label>
+            <input type="text" id="profile-name" required>
+        </div>
+        <div class="club-form-group">
+            <label>אימייל:</label>
+            <input type="email" id="profile-email" required>
+        </div>
+        <div class="club-form-group">
+            <label>טלפון:</label>
+            <input type="tel" id="profile-phone" required>
+        </div>
+        
+        <!-- כתובת מפורטת -->
+        <div style="font-weight: 700; color: #28a745; margin: 15px 0 10px 0; font-size: 1.1em;">כתובת (אופציונלי)</div>
+        
+        <div style="display: flex; gap: 10px;">
+            <div class="club-form-group" style="flex: 1;">
+                <label>שם רחוב:</label>
+                <input type="text" id="profile-address-street">
+            </div>
+            <div class="club-form-group" style="flex: 0 0 90px;">
+                <label>מס' בית:</label>
+                <input type="text" id="profile-address-house">
             </div>
         </div>
-    </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <div class="club-form-group" style="flex: 1;">
+                <label>עיר:</label>
+                <input type="text" id="profile-address-city">
+            </div>
+            <div class="club-form-group" style="flex: 0 0 90px;">
+                <label>מיקוד:</label>
+                <input type="text" id="profile-address-zip">
+            </div>
+        </div>
+        
+        <div class="club-form-group">
+            <label>מדינה:</label>
+            <input type="text" id="profile-address-country" value="ישראל">
+        </div>
+        
+        <button type="submit" class="club-submit-btn">עדכן פרטים</button>
+    </form>
+    <button class="club-logout-btn" id="club-logout-btn">התנתק</button>
+</div>
     
     <div id="filters">
         <input type="text" id="search-input" placeholder="חפש מוצר..." />
@@ -1566,20 +1591,20 @@
                 </div>
             </div>
 
-            <!-- Points Usage Section (only for logged-in members) -->
-            <div class="cart-section" id="points-usage-container" style="display: none;">
-                <div class="cart-section-title">שימוש בנקודות מועדון</div>
-                <div class="points-usage-section">
-                    <h4>יתרה: <span id="cart-available-points">0</span> נקודות (<span id="cart-points-value">0.00</span>₪)</h4>
-                    <div class="points-slider-container">
-                        <input type="range" min="0" max="0" value="0" class="points-slider" id="points-slider">
-                        <div class="points-info">
-                            <span>נקודות לשימוש: <strong id="points-to-use">0</strong></span>
-                            <span>הנחה: <strong id="points-discount">0.00</strong>₪</span>
-                        </div>
-                    </div>
-                </div>
+<div class="cart-section" id="points-usage-container" style="display: none;">
+    <div class="cart-section-title">שימוש בנקודות מועדון</div>
+    <div class="points-usage-section">
+        <h4>יתרה: <span id="cart-available-points">0</span> נקודות (<span id="cart-points-value">0.00</span>₪)</h4>
+        <p style="font-size: 0.85em; color: #666; margin: 5px 0;">מינימום שימוש: 10 נקודות</p>
+        <div class="points-slider-container">
+            <input type="range" min="10" max="0" value="10" class="points-slider" id="points-slider">
+            <div class="points-info">
+                <span>נקודות לשימוש: <strong id="points-to-use">0</strong></span>
+                <span>הנחה: <strong id="points-discount">0.00</strong>₪</span>
             </div>
+        </div>
+    </div>
+</div> <!-- ← הוסף את זה! -->
             
             <!-- Cart Totals -->
             <div class="cart-totals">
@@ -1904,37 +1929,62 @@
             }
         }
 
-        function updateClubModal() {
-            const guestView = document.getElementById('club-guest-view');
-            const memberView = document.getElementById('club-member-view');
-            const modalTitle = document.getElementById('club-modal-title');
+function updateClubModal() {
+    const guestView = document.getElementById('club-guest-view');
+    const memberView = document.getElementById('club-member-view');
+    const modalTitle = document.getElementById('club-modal-title');
 
-            if (currentClubMember) {
-                guestView.style.display = 'none';
-                memberView.style.display = 'block';
-                modalTitle.textContent = `שלום ${currentClubMember.name.split(' ')[0]}!`;
+    if (currentClubMember) {
+        guestView.style.display = 'none';
+        memberView.style.display = 'block';
+        modalTitle.textContent = `שלום ${currentClubMember.name.split(' ')[0]}!`;
+        
+        // Update points display
+        document.getElementById('member-points').textContent = currentClubMember.points || 0;
+        document.getElementById('member-points-value').textContent = (currentClubMember.points || 0).toFixed(2);
+        
+        // Update profile form
+        document.getElementById('profile-name').value = currentClubMember.name || '';
+        document.getElementById('profile-email').value = currentClubMember.email || '';
+        document.getElementById('profile-phone').value = currentClubMember.phone || '';
+        
+        // Parse and fill address fields
+        if (currentClubMember.address) {
+            const addressParts = currentClubMember.address.split(',').map(p => p.trim());
+            if (addressParts.length >= 3) {
+                // Street and house number
+                const streetHouse = addressParts[0].split(' ');
+                document.getElementById('profile-address-house').value = streetHouse.pop() || '';
+                document.getElementById('profile-address-street').value = streetHouse.join(' ') || '';
                 
-                // Update points display
-                document.getElementById('member-points').textContent = currentClubMember.points || 0;
-                document.getElementById('member-points-value').textContent = (currentClubMember.points || 0).toFixed(2);
+                // City
+                document.getElementById('profile-address-city').value = addressParts[1] || '';
                 
-                // Update profile form
-                document.getElementById('profile-name').value = currentClubMember.name || '';
-                document.getElementById('profile-email').value = currentClubMember.email || '';
-                document.getElementById('profile-phone').value = currentClubMember.phone || '';
-                document.getElementById('profile-address').value = currentClubMember.address || '';
-                
-                // Load orders
-                loadMemberOrders();
-            } else {
-                guestView.style.display = 'block';
-                memberView.style.display = 'none';
-                modalTitle.textContent = 'מועדון VIP';
+                // Country and zip
+                const countryZip = addressParts[2].split(' ');
+                document.getElementById('profile-address-zip').value = countryZip.pop() || '';
+                document.getElementById('profile-address-country').value = countryZip.join(' ') || 'ישראל';
             }
-            
-            updateCheckoutForm();
-            updatePointsUsage();
+        } else {
+            // Clear all address fields
+            document.getElementById('profile-address-street').value = '';
+            document.getElementById('profile-address-house').value = '';
+            document.getElementById('profile-address-city').value = '';
+            document.getElementById('profile-address-zip').value = '';
+            document.getElementById('profile-address-country').value = 'ישראל';
         }
+        
+        // Load orders
+        loadMemberOrders();
+    } else {
+        guestView.style.display = 'block';
+        memberView.style.display = 'none';
+        modalTitle.textContent = 'מועדון VIP';
+    }
+    
+    updateCheckoutForm();
+    updatePointsUsage();
+}
 
         async function loadMemberOrders() {
             const ordersList = document.getElementById('member-orders-list');
@@ -2007,29 +2057,37 @@
                 joinClubSection.style.display = 'block';
             }
         }
-
-        function updatePointsUsage() {
-            const pointsContainer = document.getElementById('points-usage-container');
-            const slider = document.getElementById('points-slider');
-            
-            if (currentClubMember && currentClubMember.points >= 10) {
-                pointsContainer.style.display = 'block';
-                
-                const maxPoints = Math.min(currentClubMember.points, Math.floor(subtotal));
-                slider.max = maxPoints;
-                slider.value = Math.min(pointsToUse, maxPoints);
-                
-                document.getElementById('cart-available-points').textContent = currentClubMember.points;
-                document.getElementById('cart-points-value').textContent = currentClubMember.points.toFixed(2);
-                
-                updatePointsDisplay();
-            } else {
-                pointsContainer.style.display = 'none';
-                pointsToUse = 0;
-                pointsDiscount = 0;
-            }
+function updatePointsUsage() {
+    const pointsContainer = document.getElementById('points-usage-container');
+    const slider = document.getElementById('points-slider');
+    
+    if (currentClubMember && currentClubMember.points >= 10) {
+        pointsContainer.style.display = 'block';
+        
+        const maxPoints = Math.min(currentClubMember.points, Math.floor(subtotal));
+        
+        // Set slider range: min=10 (not 0)
+        slider.min = 10;
+        slider.max = maxPoints;
+        
+        // Set initial value
+        if (pointsToUse < 10) {
+            pointsToUse = 0;
+            slider.value = 10; // Visual minimum
+        } else {
+            slider.value = Math.min(pointsToUse, maxPoints);
         }
-
+        
+        document.getElementById('cart-available-points').textContent = currentClubMember.points;
+        document.getElementById('cart-points-value').textContent = currentClubMember.points.toFixed(2);
+        
+        updatePointsDisplay();
+    } else {
+        pointsContainer.style.display = 'none';
+        pointsToUse = 0;
+        pointsDiscount = 0;
+    }
+}
         function updatePointsDisplay() {
             document.getElementById('points-to-use').textContent = pointsToUse;
             document.getElementById('points-discount').textContent = pointsDiscount.toFixed(2);
@@ -2172,54 +2230,80 @@
             }
         });
 
-        // Profile Update Form
-        document.getElementById('club-profile-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!currentClubMember) return;
-            
-            const name = document.getElementById('profile-name').value.trim();
-            const phone = document.getElementById('profile-phone').value.trim();
-            const address = document.getElementById('profile-address').value.trim();
-            
-            try {
-                await db.collection('ClubMembers').doc(currentClubMember.id).update({
-                    name: name,
-                    phone: phone,
-                    address: address
-                });
-                
-                currentClubMember.name = name;
-                currentClubMember.phone = phone;
-                currentClubMember.address = address;
-                saveClubMember();
-                updateClubButton();
-                showClubMessage('הפרטים עודכנו בהצלחה!');
-            } catch (error) {
-                console.error('Profile update error:', error);
-                showClubMessage('שגיאה בעדכון פרטים', 'error');
-            }
+// Profile Update Form
+document.getElementById('club-profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentClubMember) return;
+    
+    const name = document.getElementById('profile-name').value.trim();
+    const phone = document.getElementById('profile-phone').value.trim();
+    
+    // Build address from parts
+    const street = document.getElementById('profile-address-street').value.trim();
+    const house = document.getElementById('profile-address-house').value.trim();
+    const city = document.getElementById('profile-address-city').value.trim();
+    const zip = document.getElementById('profile-address-zip').value.trim();
+    const country = document.getElementById('profile-address-country').value.trim();
+    
+    let address = '';
+    if (street || house || city) {
+        address = `${street} ${house}, ${city}, ${country} ${zip}`.trim();
+    }
+    
+    try {
+        await db.collection('ClubMembers').doc(currentClubMember.id).update({
+            name: name,
+            phone: phone,
+            address: address
         });
+        
+        currentClubMember.name = name;
+        currentClubMember.phone = phone;
+        currentClubMember.address = address;
+        saveClubMember();
+        updateClubButton();
+        showClubMessage('הפרטים עודכנו בהצלחה!');
+    } catch (error) {
+        console.error('Profile update error:', error);
+        showClubMessage('שגיאה בעדכון פרטים', 'error');
+    }
+});
 
-        // Logout
-        document.getElementById('club-logout-btn').addEventListener('click', () => {
-            currentClubMember = null;
-            pointsToUse = 0;
-            pointsDiscount = 0;
-            saveClubMember();
-            updateClubButton();
-            updateClubModal();
-            updateCartDisplay();
-            showClubMessage('התנתקת בהצלחה');
-        });
+// Logout
+document.getElementById('club-logout-btn').addEventListener('click', () => {
+    currentClubMember = null;
+    pointsToUse = 0;
+    pointsDiscount = 0;
+    
+    // Reset slider
+    const pointsSlider = document.getElementById('points-slider');
+    if (pointsSlider) {
+        pointsSlider.value = 10;
+    }
+    
+    saveClubMember();
+    updateClubButton();
+    updateClubModal();
+    updateCartDisplay();
+    showClubMessage('התנתקת בהצלחה');
+});
 
         // Points Slider
-        document.getElementById('points-slider').addEventListener('input', (e) => {
-            pointsToUse = parseInt(e.target.value) || 0;
-            if (pointsToUse < 10) pointsToUse = 0;
-            pointsDiscount = pointsToUse;
-            updatePointsDisplay();
-            updateCartDisplay();
-        });
+// Points Slider - תיקון לוגיקת המינימום
+document.getElementById('points-slider').addEventListener('input', (e) => {
+    let value = parseInt(e.target.value) || 0;
+
+    if (value < 10) {
+        pointsToUse = 0;
+        pointsDiscount = 0;
+    } else {
+        pointsToUse = value;
+        pointsDiscount = value;
+    }
+    
+    updatePointsDisplay();
+    updateCartDisplay();
+});
 
         // Join Club Checkbox
         document.getElementById('join-club-checkbox').addEventListener('change', (e) => {
@@ -2484,19 +2568,19 @@
             }
         }
 
-        function applyCouponDiscount() {
-            if (!appliedCoupon) return 0;
-            let discount = 0;
-            if (appliedCoupon.Type === 'free_shipping') {
-                discount = shippingCost;
-                shippingCost = 0;
-            } else if (appliedCoupon.Type === 'fixed_discount') {
-                discount = Math.min(appliedCoupon.Value, subtotal);
-            } else if (appliedCoupon.Type === 'percentage_discount') {
-                discount = (subtotal * appliedCoupon.Value) / 100;
-            }
-            return discount;
-        }
+function applyCouponDiscount() {
+    if (!appliedCoupon) return 0;
+    let discount = 0;
+    if (appliedCoupon.Type === 'free_shipping') {
+        discount = shippingCost;
+        shippingCost = 0;
+    } else if (appliedCoupon.Type === 'fixed_discount') {
+        discount = Math.min(appliedCoupon.Value, subtotal);
+    } else if (appliedCoupon.Type === 'percentage_discount') {
+        discount = (subtotal * appliedCoupon.Value) / 100;
+    }
+    return discount;
+}
 
 function updateCartDisplay() {
     cartItemsList.innerHTML = '';
@@ -2554,9 +2638,47 @@ function updateCartDisplay() {
     total = subtotal + shippingCost - couponDiscount - pointsDiscount;
     if (total < 0) total = 0;
 
-    cartSubtotalElement.textContent = subtotal.toFixed(2);
-    shippingCostElement.textContent = shippingCost.toFixed(2);
-    cartTotalElement.textContent = total.toFixed(2);
+    // Update cart totals section HTML with all discounts
+    const cartTotalsSection = document.querySelector('.cart-totals');
+    let totalsHTML = `
+        <div class="total-row">
+            <span>סה"כ מוצרים:</span>
+            <span>${subtotal.toFixed(2)} ₪</span>
+        </div>
+        <div class="total-row">
+            <span>דמי משלוח:</span>
+            <span>${shippingCost.toFixed(2)} ₪</span>
+        </div>
+    `;
+
+    // Add coupon discount row if applicable
+    if (couponDiscount > 0) {
+        totalsHTML += `
+        <div class="total-row" style="color: #28a745;">
+            <span>הנחת קופון:</span>
+            <span>-${couponDiscount.toFixed(2)} ₪</span>
+        </div>
+        `;
+    }
+
+    // Add points discount row if applicable
+    if (pointsDiscount > 0) {
+        totalsHTML += `
+        <div class="total-row" style="color: #28a745;">
+            <span>הנחת נקודות:</span>
+            <span>-${pointsDiscount.toFixed(2)} ₪</span>
+        </div>
+        `;
+    }
+
+    totalsHTML += `
+        <div class="total-row grand-total">
+            <span>סה"כ לתשלום:</span>
+            <span>${total.toFixed(2)} ₪</span>
+        </div>
+    `;
+
+    cartTotalsSection.innerHTML = totalsHTML;
 
     updateCartButton();
     saveCartToStorage();
@@ -3025,26 +3147,35 @@ function renderPayPalButton() {
                         couponDetails: appliedCoupon
                     });
 
-                    if (emailSent) {
-                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
-                    } else {
-                        alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
-                    }
+if (emailSent) {
+    alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
+} else {
+    alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nסך הכל לתשלום: ${total.toFixed(2)} ₪\n(ההזמנה התקבלה אך הייתה שגיאה בשליחת הקבלה)\nלקבלת הקבלה אנא פנה אלינו`);
+}
 
-                    cart = [];
-                    appliedCoupon = null;
-                    pointsToUse = 0;
-                    pointsDiscount = 0;
-                    couponInput.value = '';
-                    couponInput.disabled = false;
-                    applyCouponBtn.disabled = false;
-                    couponMessage.innerHTML = '';
-                    localStorage.removeItem('vipshirts_cart');
-                    localStorage.removeItem('vipshirts_coupon');
-                    updateCartDisplay();
-                    updateClubModal();
-                    checkoutForm.reset();
-                    closeCart();
+cart = [];
+appliedCoupon = null;
+pointsToUse = 0;
+pointsDiscount = 0;
+couponInput.value = '';
+couponInput.disabled = false;
+applyCouponBtn.disabled = false;
+couponMessage.innerHTML = '';
+
+// ← **התוספת החדשה מתחילה כאן** ←
+// Reset points slider
+const pointsSlider = document.getElementById('points-slider');
+if (pointsSlider) {
+    pointsSlider.value = pointsSlider.min || 10;
+}
+// ← **התוספת החדשה נגמרת כאן** ←
+
+localStorage.removeItem('vipshirts_cart');
+localStorage.removeItem('vipshirts_coupon');
+updateCartDisplay();
+updateClubModal();
+checkoutForm.reset();
+closeCart();
                 } catch (error) {
                     console.error('Error:', error);
                     alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
