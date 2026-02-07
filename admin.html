@@ -6,19 +6,27 @@
     <title>פאנל ניהול - VIP Shirts</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f0f0f0;
             color: #333;
             direction: rtl;
+            min-height: 100vh;
         }
 
+        /* ===== LOGIN OVERLAY ===== */
         #login-overlay {
             position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            top: 0; 
+            left: 0;
+            width: 100vw; 
+            height: 100vh;
             background: rgba(0,0,0,0.75);
             display: flex;
             justify-content: center;
@@ -48,14 +56,16 @@
             width: 100%;
             padding: 12px;
             margin-bottom: 15px;
-            border: 1px solid #cce0ff;
+            border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 1em;
             outline: none;
             transition: border-color 0.3s;
         }
 
-        #login-form-container input:focus { border-color: #dc3545; }
+        #login-form-container input:focus { 
+            border-color: #dc3545; 
+        }
 
         #login-button {
             background: #dc3545;
@@ -69,7 +79,10 @@
             width: 100%;
             transition: background 0.3s;
         }
-        #login-button:hover { background: #c82333; }
+        
+        #login-button:hover { 
+            background: #c82333; 
+        }
 
         #login-error-message {
             color: #e74c3c;
@@ -78,17 +91,27 @@
             font-size: 0.95em;
         }
 
-        .admin-layout { display: none; min-height: 100vh; }
-        .admin-layout.active { display: flex; }
+        /* ===== ADMIN LAYOUT ===== */
+        .admin-layout { 
+            display: none;
+            flex-direction: row;
+            min-height: 100vh;
+        }
+        
+        .admin-layout.active { 
+            display: flex; 
+        }
 
+        /* ===== SIDEBAR ===== */
         .sidebar {
             width: 250px;
             background: #2c3e50;
             min-height: 100vh;
-            padding: 0;
             position: fixed;
             right: 0;
             top: 0;
+            z-index: 100;
+            overflow-y: auto;
         }
 
         .sidebar-header {
@@ -97,10 +120,24 @@
             background: #34495e;
             border-bottom: 2px solid #1a252f;
         }
-        .sidebar-header img { width: 120px; height: auto; }
-        .sidebar-header h1 { color: #fff; font-size: 1.2em; margin-top: 15px; font-weight: 600; }
+        
+        .sidebar-header img { 
+            width: 120px; 
+            height: auto; 
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .sidebar-header h1 { 
+            color: #fff; 
+            font-size: 1.2em; 
+            margin-top: 15px; 
+            font-weight: 600; 
+        }
 
-        .sidebar-menu { padding: 20px 0; }
+        .sidebar-menu { 
+            padding: 20px 0; 
+        }
 
         .menu-item {
             padding: 15px 25px;
@@ -111,7 +148,12 @@
             position: relative;
             border-right: 4px solid transparent;
         }
-        .menu-item:hover { background: #34495e; color: #fff; }
+        
+        .menu-item:hover { 
+            background: #34495e; 
+            color: #fff; 
+        }
+        
         .menu-item.active {
             background: #1a252f;
             color: #fff;
@@ -119,10 +161,12 @@
             box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         }
 
+        /* ===== MAIN CONTENT ===== */
         .main-content {
             margin-right: 250px;
             padding: 40px;
             width: calc(100% - 250px);
+            min-height: 100vh;
         }
 
         .content-section {
@@ -132,31 +176,105 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .content-section.active { display: block; }
-
-        .content-header { margin-bottom: 30px; padding-bottom: 15px; border-bottom: 2px solid #ecf0f1; }
-        .content-header h2 { font-size: 2em; color: #2c3e50; font-weight: 600; }
-
-        .search-container { margin-bottom: 25px; display: flex; gap: 10px; align-items: center; }
-        .search-container input {
-            flex: 1; padding: 12px 15px; border: 2px solid #ddd;
-            border-radius: 6px; font-size: 1em; transition: border-color 0.3s;
+        
+        .content-section.active { 
+            display: block; 
         }
-        .search-container input:focus { outline: none; border-color: #dc3545; }
 
-        .btn { padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: 500; transition: all 0.3s; }
-        .btn-primary { background: #dc3545; color: white; }
-        .btn-primary:hover { background: #c82333; }
-        .btn-secondary { background: #95a5a6; color: white; }
-        .btn-secondary:hover { background: #7f8c8d; }
-        .btn-danger { background: #e74c3c; color: white; }
-        .btn-danger:hover { background: #c0392b; }
-        .btn-success { background: #27ae60; color: white; }
-        .btn-success:hover { background: #229954; }
-        .btn-dark { background: #2c3e50; color: white; }
-        .btn-dark:hover { background: #1a252f; }
+        .content-header { 
+            margin-bottom: 30px; 
+            padding-bottom: 15px; 
+            border-bottom: 2px solid #ecf0f1; 
+        }
+        
+        .content-header h2 { 
+            font-size: 2em; 
+            color: #2c3e50; 
+            font-weight: 600; 
+        }
 
-        .categories-grid { display: grid; gap: 20px; margin-top: 30px; }
+        /* ===== SEARCH CONTAINER ===== */
+        .search-container { 
+            margin-bottom: 25px; 
+            display: flex; 
+            gap: 10px; 
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .search-container input {
+            flex: 1; 
+            min-width: 200px;
+            padding: 12px 15px; 
+            border: 2px solid #ddd;
+            border-radius: 6px; 
+            font-size: 1em; 
+            transition: border-color 0.3s;
+        }
+        
+        .search-container input:focus { 
+            outline: none; 
+            border-color: #dc3545; 
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn { 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1em; 
+            font-weight: 500; 
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .btn-primary { 
+            background: #dc3545; 
+            color: white; 
+        }
+        .btn-primary:hover { 
+            background: #c82333; 
+        }
+        
+        .btn-secondary { 
+            background: #95a5a6; 
+            color: white; 
+        }
+        .btn-secondary:hover { 
+            background: #7f8c8d; 
+        }
+        
+        .btn-danger { 
+            background: #e74c3c; 
+            color: white; 
+        }
+        .btn-danger:hover { 
+            background: #c0392b; 
+        }
+        
+        .btn-success { 
+            background: #27ae60; 
+            color: white; 
+        }
+        .btn-success:hover { 
+            background: #229954; 
+        }
+        
+        .btn-dark { 
+            background: #2c3e50; 
+            color: white; 
+        }
+        .btn-dark:hover { 
+            background: #1a252f; 
+        }
+
+        /* ===== CATEGORIES GRID ===== */
+        .categories-grid { 
+            display: grid; 
+            gap: 20px; 
+            margin-top: 30px; 
+        }
 
         .category-box {
             background: #f8f9fa;
@@ -172,39 +290,114 @@
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 2px solid #dee2e6;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .category-box-header h3 { font-size: 1.5em; color: #2c3e50; }
-        .category-actions { display: flex; gap: 10px; }
-        .category-actions button { padding: 8px 16px; font-size: 0.9em; }
+        
+        .category-box-header h3 { 
+            font-size: 1.5em; 
+            color: #2c3e50; 
+        }
+        
+        .category-actions { 
+            display: flex; 
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .category-actions button { 
+            padding: 8px 16px; 
+            font-size: 0.9em; 
+        }
 
         .products-in-category {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 15px;
             margin-top: 15px;
         }
 
         .product-mini-card {
-            background: white; border: 1px solid #ddd; border-radius: 6px;
-            padding: 12px; text-align: center; transition: all 0.3s; position: relative;
+            background: white; 
+            border: 1px solid #ddd; 
+            border-radius: 6px;
+            padding: 12px; 
+            text-align: center; 
+            transition: all 0.3s; 
+            position: relative;
         }
-        .product-mini-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
-        .product-mini-card img { width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
-        .product-mini-card h4 { font-size: 0.95em; margin-bottom: 8px; color: #2c3e50; }
-        .product-mini-card .product-price { color: #dc3545; font-weight: bold; margin-bottom: 10px; }
-        .product-mini-card .product-price.on-sale { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .product-mini-card .product-price.on-sale .original-price { text-decoration: line-through; color: #999; font-size: 0.85em; }
-        .product-mini-card .product-price.on-sale .sale-price { color: #e74c3c; font-size: 1.1em; }
+        
+        .product-mini-card:hover { 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            transform: translateY(-2px); 
+        }
+        
+        .product-mini-card img { 
+            width: 100%; 
+            height: 120px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            margin-bottom: 8px; 
+        }
+        
+        .product-mini-card h4 { 
+            font-size: 0.95em; 
+            margin-bottom: 8px; 
+            color: #2c3e50;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .product-mini-card .product-price { 
+            color: #dc3545; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+        }
+        
+        .product-mini-card .product-price.on-sale { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+        }
+        
+        .product-mini-card .product-price.on-sale .original-price { 
+            text-decoration: line-through; 
+            color: #999; 
+            font-size: 0.85em; 
+        }
+        
+        .product-mini-card .product-price.on-sale .sale-price { 
+            color: #e74c3c; 
+            font-size: 1.1em; 
+        }
 
         .sale-badge-mini {
-            position: absolute; top: 8px; right: 8px;
-            background: #e74c3c; color: white; padding: 4px 8px;
-            font-size: 0.75em; border-radius: 4px; font-weight: bold;
+            position: absolute; 
+            top: 8px; 
+            right: 8px;
+            background: #e74c3c; 
+            color: white; 
+            padding: 4px 8px;
+            font-size: 0.75em; 
+            border-radius: 4px; 
+            font-weight: bold;
         }
 
-        .product-mini-actions { display: flex; gap: 5px; justify-content: center; }
-        .product-mini-actions button { padding: 6px 12px; font-size: 0.85em; }
+        .product-mini-actions { 
+            display: flex; 
+            gap: 5px; 
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .product-mini-actions button { 
+            padding: 6px 12px; 
+            font-size: 0.85em; 
+        }
 
+        /* ===== PRODUCTS GRID ===== */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -213,49 +406,141 @@
         }
 
         .product-card {
-            background: #f8f9fa; border: 2px solid #e9ecef;
-            border-radius: 8px; padding: 20px; transition: all 0.3s; position: relative;
+            background: #f8f9fa; 
+            border: 2px solid #e9ecef;
+            border-radius: 8px; 
+            padding: 20px; 
+            transition: all 0.3s; 
+            position: relative;
         }
-        .product-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-2px); }
-        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; }
-        .product-card h3 { font-size: 1.3em; margin-bottom: 10px; color: #2c3e50; }
+        
+        .product-card:hover { 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            transform: translateY(-2px); 
+        }
+        
+        .product-card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+        }
+        
+        .product-card h3 { 
+            font-size: 1.3em; 
+            margin-bottom: 10px; 
+            color: #2c3e50; 
+        }
+        
         .product-card .product-category {
-            display: inline-block; background: #dc3545; color: white;
-            padding: 4px 12px; border-radius: 4px; font-size: 0.85em; margin-bottom: 10px; margin-left: 4px;
+            display: inline-block; 
+            background: #dc3545; 
+            color: white;
+            padding: 4px 12px; 
+            border-radius: 4px; 
+            font-size: 0.85em; 
+            margin-bottom: 10px; 
+            margin-left: 4px;
         }
-        .product-card .product-price { font-size: 1.4em; color: #dc3545; font-weight: bold; margin-bottom: 15px; }
-        .product-card .product-price.on-sale { display: flex; align-items: center; gap: 10px; }
-        .product-card .product-price.on-sale .original-price { text-decoration: line-through; color: #999; font-size: 0.8em; }
-        .product-card .product-price.on-sale .sale-price { color: #e74c3c; }
+        
+        .product-card .product-price { 
+            font-size: 1.4em; 
+            color: #dc3545; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+        }
+        
+        .product-card .product-price.on-sale { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        
+        .product-card .product-price.on-sale .original-price { 
+            text-decoration: line-through; 
+            color: #999; 
+            font-size: 0.8em; 
+        }
+        
+        .product-card .product-price.on-sale .sale-price { 
+            color: #e74c3c; 
+        }
 
         .sale-badge {
-            position: absolute; top: 15px; right: 15px;
-            background: #e74c3c; color: white; padding: 8px 15px;
-            font-weight: 900; font-size: 0.9em; border-radius: 8px;
+            position: absolute; 
+            top: 15px; 
+            right: 15px;
+            background: #e74c3c; 
+            color: white; 
+            padding: 8px 15px;
+            font-weight: 900; 
+            font-size: 0.9em; 
+            border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        .product-card-actions { display: flex; gap: 10px; }
-        .product-card-actions button { flex: 1; }
+        .product-card-actions { 
+            display: flex; 
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .product-card-actions button { 
+            flex: 1;
+            min-width: 100px;
+        }
 
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; }
+        /* ===== FORM GROUPS ===== */
+        .form-group { 
+            margin-bottom: 20px; 
+        }
+        
+        .form-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #2c3e50; 
+        }
+        
         .form-group input[type="text"],
         .form-group input[type="number"],
         .form-group input[type="date"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="password"],
         .form-group input[type="file"],
         .form-group textarea,
         .form-group select {
-            width: 100%; padding: 12px; border: 2px solid #ddd;
-            border-radius: 6px; font-size: 1em; transition: border-color 0.3s;
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd;
+            border-radius: 6px; 
+            font-size: 1em; 
+            transition: border-color 0.3s;
+            font-family: inherit;
         }
-        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-            outline: none; border-color: #dc3545;
+        
+        .form-group input:focus, 
+        .form-group textarea:focus, 
+        .form-group select:focus {
+            outline: none; 
+            border-color: #dc3545;
         }
-        .form-group textarea { resize: vertical; min-height: 80px; }
-        .form-group small { display: block; margin-top: 5px; color: #666; font-size: 0.9em; }
+        
+        .form-group textarea { 
+            resize: vertical; 
+            min-height: 80px; 
+        }
+        
+        .form-group small { 
+            display: block; 
+            margin-top: 5px; 
+            color: #666; 
+            font-size: 0.9em; 
+        }
 
-        /* ===== SALE INFO BOX - no yellow styling ===== */
+        /* ===== SALE INFO BOX ===== */
         .sale-info-box {
             border: 2px solid #dee2e6;
             border-radius: 8px;
@@ -263,6 +548,7 @@
             margin-bottom: 20px;
             background: #fff;
         }
+        
         .sale-info-box h4 {
             color: #2c3e50;
             margin-bottom: 10px;
@@ -280,6 +566,7 @@
             min-height: 44px;
             align-items: center;
         }
+        
         .category-checkboxes label {
             display: flex;
             align-items: center;
@@ -291,108 +578,350 @@
             border-radius: 4px;
             transition: background 0.15s;
         }
-        .category-checkboxes label:hover { background: #eef5ff; }
+        
+        .category-checkboxes label:hover { 
+            background: #eef5ff; 
+        }
+        
         .category-checkboxes input[type="checkbox"] {
-            width: auto;
-            accent-color: #dc3545;
             width: 16px;
             height: 16px;
+            cursor: pointer;
         }
 
+        /* ===== IMAGE UPLOAD ===== */
         .image-upload-container {
-            border: 2px dashed #ddd; border-radius: 8px; padding: 20px;
-            text-align: center; background: #f8f9fa; transition: all 0.3s;
+            border: 2px dashed #ddd; 
+            border-radius: 8px; 
+            padding: 20px;
+            text-align: center; 
+            background: #f8f9fa; 
+            transition: all 0.3s;
+            cursor: pointer;
         }
-        .image-upload-container:hover { border-color: #dc3545; background: #fff; }
-        .image-upload-container.uploading { background: #fff3cd; border-color: #ffc107; }
+        
+        .image-upload-container:hover { 
+            border-color: #dc3545; 
+            background: #fff; 
+        }
+        
+        .image-upload-container.uploading { 
+            background: #fff3cd; 
+            border-color: #ffc107; 
+        }
 
-        .image-preview { max-width: 200px; max-height: 200px; margin: 10px auto; border-radius: 8px; display: none; }
-        .image-preview.show { display: block; }
+        .image-preview { 
+            max-width: 200px; 
+            max-height: 200px; 
+            margin: 10px auto; 
+            border-radius: 8px; 
+            display: none; 
+        }
+        
+        .image-preview.show { 
+            display: block; 
+        }
 
-        .upload-status { margin-top: 10px; font-weight: bold; }
-        .upload-status.success { color: #27ae60; }
-        .upload-status.error { color: #e74c3c; }
+        .upload-status { 
+            margin-top: 10px; 
+            font-weight: bold; 
+        }
+        
+        .upload-status.success { 
+            color: #27ae60; 
+        }
+        
+        .upload-status.error { 
+            color: #e74c3c; 
+        }
 
+        /* ===== CUSTOM FIELDS ===== */
         .custom-field-container {
-            border: 2px solid #e9ecef; padding: 20px; margin: 15px 0;
-            border-radius: 8px; background: #f8f9fa;
+            border: 2px solid #e9ecef; 
+            padding: 20px; 
+            margin: 15px 0;
+            border-radius: 8px; 
+            background: #f8f9fa;
         }
 
-        .custom-field-header { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; }
-        .custom-field-options { margin-top: 15px; }
-
-        .option-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
-        .option-item input[type="text"], .option-item input[type="number"] {
-            flex: 1; min-width: 150px; padding: 8px; border: 2px solid #ddd; border-radius: 4px;
+        .custom-field-header { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 15px; 
+            flex-wrap: wrap; 
+            align-items: center; 
+        }
+        
+        .custom-field-options { 
+            margin-top: 15px; 
         }
 
+        .option-item { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 10px; 
+            align-items: center; 
+            flex-wrap: wrap; 
+        }
+        
+        .option-item input[type="text"], 
+        .option-item input[type="number"] {
+            flex: 1; 
+            min-width: 150px; 
+            padding: 8px; 
+            border: 2px solid #ddd; 
+            border-radius: 4px;
+        }
+
+        /* ===== MODALS ===== */
         .modal {
-            display: none; position: fixed; left: 0; top: 0;
-            width: 100vw; height: 100vh; background: rgba(0,0,0,0.75);
-            z-index: 1000; align-items: center; justify-content: center; overflow-y: auto;
+            display: none; 
+            position: fixed; 
+            left: 0; 
+            top: 0;
+            width: 100vw; 
+            height: 100vh; 
+            background: rgba(0,0,0,0.75);
+            z-index: 1000; 
+            align-items: center; 
+            justify-content: center; 
+            overflow-y: auto;
+            padding: 20px;
         }
-        .modal.active { display: flex; }
+        
+        .modal.active { 
+            display: flex; 
+        }
 
         .modal-content {
-            background: #fff; border-radius: 10px; padding: 35px 30px;
-            min-width: 300px; max-width: 700px;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.2); position: relative;
-            max-height: 85vh; overflow-y: auto; margin: 20px;
+            background: #fff; 
+            border-radius: 10px; 
+            padding: 35px 30px;
+            min-width: 300px; 
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.2); 
+            position: relative;
+            max-height: 85vh; 
+            overflow-y: auto; 
+            margin: auto;
         }
-        .modal-content h3 { margin: 0 0 20px 0; color: #2c3e50; font-size: 1.8em; }
+        
+        .modal-content h3 { 
+            margin: 0 0 20px 0; 
+            color: #2c3e50; 
+            font-size: 1.8em; 
+        }
+        
         .modal-content .close-button {
-            position: absolute; left: 20px; top: 20px;
-            background: none; border: none; font-size: 1.6em;
-            cursor: pointer; color: #888; transition: color 0.3s;
+            position: absolute; 
+            left: 20px; 
+            top: 20px;
+            background: none; 
+            border: none; 
+            font-size: 1.6em;
+            cursor: pointer; 
+            color: #888; 
+            transition: color 0.3s;
+            line-height: 1;
         }
-        .modal-content .close-button:hover { color: #dc3545; }
+        
+        .modal-content .close-button:hover { 
+            color: #dc3545; 
+        }
 
-        .settings-grid { display: grid; gap: 30px; margin-top: 20px; }
+        /* ===== SETTINGS ===== */
+        .settings-grid { 
+            display: grid; 
+            gap: 30px; 
+            margin-top: 20px; 
+        }
+        
         .settings-section {
-            background: #f8f9fa; padding: 25px; border-radius: 8px; border: 2px solid #e9ecef;
+            background: #f8f9fa; 
+            padding: 25px; 
+            border-radius: 8px; 
+            border: 2px solid #e9ecef;
         }
+        
         .settings-section h3 {
-            margin-bottom: 20px; color: #2c3e50; font-size: 1.4em;
-            padding-bottom: 10px; border-bottom: 2px solid #dee2e6;
+            margin-bottom: 20px; 
+            color: #2c3e50; 
+            font-size: 1.4em;
+            padding-bottom: 10px; 
+            border-bottom: 2px solid #dee2e6;
         }
 
-        .item-list { margin-top: 20px; }
+        .item-list { 
+            margin-top: 20px; 
+        }
+        
         .list-item {
-            background: white; padding: 15px 20px; margin-bottom: 12px;
-            border-radius: 6px; border: 1px solid #ddd;
-            display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;
+            background: white; 
+            padding: 15px 20px; 
+            margin-bottom: 12px;
+            border-radius: 6px; 
+            border: 1px solid #ddd;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            transition: all 0.3s;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .list-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .list-item-actions { display: flex; gap: 8px; }
-        .list-item-actions button { padding: 6px 14px; font-size: 0.9em; }
-
-        .order-card, .contact-lead-item {
-            background: #f8f9fa; border: 2px solid #e9ecef;
-            border-radius: 8px; padding: 20px; margin-bottom: 15px;
-            cursor: pointer; transition: all 0.3s;
+        
+        .list-item:hover { 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
         }
-        .order-card:hover, .contact-lead-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        
+        .list-item-actions { 
+            display: flex; 
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .list-item-actions button { 
+            padding: 6px 14px; 
+            font-size: 0.9em; 
+        }
 
-        .order-status-section { margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6; }
+        /* ===== ORDER/LEAD CARDS ===== */
+        .order-card, 
+        .contact-lead-item {
+            background: #f8f9fa; 
+            border: 2px solid #e9ecef;
+            border-radius: 8px; 
+            padding: 20px; 
+            margin-bottom: 15px;
+            cursor: pointer; 
+            transition: all 0.3s;
+        }
+        
+        .order-card:hover, 
+        .contact-lead-item:hover { 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            transform: translateY(-2px); 
+        }
+
+        .order-status-section { 
+            margin-top: 20px; 
+            padding-top: 20px; 
+            border-top: 2px solid #dee2e6; 
+        }
+        
         .order-status-section textarea {
-            width: 100%; padding: 10px; border: 2px solid #ddd;
-            border-radius: 6px; min-height: 70px; font-family: inherit; resize: vertical;
+            width: 100%; 
+            padding: 10px; 
+            border: 2px solid #ddd;
+            border-radius: 6px; 
+            min-height: 70px; 
+            font-family: inherit; 
+            resize: vertical;
         }
-        .order-status-section button { margin-top: 12px; }
+        
+        .order-status-section button { 
+            margin-top: 12px; 
+        }
 
-        .section-divider { border-top: 2px solid #e9ecef; margin: 40px 0 30px 0; padding-top: 30px; }
+        .section-divider { 
+            border-top: 2px solid #e9ecef; 
+            margin: 40px 0 30px 0; 
+            padding-top: 30px; 
+        }
 
         .coupon-options-container {
-            margin-top: 15px; padding: 15px; background: #fff;
-            border: 1px solid #ddd; border-radius: 6px;
+            margin-top: 15px; 
+            padding: 15px; 
+            background: #fff;
+            border: 1px solid #ddd; 
+            border-radius: 6px;
         }
-        .coupon-option-field { margin-bottom: 10px; }
+        
+        .coupon-option-field { 
+            margin-bottom: 10px; 
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .sidebar { 
+                width: 200px; 
+            }
+            
+            .main-content { 
+                margin-right: 200px; 
+                width: calc(100% - 200px); 
+                padding: 30px 20px; 
+            }
+            
+            .products-in-category { 
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+            }
+            
+            .products-grid { 
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+            }
+        }
 
         @media (max-width: 768px) {
-            .sidebar { width: 200px; }
-            .main-content { margin-right: 200px; width: calc(100% - 200px); padding: 20px; }
-            .products-in-category { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-            .products-grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+            .sidebar {
+                width: 100%;
+                position: relative;
+                min-height: auto;
+            }
+            
+            .main-content {
+                margin-right: 0;
+                width: 100%;
+                padding: 20px 15px;
+            }
+            
+            .admin-layout.active {
+                flex-direction: column;
+            }
+            
+            .category-box-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .product-card-actions {
+                flex-direction: column;
+            }
+            
+            .product-card-actions button {
+                width: 100%;
+            }
+            
+            .search-container {
+                flex-direction: column;
+            }
+            
+            .search-container input {
+                width: 100%;
+            }
+            
+            .modal-content {
+                padding: 25px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-header h2 {
+                font-size: 1.5em;
+            }
+            
+            .products-in-category,
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .category-actions {
+                width: 100%;
+            }
+            
+            .category-actions button {
+                flex: 1;
+            }
         }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -416,12 +945,13 @@
                 <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
                 <h1>פאנל ניהול</h1>
             </div>
-            <div class="sidebar-menu">
-                <div class="menu-item active" data-section="categories">קטגוריות</div>
-                <div class="menu-item" data-section="products">מוצרים</div>
-                <div class="menu-item" data-section="orders">הזמנות</div>
-                <div class="menu-item" data-section="leads">פניות</div>
-                <div class="menu-item" data-section="settings">הגדרות</div>
+<div class="sidebar-menu">
+    <div class="menu-item active" data-section="categories">קטגוריות</div>
+    <div class="menu-item" data-section="products">מוצרים</div>
+    <div class="menu-item" data-section="orders">הזמנות</div>
+    <div class="menu-item" data-section="leads">פניות</div>
+    <div class="menu-item" data-section="customers">מועדון לקוחות</div>
+    <div class="menu-item" data-section="settings">הגדרות</div>
             </div>
         </div>
 
@@ -525,6 +1055,20 @@
                 <div id="contact-leads-list"><p>טוען פניות...</p></div>
             </div>
 
+            <!-- ניהול לקוחות -->
+            <div class="content-section" id="customers-section">
+                <div class="content-header"><h2>ניהול לקוחות מועדון VIP</h2></div>
+                
+                <!-- חיפוש לקוחות -->
+                <div class="search-container">
+                    <input type="text" id="customer-search" placeholder="חיפוש לפי שם, אימייל, טלפון או כתובת...">
+                    <button class="btn btn-primary" id="search-customer-btn">חפש</button>
+                    <button class="btn btn-secondary" id="clear-customer-search-btn">נקה</button>
+                </div>
+
+                <div id="customers-list"><p>טוען לקוחות...</p></div>
+            </div>
+        
             <!-- הגדרות -->
             <div class="content-section" id="settings-section">
                 <div class="content-header"><h2>הגדרות</h2></div>
@@ -652,6 +1196,33 @@
             <span class="close-button">&times;</span>
             <h3>עריכת חולצה</h3>
             <div id="edit-form-container"></div>
+        </div>
+    </div>
+
+    <!-- מודאל עריכת לקוח -->
+    <div id="edit-customer-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3>עריכת לקוח</h3>
+            <div id="edit-customer-form-container"></div>
+        </div>
+    </div>
+
+    <!-- מודאל הזמנות לקוח -->
+    <div id="customer-orders-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3>הזמנות לקוח</h3>
+            <div id="customer-orders-list"></div>
+        </div>
+    </div>
+
+    <!-- מודאל פניות לקוח -->
+    <div id="customer-leads-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3>פניות לקוח</h3>
+            <div id="customer-leads-list"></div>
         </div>
     </div>
 
@@ -1934,12 +2505,454 @@ if (!name || !description || isNaN(price) || price < 0 || !image) {
             editProductModal.classList.remove('active');
         });
     });
-    window.addEventListener('click', (event) => {
+window.addEventListener('click', (event) => {
         if (event.target === orderDetailsModal) orderDetailsModal.classList.remove('active');
         if (event.target === leadDetailsModal) leadDetailsModal.classList.remove('active');
         if (event.target === linkOrderModal) linkOrderModal.classList.remove('active');
         if (event.target === editProductModal) editProductModal.classList.remove('active');
+        if (event.target === editCustomerModal) editCustomerModal.classList.remove('active');
+        if (event.target === customerOrdersModal) customerOrdersModal.classList.remove('active');
+        if (event.target === customerLeadsModal) customerLeadsModal.classList.remove('active');
     });
+
+    // ============================================
+    // CUSTOMERS MANAGEMENT
+    // ============================================
+    const customerSearchInput = document.getElementById('customer-search');
+    const searchCustomerBtn = document.getElementById('search-customer-btn');
+    const clearCustomerSearchBtn = document.getElementById('clear-customer-search-btn');
+    const editCustomerModal = document.getElementById('edit-customer-modal');
+    const customerOrdersModal = document.getElementById('customer-orders-modal');
+    const customerLeadsModal = document.getElementById('customer-leads-modal');
+    let currentCustomerSearchTerm = '';
+    let currentEditingCustomer = null;
+
+    searchCustomerBtn.addEventListener('click', () => { 
+        currentCustomerSearchTerm = customerSearchInput.value.trim().toLowerCase(); 
+        fetchCustomers(currentCustomerSearchTerm); 
+    });
+
+    clearCustomerSearchBtn.addEventListener('click', () => { 
+        customerSearchInput.value = ''; 
+        currentCustomerSearchTerm = ''; 
+        fetchCustomers(); 
+    });
+
+    customerSearchInput.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') { 
+            currentCustomerSearchTerm = customerSearchInput.value.trim().toLowerCase(); 
+            fetchCustomers(currentCustomerSearchTerm); 
+        } 
+    });
+
+    async function fetchCustomers(searchTerm = '') {
+        const customersList = document.getElementById('customers-list');
+        customersList.innerHTML = '<p>טוען לקוחות...</p>';
+        
+        try {
+            const customersSnapshot = await db.collection('ClubMembers').orderBy('joinDate', 'desc').get();
+            let customers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            if (searchTerm) {
+                customers = customers.filter(customer => {
+                    const name = (customer.name || '').toLowerCase();
+                    const email = (customer.email || '').toLowerCase();
+                    const phone = (customer.phone || '').toLowerCase();
+                    const address = (customer.address || '').toLowerCase();
+                    return name.includes(searchTerm) || 
+                           email.includes(searchTerm) || 
+                           phone.includes(searchTerm) || 
+                           address.includes(searchTerm);
+                });
+            }
+
+            if (customers.length === 0) {
+                customersList.innerHTML = searchTerm 
+                    ? '<p>לא נמצאו לקוחות התואמים לחיפוש.</p>' 
+                    : '<p>אין לקוחות במועדון.</p>';
+                return;
+            }
+
+            customersList.innerHTML = '';
+            
+            customers.forEach(customer => {
+                const joinDate = customer.joinDate ? new Date(customer.joinDate.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                const customerCard = document.createElement('div');
+                customerCard.classList.add('order-card');
+                customerCard.style.cursor = 'default';
+                
+                customerCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px;">
+                        <div style="flex: 1;">
+                            <strong style="font-size: 1.2em; color: #2c3e50;">👤 ${customer.name || 'ללא שם'}</strong>
+                            <p style="margin-top: 10px;"><strong>📧 אימייל:</strong> ${customer.email || 'לא ידוע'}</p>
+                            <p><strong>📞 טלפון:</strong> ${customer.phone || 'לא ידוע'}</p>
+                            <p><strong>📍 כתובת:</strong> ${customer.address || 'לא הוזנה'}</p>
+                            <p><strong>⭐ נקודות:</strong> <span style="color: #27ae60; font-weight: bold;">${customer.points || 0}</span> (שווי: ${(customer.points || 0).toFixed(2)}₪)</p>
+                            <p><strong>💰 סה"כ רכישות:</strong> ${(customer.totalSpent || 0).toFixed(2)}₪</p>
+                            <p><strong>🛒 מספר הזמנות:</strong> ${customer.orderCount || 0}</p>
+                            <p><strong>📅 תאריך הצטרפות:</strong> ${joinDate}</p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px; min-width: 150px;">
+                            <button class="btn btn-dark btn-edit-customer" data-customer-id="${customer.id}" onclick="event.stopPropagation()">✏️ ערוך פרטים</button>
+                            <button class="btn btn-primary btn-view-orders" data-customer-id="${customer.id}" data-customer-email="${customer.email}" onclick="event.stopPropagation()">📦 הזמנות</button>
+                            <button class="btn btn-secondary btn-view-leads" data-customer-id="${customer.id}" data-customer-email="${customer.email}" data-customer-phone="${customer.phone}" onclick="event.stopPropagation()">💬 פניות</button>
+                            <button class="btn btn-success btn-copy-reset-link" data-customer-email="${customer.email}" onclick="event.stopPropagation()" title="העתק קישור איפוס">🔗 קישור</button>
+                            <button class="btn btn-danger btn-delete-customer" data-customer-id="${customer.id}" onclick="event.stopPropagation()">🗑️ מחק</button>
+                        </div>
+                    </div>
+                `;
+                
+                customersList.appendChild(customerCard);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.btn-edit-customer').forEach(btn => {
+                btn.addEventListener('click', () => openEditCustomerModal(btn.dataset.customerId));
+            });
+
+            document.querySelectorAll('.btn-view-orders').forEach(btn => {
+                btn.addEventListener('click', () => viewCustomerOrders(btn.dataset.customerId, btn.dataset.customerEmail));
+            });
+
+            document.querySelectorAll('.btn-view-leads').forEach(btn => {
+                btn.addEventListener('click', () => viewCustomerLeads(btn.dataset.customerId, btn.dataset.customerEmail, btn.dataset.customerPhone));
+            });
+
+            document.querySelectorAll('.btn-copy-reset-link').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const resetLink = `${window.location.origin}/customer.html#${encodeURIComponent(btn.dataset.customerEmail)}`;
+                    navigator.clipboard.writeText(resetLink).then(() => {
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '✓ הועתק';
+                        btn.style.background = '#27ae60';
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.style.background = '';
+                        }, 2000);
+                    }).catch(err => {
+                        alert('שגיאה בהעתקת הקישור');
+                        console.error(err);
+                    });
+                });
+            });
+
+            document.querySelectorAll('.btn-delete-customer').forEach(btn => {
+                btn.addEventListener('click', () => deleteCustomer(btn.dataset.customerId));
+            });
+
+        } catch (error) {
+            customersList.innerHTML = '<p style="color: red;">שגיאה בטעינת לקוחות.</p>';
+            console.error(error);
+        }
+    }
+
+    async function openEditCustomerModal(customerId) {
+        try {
+            const customerDoc = await db.collection('ClubMembers').doc(customerId).get();
+            if (!customerDoc.exists) {
+                alert('לקוח לא נמצא');
+                return;
+            }
+
+            const customer = { id: customerDoc.id, ...customerDoc.data() };
+            currentEditingCustomer = customerId;
+
+            const formContainer = document.getElementById('edit-customer-form-container');
+            
+            // Parse address
+            let street = '', house = '', city = '', zip = '', country = 'ישראל';
+            if (customer.address) {
+                const addressParts = customer.address.split(',').map(p => p.trim());
+                if (addressParts.length >= 3) {
+                    const streetHouse = addressParts[0].trim();
+                    const houseMatch = streetHouse.match(/\s+(\d+[א-ת]?)$/);
+                    if (houseMatch) {
+                        house = houseMatch[1];
+                        street = streetHouse.replace(/\s+\d+[א-ת]?$/, '').trim();
+                    } else {
+                        street = streetHouse;
+                    }
+                    city = addressParts[1] || '';
+                    const countryZip = addressParts[2].trim().split(/\s+/);
+                    const lastPart = countryZip[countryZip.length - 1];
+                    if (lastPart && /^\d+$/.test(lastPart)) {
+                        zip = lastPart;
+                        country = countryZip.slice(0, -1).join(' ') || 'ישראל';
+                    } else {
+                        country = addressParts[2] || 'ישראל';
+                    }
+                }
+            }
+
+            formContainer.innerHTML = `
+                <form id="edit-customer-form">
+                    <div class="form-group">
+                        <label>שם מלא: *</label>
+                        <input type="text" id="edit-customer-name" value="${customer.name || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>אימייל: *</label>
+                        <input type="email" id="edit-customer-email" value="${customer.email || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>טלפון: *</label>
+                        <input type="tel" id="edit-customer-phone" value="${customer.phone || ''}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>סיסמה חדשה: (השאר ריק אם לא רוצה לשנות)</label>
+                        <input type="password" id="edit-customer-password" minlength="6" placeholder="לפחות 6 תווים">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>נקודות:</label>
+                        <input type="number" id="edit-customer-points" value="${customer.points || 0}" min="0" step="1">
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                        <h4 style="margin-bottom: 15px; color: #2c3e50;">כתובת</h4>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label>רחוב:</label>
+                                <input type="text" id="edit-customer-street" value="${street}">
+                            </div>
+                            <div class="form-group" style="flex: 0 0 100px; margin-bottom: 0;">
+                                <label>מספר:</label>
+                                <input type="text" id="edit-customer-house" value="${house}">
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                <label>עיר:</label>
+                                <input type="text" id="edit-customer-city" value="${city}">
+                            </div>
+                            <div class="form-group" style="flex: 0 0 100px; margin-bottom: 0;">
+                                <label>מיקוד:</label>
+                                <input type="text" id="edit-customer-zip" value="${zip}">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>מדינה:</label>
+                            <input type="text" id="edit-customer-country" value="${country}">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark">💾 שמור שינויים</button>
+                </form>
+            `;
+
+            document.getElementById('edit-customer-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveCustomerChanges(customerId);
+            });
+
+            editCustomerModal.classList.add('active');
+
+        } catch (error) {
+            console.error('Error opening edit customer modal:', error);
+            alert('שגיאה בטעינת פרטי לקוח');
+        }
+    }
+
+    async function saveCustomerChanges(customerId) {
+        try {
+            const name = document.getElementById('edit-customer-name').value.trim();
+            const email = document.getElementById('edit-customer-email').value.trim();
+            const phone = document.getElementById('edit-customer-phone').value.trim();
+            const password = document.getElementById('edit-customer-password').value;
+            const points = parseInt(document.getElementById('edit-customer-points').value) || 0;
+            
+            // Build address
+            const street = document.getElementById('edit-customer-street').value.trim();
+            const house = document.getElementById('edit-customer-house').value.trim();
+            const city = document.getElementById('edit-customer-city').value.trim();
+            const zip = document.getElementById('edit-customer-zip').value.trim();
+            const country = document.getElementById('edit-customer-country').value.trim();
+            
+            let address = '';
+            if (street || house || city) {
+                address = `${street} ${house}, ${city}, ${country} ${zip}`.trim();
+            }
+
+            const updateData = {
+                name: name,
+                email: email,
+                phone: phone,
+                points: points,
+                address: address
+            };
+
+            // Update password only if provided
+            if (password && password.length >= 6) {
+                updateData.password = password;
+            }
+
+            await db.collection('ClubMembers').doc(customerId).update(updateData);
+            
+            alert('פרטי לקוח עודכנו בהצלחה!');
+            editCustomerModal.classList.remove('active');
+            await fetchCustomers(currentCustomerSearchTerm);
+
+        } catch (error) {
+            console.error('Error saving customer:', error);
+            alert('שגיאה בשמירת פרטי לקוח');
+        }
+    }
+
+    // ========================================
+// תיקון בעיית Indexes - Firestore
+// ========================================
+
+// החלף את הפונקציה viewCustomerOrders בקוד שלך:
+
+async function viewCustomerOrders(customerId, customerEmail) {
+    const ordersList = document.getElementById('customer-orders-list');
+    ordersList.innerHTML = '<p>טוען הזמנות...</p>';
+    
+    try {
+        // ⚡ FIX: משיכת כל ההזמנות ללא orderBy (כדי להימנע מ-index)
+        const ordersSnapshot = await db.collection('orders')
+            .where('clubMemberId', '==', customerId)
+            .get();
+        
+        if (ordersSnapshot.empty) {
+            ordersList.innerHTML = '<p style="color: #666;">לקוח זה עדיין לא ביצע הזמנות.</p>';
+            customerOrdersModal.classList.add('active');
+            return;
+        }
+
+        // המרה למערך ומיון בצד הלקוח
+        const customerOrders = ordersSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .sort((a, b) => {
+                // מיון לפי תאריך (החדש ביותר ראשון)
+                const dateA = a.orderDate ? a.orderDate.toDate() : new Date(0);
+                const dateB = b.orderDate ? b.orderDate.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+
+        ordersList.innerHTML = '<h4 style="margin-bottom: 15px;">הזמנות:</h4>';
+        
+        customerOrders.forEach(order => {
+            const orderDate = order.orderDate ? new Date(order.orderDate.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+            const orderDiv = document.createElement('div');
+            orderDiv.className = 'list-item';
+            orderDiv.style.flexDirection = 'column';
+            orderDiv.style.alignItems = 'start';
+            
+            const itemsList = order.items ? order.items.map(item => 
+                `<li>${item.quantity}x ${item.productName || item.name} - ${item.price.toFixed(2)}₪</li>`
+            ).join('') : '<li>אין פריטים</li>';
+            
+            orderDiv.innerHTML = `
+                <div><strong>הזמנה #${order.id.substring(0, 8)}...</strong></div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">📅 ${orderDate}</div>
+                <ul style="margin: 10px 0; padding-right: 20px;">${itemsList}</ul>
+                <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px solid #ddd;">
+                    <span><strong>סה"כ:</strong> ${(order.totalAmount || 0).toFixed(2)}₪</span>
+                    <span style="color: ${order.completed ? '#27ae60' : '#e74c3c'}; font-weight: bold;">
+                        ${order.completed ? '✓ הושלם' : '⏳ בטיפול'}
+                    </span>
+                </div>
+            `;
+            
+            ordersList.appendChild(orderDiv);
+        });
+        
+        customerOrdersModal.classList.add('active');
+        
+    } catch (error) {
+        console.error('Error loading customer orders:', error);
+        ordersList.innerHTML = `<p style="color: red;">שגיאה בטעינת הזמנות: ${error.message}</p>`;
+        customerOrdersModal.classList.add('active');
+    }
+}
+
+// ========================================
+
+// החלף את הפונקציה viewCustomerLeads בקוד שלך:
+
+async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
+    const leadsList = document.getElementById('customer-leads-list');
+    leadsList.innerHTML = '<p>טוען פניות...</p>';
+    
+    try {
+        // ⚡ FIX: משיכת הפניות ללא orderBy (כדי להימנע מ-index)
+        const leadsSnapshot = await db.collection('ContactLeads')
+            .where('email', '==', customerEmail)
+            .get();
+
+        if (leadsSnapshot.empty) {
+            leadsList.innerHTML = '<p style="color: #666;">לא נמצאו פניות מלקוח זה.</p>';
+            customerLeadsModal.classList.add('active');
+            return;
+        }
+
+        // המרה למערך ומיון בצד הלקוח
+        const customerLeads = leadsSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .sort((a, b) => {
+                // מיון לפי תאריך (החדש ביותר ראשון)
+                const dateA = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                const dateB = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+
+        leadsList.innerHTML = '<h4 style="margin-bottom: 15px;">פניות:</h4>';
+        
+        customerLeads.forEach(lead => {
+            const leadDate = lead.createdAt ? new Date(lead.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+            const leadDiv = document.createElement('div');
+            leadDiv.className = 'list-item';
+            leadDiv.style.flexDirection = 'column';
+            leadDiv.style.alignItems = 'start';
+            
+            leadDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; width: 100%;">
+                    <strong>${lead.name || 'ללא שם'}</strong>
+                    <span style="color: ${lead.status === 'closed' ? '#27ae60' : '#666'}; font-size: 0.9em;">
+                        ${lead.status === 'closed' ? '✓ סגור' : '⏳ פתוח'}
+                    </span>
+                </div>
+                <div style="font-size: 0.9em; color: #666; margin-top: 5px;">📅 ${leadDate}</div>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-top: 10px; width: 100%;">
+                    ${lead.message || 'אין הודעה'}
+                </div>
+            `;
+            
+            leadsList.appendChild(leadDiv);
+        });
+        
+        customerLeadsModal.classList.add('active');
+        
+    } catch (error) {
+        console.error('Error loading customer leads:', error);
+        leadsList.innerHTML = `<p style="color: red;">שגיאה בטעינת פניות: ${error.message}</p>`;
+        customerLeadsModal.classList.add('active');
+    }
+}
+
+    async function deleteCustomer(customerId) {
+        if (!confirm('⚠️ האם אתה בטוח שברצונך למחוק לקוח זה?\n\nפעולה זו תמחק:\n• את פרטי הלקוח\n• את כל נקודות המועדון שלו\n\nההזמנות והפניות שלו יישארו במערכת.')) {
+            return;
+        }
+
+        try {
+            await db.collection('ClubMembers').doc(customerId).delete();
+            alert('✓ לקוח נמחק בהצלחה!');
+            await fetchCustomers(currentCustomerSearchTerm);
+        } catch (error) {
+            console.error('Error deleting customer:', error);
+            alert('שגיאה במחיקת לקוח');
+        }
+    }
+
     </script>
 </body>
 </html>
