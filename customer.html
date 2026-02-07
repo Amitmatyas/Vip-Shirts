@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>עדכון פרטים - VIP Shirts</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Heebo', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 100px;
+            height: auto;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input:disabled {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .address-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .address-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .address-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .address-row .form-group {
+            flex: 1;
+        }
+
+        .address-row .form-group.small {
+            flex: 0 0 100px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .address-row {
+                flex-direction: column;
+            }
+
+            .address-row .form-group.small {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
+        </div>
+
+        <h1>עדכון פרטי חשבון</h1>
+        <p class="subtitle">עדכן את הפרטים שלך במועדון VIP</p>
+
+        <div id="loading-state" class="loading">
+            <div class="loading-spinner"></div>
+            <p>טוען פרטים...</p>
+        </div>
+
+        <div id="message" class="message"></div>
+
+        <form id="customer-form" style="display: none;">
+            <div class="form-group">
+                <label>שם מלא *</label>
+                <input type="text" id="customer-name" required>
+            </div>
+
+            <div class="form-group">
+                <label>אימייל *</label>
+                <input type="email" id="customer-email" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>טלפון *</label>
+                <input type="tel" id="customer-phone" required>
+            </div>
+
+            <div class="form-group">
+                <label>סיסמה חדשה (השאר ריק אם לא רוצה לשנות)</label>
+                <input type="password" id="customer-password" minlength="6">
+            </div>
+
+            <div class="address-section">
+                <h3>כתובת (אופציונלי)</h3>
+                
+                <div class="address-row">
+                    <div class="form-group">
+                        <label>רחוב</label>
+                        <input type="text" id="customer-street">
+                    </div>
+                    <div class="form-group small">
+                        <label>מספר</label>
+                        <input type="text" id="customer-house">
+                    </div>
+                </div>
+
+                <div class="address-row">
+                    <div class="form-group">
+                        <label>עיר</label>
+                        <input type="text" id="customer-city">
+                    </div>
+                    <div class="form-group small">
+                        <label>מיקוד</label>
+                        <input type="text" id="customer-zip">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>מדינה</label>
+                    <input type="text" id="customer-country" value="ישראל">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submit-btn">עדכן פרטים</button>
+        </form>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+            authDomain: "timetable-titus.firebaseapp.com",
+            projectId: "timetable-titus",
+            storageBucket: "timetable-titus.firebasestorage.app",
+            messagingSenderId: "199146911555",
+            appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
+            measurementId: "G-JQ02VEC325"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let currentMember = null;
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        async function loadCustomerData() {
+            const hash = window.location.hash.substring(1);
+            const email = decodeURIComponent(hash);
+
+            if (!email) {
+                showMessage('לא נמצא אימייל בכתובת', 'error');
+                document.getElementById('loading-state').style.display = 'none';
+                return;
+            }
+
+            try {
+                const membersSnapshot = await db.collection('ClubMembers')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+
+                if (membersSnapshot.empty) {
+                    showMessage('לקוח לא נמצא במערכת', 'error');
+                    document.getElementById('loading-state').style.display = 'none';
+                    return;
+                }
+
+                const memberDoc = membersSnapshot.docs[0];
+                currentMember = { id: memberDoc.id, ...memberDoc.data() };
+
+                // Fill form
+                document.getElementById('customer-name').value = currentMember.name || '';
+                document.getElementById('customer-email').value = currentMember.email || '';
+                document.getElementById('customer-phone').value = currentMember.phone || '';
+
+                // Parse address
+                if (currentMember.address) {
+                    const addressParts = currentMember.address.split(',').map(p => p.trim());
+                    
+                    if (addressParts.length >= 3) {
+                        const streetHouse = addressParts[0].trim();
+                        const houseMatch = streetHouse.match(/\s+(\d+[א-ת]?)$/);
+                        
+                        if (houseMatch) {
+                            document.getElementById('customer-house').value = houseMatch[1];
+                            document.getElementById('customer-street').value = streetHouse.replace(/\s+\d+[א-ת]?$/, '').trim();
+                        } else {
+                            document.getElementById('customer-street').value = streetHouse;
+                        }
+                        
+                        document.getElementById('customer-city').value = addressParts[1] || '';
+                        
+                        const countryZip = addressParts[2].trim().split(/\s+/);
+                        const lastPart = countryZip[countryZip.length - 1];
+                        
+                        if (lastPart && /^\d+$/.test(lastPart)) {
+                            document.getElementById('customer-zip').value = lastPart;
+                            document.getElementById('customer-country').value = countryZip.slice(0, -1).join(' ') || 'ישראל';
+                        } else {
+                            document.getElementById('customer-country').value = addressParts[2] || 'ישראל';
+                        }
+                    }
+                }
+
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('customer-form').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading customer:', error);
+                showMessage('שגיאה בטעינת נתונים', 'error');
+                document.getElementById('loading-state').style.display = 'none';
+            }
+        }
+
+        document.getElementById('customer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentMember) return;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'שומר...';
+
+            try {
+                const name = document.getElementById('customer-name').value.trim();
+                const phone = document.getElementById('customer-phone').value.trim();
+                const password = document.getElementById('customer-password').value;
+
+                // Build address
+                const street = document.getElementById('customer-street').value.trim();
+                const house = document.getElementById('customer-house').value.trim();
+                const city = document.getElementById('customer-city').value.trim();
+                const zip = document.getElementById('customer-zip').value.trim();
+                const country = document.getElementById('customer-country').value.trim();
+                
+                let address = '';
+                if (street || house || city) {
+                    address = `${street} ${house}, ${city}, ${country} ${zip}`.trim();
+                }
+
+                const updateData = {
+                    name: name,
+                    phone: phone,
+                    address: address
+                };
+
+                // Update password only if provided
+                if (password && password.length >= 6) {
+                    updateData.password = password;
+                }
+
+                await db.collection('ClubMembers').doc(currentMember.id).update(updateData);
+
+                showMessage('הפרטים עודכנו בהצלחה!', 'success');
+                
+                // Clear password field
+                document.getElementById('customer-password').value = '';
+
+            } catch (error) {
+                console.error('Error updating customer:', error);
+                showMessage('שגיאה בעדכון פרטים', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'עדכן פרטים';
+            }
+        });
+
+        // Load data on page load
+        window.addEventListener('load', loadCustomerData);
+        window.addEventListener('hashchange', loadCustomerData);
+    </script>
+</body>
+</html>
