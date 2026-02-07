@@ -2051,52 +2051,70 @@ function updateClubModal() {
 }
 
 
-        async function loadMemberOrders() {
-            const ordersList = document.getElementById('member-orders-list');
-            if (!currentClubMember) return;
-            
-            try {
-                ordersList.innerHTML = '<p style="text-align: center; color: #999;">טוען הזמנות...</p>';
-                
-                const ordersSnapshot = await db.collection('orders')
-                    .where('clubMemberId', '==', currentClubMember.id)
-                    .orderBy('orderDate', 'desc')
-                    .limit(20)
-                    .get();
-                
-                if (ordersSnapshot.empty) {
-                    ordersList.innerHTML = '<p style="text-align: center; color: #999;">אין הזמנות עדיין</p>';
-                    return;
-                }
-                
-                ordersList.innerHTML = '';
-                ordersSnapshot.forEach(doc => {
-                    const order = doc.data();
-                    const orderDate = order.orderDate ? new Date(order.orderDate.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
-                    const statusClass = order.completed ? 'completed' : 'pending';
-                    const statusText = order.completed ? 'הושלם' : 'בטיפול';
-                    
-                    const itemsText = order.items.map(item => 
-                        `${item.quantity}x ${item.productName || item.name}`
-                    ).join(', ');
-                    
-                    const orderHTML = `
-                        <div class="club-order-item">
-                            <div class="club-order-header">
-                                <span class="club-order-date">📅 ${orderDate}</span>
-                                <span class="club-order-total">₪${order.totalAmount.toFixed(2)}</span>
-                            </div>
-                            <div class="club-order-items">${itemsText}</div>
-                            <span class="club-order-status ${statusClass}">${statusText}</span>
-                        </div>
-                    `;
-                    ordersList.innerHTML += orderHTML;
-                });
-            } catch (error) {
-                console.error('Error loading orders:', error);
-                ordersList.innerHTML = '<p style="text-align: center; color: #dc3545;">שגיאה בטעינת הזמנות</p>';
-            }
+async function loadMemberOrders() {
+    const ordersList = document.getElementById('member-orders-list');
+    if (!currentClubMember) return;
+    
+    try {
+        ordersList.innerHTML = '<p style="text-align: center; color: #999;">טוען הזמנות...</p>';
+        
+        // שליפת הנתונים ללא orderBy כדי למנוע שגיאת אינדקס
+        const ordersSnapshot = await db.collection('orders')
+            .where('clubMemberId', '==', currentClubMember.id)
+            .get();
+        
+        if (ordersSnapshot.empty) {
+            ordersList.innerHTML = '<p style="text-align: center; color: #999;">אין הזמנות עדיין</p>';
+            return;
         }
+
+        // המרה למערך ומיון ידני (החדש ביותר למעלה)
+        const sortedOrders = ordersSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .sort((a, b) => {
+                const dateA = a.orderDate ? a.orderDate.toDate() : new Date(0);
+                const dateB = b.orderDate ? b.orderDate.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+        
+        ordersList.innerHTML = '';
+        
+        sortedOrders.forEach(order => {
+            // טיפול בטוח בתאריך
+            const orderDate = order.orderDate ? new Date(order.orderDate.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+            
+            // הגנה על הסטטוס
+            const statusClass = order.completed ? 'completed' : 'pending';
+            const statusText = order.completed ? 'הושלם' : 'בטיפול';
+            
+            // תיקון קריטי: הגנה על totalAmount למקרה שהוא undefined או null
+            const amount = (order.totalAmount && typeof order.totalAmount === 'number') 
+                ? order.totalAmount.toFixed(2) 
+                : '0.00';
+            
+            // הגנה על items: וודא שזה מערך לפני map
+            const itemsText = (Array.isArray(order.items)) 
+                ? order.items.map(item => `${item.quantity}x ${item.productName || item.name || 'מוצר'}`).join(', ')
+                : 'אין פירוט פריטים';
+            
+            const orderHTML = `
+                <div class="club-order-item">
+                    <div class="club-order-header">
+                        <span class="club-order-date">📅 ${orderDate}</span>
+                        <span class="club-order-total">₪${amount}</span>
+                    </div>
+                    <div class="club-order-items">${itemsText}</div>
+                    <span class="club-order-status ${statusClass}">${statusText}</span>
+                </div>
+            `;
+            ordersList.insertAdjacentHTML('beforeend', orderHTML);
+        });
+
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        ordersList.innerHTML = `<p style="text-align: center; color: #dc3545;">שגיאה בטעינת הזמנות: ${error.message}</p>`;
+    }
+}
 
 function updateCheckoutForm() {
     const joinClubSection = document.getElementById('join-club-section');
