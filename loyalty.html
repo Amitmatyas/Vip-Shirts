@@ -25,18 +25,20 @@
             margin-right: min(450px, 90vw);
         }
 
-        #announcement-bar {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 1.05em;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
-            min-height: 20px;
-        }
+#announcement-bar {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 12px 20px;
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.05em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky; /* ← אם תרצה שזה יישאר למעלה בגלילה */
+    top: 0;
+    z-index: 999; /* ← מתחת לכפתורים */
+    overflow: hidden;
+    min-height: 20px;
+}
 
         .announcement-text {
             animation: fadeInOut 0.5s ease-in-out;
@@ -322,16 +324,40 @@
             transform: translateX(0);
         }
 
-        /* Cart Header */
-        .cart-header {
-            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-            color: white;
-            padding: 20px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+.cart-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative; /* ← הוסף */
+}
+
+/* ← **כפתור X חדש בכותרת העגלה** ← */
+.cart-close-btn {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.cart-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
 
         .cart-header h2 {
             margin: 0;
@@ -842,26 +868,35 @@
             font-family: Arial, sans-serif;
         }
 
-        /* ===== CLUB SYSTEM STYLES ===== */
-        #club-toggle-button {
-            position: fixed;
-            top: 80px;
-            left: 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 50px;
-            font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
-            z-index: 1001;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+#club-toggle-button {
+    position: fixed;
+    top: 80px; /* ← שנה ל-70px כדי שיהיה מתחת ל-announcement */
+    left: 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+    z-index: 1001;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ← **תיקון למובייל** ← */
+@media (max-width: 768px) {
+    #club-toggle-button {
+        top: 70px; /* ← מתחת ל-cart button */
+        left: 15px;
+        padding: 10px 16px;
+        font-size: 0.9em;
+    }
+}
 
         #club-toggle-button:hover {
             background: #218838;
@@ -1243,12 +1278,26 @@
             #cart-container {
                 width: 100vw;
             }
-
-            body.cart-open #cart-toggle-button {
-                left: calc(15px + 100vw);
-            }
-        }
+}
         
+/* במקום שהכפתור יזוז שמאלה, אנחנו פשוט מעלימים אותו כשהעגלה פתוחה */
+        body.cart-open #cart-toggle-button {
+            display: none !important;
+        }
+
+        /* עדכון כפתור המועדון שיהיה מתחת לבר ההודעות ויזוז עם העגלה */
+        #club-toggle-button {
+            position: fixed;
+            top: calc(var(--announcement-height, 0px) + 20px);
+            left: 20px;
+            z-index: 1001;
+            transition: all 0.35s ease;
+        }
+
+        body.cart-open #club-toggle-button {
+            left: calc(min(450px, 90vw) + 20px);
+        }
+
         @keyframes logoPulse {
             0% { filter: drop-shadow(0 0 2px rgba(0,210,255,0.2)); }
             50% { filter: drop-shadow(0 0 10px rgba(0,210,255,0.5)); }
@@ -1373,7 +1422,7 @@
             margin-bottom: 15px;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+       <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.paypal.com/sdk/js?client-id=AcvNAO7_IAc9jQw98w56c_oLCYgNofTqSzLQiFSy1JcC77TRkbQdoxIjlgixjyo5NYKPFdkqV9ZXNn4I&currency=ILS"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -1496,57 +1545,60 @@
                     </div>
 
                     <!-- Profile Tab -->
-<!-- Profile Tab -->
-<div id="profile-tab" class="club-tab-content">
-    <form id="club-profile-form">
-        <div class="club-form-group">
-            <label>שם מלא:</label>
-            <input type="text" id="profile-name" required>
-        </div>
-        <div class="club-form-group">
-            <label>אימייל:</label>
-            <input type="email" id="profile-email" required>
-        </div>
-        <div class="club-form-group">
-            <label>טלפון:</label>
-            <input type="tel" id="profile-phone" required>
-        </div>
-        
-        <!-- כתובת מפורטת -->
-        <div style="font-weight: 700; color: #28a745; margin: 15px 0 10px 0; font-size: 1.1em;">כתובת (אופציונלי)</div>
-        
-        <div style="display: flex; gap: 10px;">
-            <div class="club-form-group" style="flex: 1;">
-                <label>שם רחוב:</label>
-                <input type="text" id="profile-address-street">
+                    <div id="profile-tab" class="club-tab-content">
+                        <form id="club-profile-form">
+                            <div class="club-form-group">
+                                <label>שם מלא:</label>
+                                <input type="text" id="profile-name" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>אימייל:</label>
+                                <input type="email" id="profile-email" required>
+                            </div>
+                            <div class="club-form-group">
+                                <label>טלפון:</label>
+                                <input type="tel" id="profile-phone" required>
+                            </div>
+                            
+                            <!-- כתובת מפורטת -->
+                            <div style="font-weight: 700; color: #28a745; margin: 15px 0 10px 0; font-size: 1.1em;">כתובת (אופציונלי)</div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <div class="club-form-group" style="flex: 1;">
+                                    <label>שם רחוב:</label>
+                                    <input type="text" id="profile-address-street">
+                                </div>
+                                <div class="club-form-group" style="flex: 0 0 90px;">
+                                    <label>מס' בית:</label>
+                                    <input type="text" id="profile-address-house">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <div class="club-form-group" style="flex: 1;">
+                                    <label>עיר:</label>
+                                    <input type="text" id="profile-address-city">
+                                </div>
+                                <div class="club-form-group" style="flex: 0 0 90px;">
+                                    <label>מיקוד:</label>
+                                    <input type="text" id="profile-address-zip">
+                                </div>
+                            </div>
+                            
+                            <div class="club-form-group">
+                                <label>מדינה:</label>
+                                <input type="text" id="profile-address-country" value="ישראל">
+                            </div>
+                            
+                            <button type="submit" class="club-submit-btn">עדכן פרטים</button>
+                        </form>
+                        <button class="club-logout-btn" id="club-logout-btn">התנתק</button>
+                    </div>
+                </div>
             </div>
-            <div class="club-form-group" style="flex: 0 0 90px;">
-                <label>מס' בית:</label>
-                <input type="text" id="profile-address-house">
-            </div>
         </div>
-        
-        <div style="display: flex; gap: 10px;">
-            <div class="club-form-group" style="flex: 1;">
-                <label>עיר:</label>
-                <input type="text" id="profile-address-city">
-            </div>
-            <div class="club-form-group" style="flex: 0 0 90px;">
-                <label>מיקוד:</label>
-                <input type="text" id="profile-address-zip">
-            </div>
-        </div>
-        
-        <div class="club-form-group">
-            <label>מדינה:</label>
-            <input type="text" id="profile-address-country" value="ישראל">
-        </div>
-        
-        <button type="submit" class="club-submit-btn">עדכן פרטים</button>
-    </form>
-    <button class="club-logout-btn" id="club-logout-btn">התנתק</button>
-</div>
-    
+    </div>
+
     <div id="filters">
         <input type="text" id="search-input" placeholder="חפש מוצר..." />
         <select id="sort-select">
@@ -1562,141 +1614,136 @@
 
     <main id="products-container"></main>
 
-    <!-- ===== ENHANCED CART SLIDE PANEL WITH INTEGRATED CHECKOUT ===== -->
-    <div id="cart-container">
-        <div class="cart-header">
-            <h2>
-                <span>🛒</span>
-                <span>עגלת הקניות שלי</span>
-            </h2>
-        </div>
-
-        <div class="cart-content">
-            <!-- Cart Items Section -->
-            <div class="cart-section">
-                <div class="cart-section-title">מוצרים בעגלה</div>
-                <ul id="cart-items"></ul>
-            </div>
-
-            <!-- Shipping Info -->
-            <div class="shipping-info" id="shipping-info"></div>
-
-            <!-- Coupon Section -->
-            <div class="cart-section">
-                <div class="cart-section-title">קוד הנחה</div>
-                <div class="coupon-section">
-                    <input type="text" id="coupon-input" placeholder="הזן קוד קופון">
-                    <button id="apply-coupon-btn">החל קופון</button>
-                    <div id="coupon-message"></div>
-                </div>
-            </div>
-
-<div class="cart-section" id="points-usage-container" style="display: none;">
-    <div class="cart-section-title">שימוש בנקודות מועדון</div>
-    <div class="points-usage-section">
-        <h4>יתרה: <span id="cart-available-points">0</span> נקודות (<span id="cart-points-value">0.00</span>₪)</h4>
-        <p style="font-size: 0.85em; color: #666; margin: 5px 0;">מינימום שימוש: 10 נקודות</p>
-        <div class="points-slider-container">
-            <input type="range" min="10" max="0" value="10" class="points-slider" id="points-slider">
-            <div class="points-info">
-                <span>נקודות לשימוש: <strong id="points-to-use">0</strong></span>
-                <span>הנחה: <strong id="points-discount">0.00</strong>₪</span>
-            </div>
-        </div>
+<div id="cart-container" class="cart-slide-panel">
+    <div class="cart-header">
+        <button class="cart-close-btn" id="cart-close-btn" type="button" onclick="closeCart()">&times;</button>
+        <h2>
+            <span>🛒</span>
+            <span>עגלת הקניות שלי</span>
+        </h2>
+        <button class="cart-close-btn" onclick="closeCart()">✕</button>
     </div>
-            
-            <!-- Cart Totals -->
-            <div class="cart-totals">
-                <div class="total-row">
-                    <span>סה"כ מוצרים:</span>
-                    <span><span id="cart-subtotal">0.00</span> ₪</span>
-                </div>
-                <div class="total-row">
-                    <span>דמי משלוח:</span>
-                    <span><span id="shipping-cost">0.00</span> ₪</span>
-                </div>
-                <div class="total-row grand-total">
-                    <span>סה"כ לתשלום:</span>
-                    <span><span id="cart-total">0.00</span> ₪</span>
-                </div>
-            </div>
 
-            <!-- ===== INTEGRATED CHECKOUT SECTION ===== -->
-            <div class="checkout-section" id="checkout-section">
-                <div class="checkout-section-title">
-                    <span>💳</span>
-                    <span>השלמת פרטים ותשלום</span>
-                </div>
+    <div class="cart-content">
+        <div class="cart-section">
+            <div class="cart-section-title">מוצרים בעגלה</div>
+            <ul id="cart-items"></ul>
+        </div>
 
-                <form id="checkout-form">
-                    <div class="form-group">
-                        <label for="name">שם מלא *</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">אימייל *</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">טלפון *</label>
-                        <input type="tel" id="phone" name="phone" required>
-                    </div>
+        <div class="shipping-info" id="shipping-info"></div>
 
-                    <div class="cart-section-title" style="margin-top: 20px;">כתובת למשלוח</div>
-
-                    <div class="address-row">
-                        <div class="form-group">
-                            <label for="address-street">שם רחוב *</label>
-                            <input type="text" id="address-street" name="address-street" required>
-                        </div>
-                        <div class="form-group small">
-                            <label for="address-house">מס' בית *</label>
-                            <input type="text" id="address-house" name="address-house" required>
-                        </div>
-                    </div>
-
-                    <div class="address-row">
-                        <div class="form-group">
-                            <label for="address-city">עיר *</label>
-                            <input type="text" id="address-city" name="address-city" required>
-                        </div>
-                        <div class="form-group small">
-                            <label for="address-zip">מיקוד *</label>
-                            <input type="text" id="address-zip" name="address-zip" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address-country">מדינה *</label>
-                        <input type="text" id="address-country" name="address-country" required value="ישראל">
-                    </div>
-
-                    <!-- Join Club Checkbox (only for non-members) -->
-                    <div id="join-club-section" style="display: none;">
-                        <div class="join-club-checkbox">
-                            <label>
-                                <input type="checkbox" id="join-club-checkbox">
-                                <span>⭐ הצטרף למועדון VIP וקבל 2% נקודות מההזמנה!</span>
-                            </label>
-                        </div>
-                        <div id="club-registration-fields" style="display: none;">
-                            <div class="form-group">
-                                <label for="club-password">סיסמה למועדון (לפחות 6 תווים) *</label>
-                                <input type="password" id="club-password" minlength="6">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="terms-agreement">
-                        ⏱️ זמן משלוח מוערך: 3 שבועות<br>
-                        📋 בביצוע התשלום אני מאשר/ת את <a href="terms.html" target="_blank" style="color: #dc3545; font-weight: bold;">התקנון</a>
-                    </div>
-
-                    <div id="paypal-button-container"></div>
-                </form>
+        <div class="cart-section">
+            <div class="cart-section-title">קוד הנחה</div>
+            <div class="coupon-section">
+                <input type="text" id="coupon-input" placeholder="הזן קוד קופון">
+                <button id="apply-coupon-btn">החל קופון</button>
+                <div id="coupon-message"></div>
             </div>
         </div>
-    </div>
+
+        <div class="cart-section" id="points-usage-container" style="display: none;">
+            <div class="cart-section-title">שימוש בנקודות מועדון</div>
+            <div class="points-usage-section">
+                <h4>יתרה: <span id="cart-available-points">0</span> נקודות (<span id="cart-points-value">0.00</span>₪)</h4>
+                <p style="font-size: 0.85em; color: #666; margin: 5px 0;">מינימום שימוש: 10 נקודות</p>
+                <div class="points-slider-container">
+                    <input type="range" min="10" max="0" value="10" class="points-slider" id="points-slider">
+                    <div class="points-info">
+                        <span>נקודות לשימוש: <strong id="points-to-use">0</strong></span>
+                        <span>הנחה: <strong id="points-discount">0.00</strong>₪</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cart-totals">
+            <div class="total-row">
+                <span>סה"כ מוצרים:</span>
+                <span><span id="cart-subtotal">0.00</span> ₪</span>
+            </div>
+            <div class="total-row">
+                <span>דמי משלוח:</span>
+                <span><span id="shipping-cost">0.00</span> ₪</span>
+            </div>
+            <div class="total-row grand-total">
+                <span>סה"כ לתשלום:</span>
+                <span><span id="cart-total">0.00</span> ₪</span>
+            </div>
+        </div>
+
+        <div class="checkout-section" id="checkout-section">
+            <div class="checkout-section-title">
+                <span>💳</span>
+                <span>השלמת פרטים ותשלום</span>
+            </div>
+
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label for="name">שם מלא *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">אימייל *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">טלפון *</label>
+                    <input type="tel" id="phone" name="phone" required>
+                </div>
+
+                <div class="cart-section-title" style="margin-top: 20px;">כתובת למשלוח</div>
+
+                <div class="address-row">
+                    <div class="form-group">
+                        <label for="address-street">שם רחוב *</label>
+                        <input type="text" id="address-street" name="address-street" required>
+                    </div>
+                    <div class="form-group small">
+                        <label for="address-house">מס' בית *</label>
+                        <input type="text" id="address-house" name="address-house" required>
+                    </div>
+                </div>
+
+                <div class="address-row">
+                    <div class="form-group">
+                        <label for="address-city">עיר *</label>
+                        <input type="text" id="address-city" name="address-city" required>
+                    </div>
+                    <div class="form-group small">
+                        <label for="address-zip">מיקוד *</label>
+                        <input type="text" id="address-zip" name="address-zip" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address-country">מדינה *</label>
+                    <input type="text" id="address-country" name="address-country" required value="ישראל">
+                </div>
+
+                <div id="join-club-section" style="display: none;">
+                    <div class="join-club-checkbox">
+                        <label>
+                            <input type="checkbox" id="join-club-checkbox">
+                            <span>הצטרף למועדון VIP וקבל 2% נקודות מההזמנה!</span>
+                        </label>
+                    </div>
+                    <div id="club-registration-fields" style="display: none;">
+                        <div class="form-group">
+                            <label for="club-password">סיסמה למועדון (לפחות 6 תווים) *</label>
+                            <input type="password" id="club-password" minlength="6">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="terms-agreement">
+                    ⏱️ זמן משלוח מוערך: 3 שבועות<br>
+                    📋 בביצוע התשלום אני מאשר/ת את <a href="terms.html" target="_blank" style="color: #dc3545; font-weight: bold;">התקנון</a>
+                </div>
+
+                <div id="paypal-button-container"></div>
+            </form>
+        </div>
+    </div> </div> ```
 
     <!-- ===== PRODUCT MODAL ===== -->
     <div id="product-modal">
@@ -1833,56 +1880,55 @@
         }
 
         // ===== ENHANCED CART TOGGLE WITH BUTTON STATE CHANGE =====
-        function updateCartButton() {
-            const cartIcon = cartToggleButton.querySelector('.cart-icon');
-            const cartText = cartToggleButton.querySelector('.cart-text');
-            const closeIcon = '<span class="close-icon">✕</span>';
-            
-            if (cartOpen) {
-                cartToggleButton.classList.add('cart-open-state');
-                cartToggleButton.innerHTML = closeIcon;
-            } else {
-                cartToggleButton.classList.remove('cart-open-state');
-                const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-                
-                if (itemCount > 0) {
-                    cartToggleButton.innerHTML = `
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-count">${itemCount}</span>
-                    `;
-                } else {
-                    cartToggleButton.innerHTML = `
-                        <span class="cart-icon">🛒</span>
-                        <span class="cart-text">עגלת קניות</span>
-                    `;
-                }
-            }
-        }
+  function updateCartButton() {
+    const btn = document.getElementById('cart-toggle-button');
+    if (!btn) return;
 
-        function openCart() {
-            if (cartOpen) return;
-            cartOpen = true;
-            cartContainer.classList.add('open');
-            document.body.classList.add('cart-open');
-            updateCartButton();
-            renderPayPalButton(); // Render PayPal when cart opens
+    if (cartOpen) {
+        btn.classList.add('cart-open-state');
+        btn.innerHTML = '<span class="close-icon">✕</span>';
+    } else {
+        btn.classList.remove('cart-open-state');
+        const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        
+        if (itemCount > 0) {
+            btn.innerHTML = `<span class="cart-icon">🛒</span><span class="cart-count">${itemCount}</span>`;
+        } else {
+            btn.innerHTML = `<span class="cart-icon">🛒</span><span class="cart-text">עגלת קניות</span>`;
         }
+    }
+}
 
-        function closeCart() {
-            if (!cartOpen) return;
-            cartOpen = false;
-            cartContainer.classList.remove('open');
-            document.body.classList.remove('cart-open');
-            updateCartButton();
-        }
+function openCart() {
+    const container = document.getElementById('cart-container');
+    if (!container) return; // מונע את השגיאה שקיבלת מקודם
 
-        function toggleCart() {
-            if (cartOpen) closeCart(); 
-            else openCart();
-        }
+    cartOpen = true;
+    container.classList.add('open');
+    document.body.classList.add('cart-open');
+    updateCartButton();
+    
+    if (typeof renderPayPalButton === 'function') renderPayPalButton();
+}
+
+function closeCart() {
+    const container = document.getElementById('cart-container');
+    if (!container) return;
+
+    cartOpen = false;
+    container.classList.remove('open');
+    document.body.classList.remove('cart-open');
+    updateCartButton();
+}
+
+function toggleCart() {
+    if (cartOpen) closeCart();
+    else openCart();
+}
 
         cartToggleButton.addEventListener('click', toggleCart);
-        
+        document.getElementById('cart-close-btn').addEventListener('click', closeCart);
+
         async function loadClubMember() {
             const memberData = localStorage.getItem('vipshirts_club_member');
             if (memberData) {
@@ -1917,7 +1963,7 @@
             const clubButton = document.getElementById('club-toggle-button');
             if (currentClubMember) {
                 clubButton.innerHTML = `
-                    <span class="club-icon">⭐</span>
+                    <span class="club-icon">👤</span>
                     <span class="club-text">${currentClubMember.name.split(' ')[0]}</span>
                 `;
             } else {
@@ -1947,22 +1993,41 @@ function updateClubModal() {
         document.getElementById('profile-email').value = currentClubMember.email || '';
         document.getElementById('profile-phone').value = currentClubMember.phone || '';
         
-        // Parse and fill address fields
+        // ← **Parse and fill address fields - IMPROVED VERSION** ←
         if (currentClubMember.address) {
             const addressParts = currentClubMember.address.split(',').map(p => p.trim());
+            
             if (addressParts.length >= 3) {
-                // Street and house number
-                const streetHouse = addressParts[0].split(' ');
-                document.getElementById('profile-address-house').value = streetHouse.pop() || '';
-                document.getElementById('profile-address-street').value = streetHouse.join(' ') || '';
+                // חלק 1: רחוב ומספר בית
+                const streetHouse = addressParts[0].trim();
+                // תפוס מספרים (עם אותיות אופציונליות כמו 12א) בסוף המחרוזת
+                const houseMatch = streetHouse.match(/\s+(\d+[א-ת]?)$/);
                 
-                // City
+                if (houseMatch) {
+                    document.getElementById('profile-address-house').value = houseMatch[1];
+                    document.getElementById('profile-address-street').value = streetHouse.replace(/\s+\d+[א-ת]?$/, '').trim();
+                } else {
+                    // אין מספר בית - כל הטקסט הוא רחוב
+                    document.getElementById('profile-address-street').value = streetHouse;
+                    document.getElementById('profile-address-house').value = '';
+                }
+                
+                // חלק 2: עיר
                 document.getElementById('profile-address-city').value = addressParts[1] || '';
                 
-                // Country and zip
-                const countryZip = addressParts[2].split(' ');
-                document.getElementById('profile-address-zip').value = countryZip.pop() || '';
-                document.getElementById('profile-address-country').value = countryZip.join(' ') || 'ישראל';
+                // חלק 3: מדינה ומיקוד
+                const countryZip = addressParts[2].trim().split(/\s+/);
+                const lastPart = countryZip[countryZip.length - 1];
+                
+                // בדיקה אם החלק האחרון הוא מיקוד (רק ספרות)
+                if (lastPart && /^\d+$/.test(lastPart)) {
+                    document.getElementById('profile-address-zip').value = lastPart;
+                    document.getElementById('profile-address-country').value = countryZip.slice(0, -1).join(' ') || 'ישראל';
+                } else {
+                    // אין מיקוד - כל הטקסט הוא מדינה
+                    document.getElementById('profile-address-zip').value = '';
+                    document.getElementById('profile-address-country').value = addressParts[2] || 'ישראל';
+                }
             }
         } else {
             // Clear all address fields
@@ -1984,6 +2049,7 @@ function updateClubModal() {
     updateCheckoutForm();
     updatePointsUsage();
 }
+
 
         async function loadMemberOrders() {
             const ordersList = document.getElementById('member-orders-list');
@@ -2032,30 +2098,61 @@ function updateClubModal() {
             }
         }
 
-        function updateCheckoutForm() {
-            const joinClubSection = document.getElementById('join-club-section');
+function updateCheckoutForm() {
+    const joinClubSection = document.getElementById('join-club-section');
+    
+    if (currentClubMember) {
+        // Auto-fill checkout form
+        document.getElementById('name').value = currentClubMember.name || '';
+        document.getElementById('email').value = currentClubMember.email || '';
+        document.getElementById('phone').value = currentClubMember.phone || '';
+        
+        // ← **Parse and fill address fields - IMPROVED VERSION** ←
+        if (currentClubMember.address) {
+            const addressParts = currentClubMember.address.split(',').map(p => p.trim());
             
-            if (currentClubMember) {
-                // Auto-fill checkout form
-                document.getElementById('name').value = currentClubMember.name || '';
-                document.getElementById('email').value = currentClubMember.email || '';
-                document.getElementById('phone').value = currentClubMember.phone || '';
+            if (addressParts.length >= 3) {
+                // חלק 1: רחוב ומספר בית
+                const streetHouse = addressParts[0].trim();
+                // תפוס מספרים (עם אותיות אופציונליות כמו 12א) בסוף המחרוזת
+                const houseMatch = streetHouse.match(/\s+(\d+[א-ת]?)$/);
                 
-                if (currentClubMember.address) {
-                    const addressParts = currentClubMember.address.split(',');
-                    if (addressParts.length >= 3) {
-                        const streetHouse = addressParts[0].trim().split(' ');
-                        document.getElementById('address-house').value = streetHouse.pop() || '';
-                        document.getElementById('address-street').value = streetHouse.join(' ') || '';
-                        document.getElementById('address-city').value = addressParts[1].trim() || '';
-                    }
+                if (houseMatch) {
+                    document.getElementById('address-house').value = houseMatch[1];
+                    document.getElementById('address-street').value = streetHouse.replace(/\s+\d+[א-ת]?$/, '').trim();
+                } else {
+                    // אין מספר בית - כל הטקסט הוא רחוב
+                    document.getElementById('address-street').value = streetHouse;
+                    document.getElementById('address-house').value = '';
                 }
                 
-                joinClubSection.style.display = 'none';
-            } else {
-                joinClubSection.style.display = 'block';
+                // חלק 2: עיר
+                document.getElementById('address-city').value = addressParts[1] || '';
+                
+                // חלק 3: מדינה ומיקוד
+                const countryZip = addressParts[2].trim().split(/\s+/);
+                const lastPart = countryZip[countryZip.length - 1];
+                
+                // בדיקה אם החלק האחרון הוא מיקוד (רק ספרות)
+                if (lastPart && /^\d+$/.test(lastPart)) {
+                    document.getElementById('address-zip').value = lastPart;
+                    // המדינה היא כל מה שלפני המיקוד
+                    const country = countryZip.slice(0, -1).join(' ');
+                    document.getElementById('address-country').value = country || 'ישראל';
+                } else {
+                    // אין מיקוד - השאר ריק
+                    document.getElementById('address-zip').value = '';
+                    document.getElementById('address-country').value = addressParts[2] || 'ישראל';
+                }
             }
         }
+        
+        joinClubSection.style.display = 'none';
+    } else {
+        joinClubSection.style.display = 'block';
+    }
+}
+
 function updatePointsUsage() {
     const pointsContainer = document.getElementById('points-usage-container');
     const slider = document.getElementById('points-slider');
@@ -2291,13 +2388,26 @@ document.getElementById('club-logout-btn').addEventListener('click', () => {
 // Points Slider - תיקון לוגיקת המינימום
 document.getElementById('points-slider').addEventListener('input', (e) => {
     let value = parseInt(e.target.value) || 0;
-
+    
+    // בדיקות תקינות
+    if (!currentClubMember || currentClubMember.points < 10) {
+        pointsToUse = 0;
+        pointsDiscount = 0;
+        e.target.value = 10;
+        updatePointsDisplay();
+        updateCartDisplay();
+        return;
+    }
+    
+    // אם הערך פחות מ-10, אפס את הכל
     if (value < 10) {
         pointsToUse = 0;
         pointsDiscount = 0;
+        e.target.value = 10; // החזר למינימום ויזואלי
     } else {
-        pointsToUse = value;
-        pointsDiscount = value;
+        // ערך תקין - השתמש בו
+        pointsToUse = Math.min(value, currentClubMember.points, Math.floor(subtotal));
+        pointsDiscount = pointsToUse;
     }
     
     updatePointsDisplay();
@@ -2319,10 +2429,12 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
         });
         
         // ===== LOAD CART FROM STORAGE =====
+        // ===== LOAD CART FROM STORAGE =====
         function loadCartFromStorage() {
             const savedCart = localStorage.getItem('vipshirts_cart');
             const savedCoupon = localStorage.getItem('vipshirts_coupon');
 
+            // טעינת העגלה
             if (savedCart) {
                 try {
                     cart = JSON.parse(savedCart);
@@ -2331,14 +2443,31 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                 }
             }
 
+            // טעינת הקופון - כעת בתוך גוף הפונקציה
             if (savedCoupon) {
                 try {
                     const couponData = JSON.parse(savedCoupon);
+                    
+                    const getSafeDate = (dateVal) => {
+                        if (!dateVal) return null;
+                        if (dateVal instanceof Date) return dateVal;
+                        if (typeof dateVal === 'string') {
+                            if (dateVal.includes('-')) return new Date(dateVal);
+                            const parts = dateVal.split(/[/.]/);
+                            if (parts.length === 3) {
+                                return new Date(parts[2], parts[1] - 1, parts[0]);
+                            }
+                        }
+                        return new Date(dateVal);
+                    };
+
                     if (couponData.ExpiryDate) {
-                        const expiry = new Date(couponData.ExpiryDate);
+                        const expiry = getSafeDate(couponData.ExpiryDate);
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
-                        if (expiry >= today) {
+                        if (expiry) expiry.setHours(0, 0, 0, 0);
+
+                        if (expiry && expiry >= today) {
                             appliedCoupon = couponData;
                             couponInput.value = couponData.Code;
                             couponInput.disabled = true;
@@ -2346,6 +2475,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                             couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
                         } else {
                             localStorage.removeItem('vipshirts_coupon');
+                            appliedCoupon = null;
                         }
                     } else {
                         appliedCoupon = couponData;
@@ -2355,11 +2485,12 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                         couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
                     }
                 } catch (e) {
+                    console.error("שגיאה בטעינת קופון:", e);
                     appliedCoupon = null;
                     localStorage.removeItem('vipshirts_coupon');
                 }
-            }
-        }
+            } 
+        } // סגירת הפונקציה loadCartFromStorage
 
         function saveCartToStorage() {
             localStorage.setItem('vipshirts_cart', JSON.stringify(cart));
@@ -2382,6 +2513,11 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                     if (announcements.length > 0) {
                         showNextAnnouncement();
                         setInterval(showNextAnnouncement, 5000);
+                        // עדכון גובה הבר עבור מיקום הכפתורים
+            const bar = document.getElementById('announcement-bar');
+            if (bar) {
+                document.documentElement.style.setProperty('--announcement-height', bar.offsetHeight + 'px');
+            }
                     }
                 }
             } catch (error) {
@@ -3246,13 +3382,13 @@ closeCart();
         }
 
 document.addEventListener('DOMContentLoaded', async () => {
-            await loadSettings();
-            await loadAnnouncements();
-            await fetchProducts();
-            await loadClubMember();
-            loadCartFromStorage();
-            updateCartDisplay();
-        });
+    await loadSettings(); // ← חובה ראשון!
+    loadCartFromStorage(); // ← עכשיו settings קיים
+    await loadAnnouncements();
+    await fetchProducts();
+    await loadClubMember();
+    updateCartDisplay();
+});
 
         // ===== DEEP LINK SUPPORT =====
         function handleDeepLink() {
