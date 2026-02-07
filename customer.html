@@ -5,392 +5,289 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>עדכון פרטים - VIP Shirts</title>
     <style>
-        /* ייבוא פונט Heebo ישירות מגוגל */
         @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800&display=swap');
 
         :root {
             --primary-color: #1a1a1a;
-            --bg-color: #f4f7f6; /* רקע מעט אפרפר כדי שהמלבן הלבן יבלוט */
+            --bg-color: #f4f7f6;
             --border-color: #e1e1e1;
             --text-main: #2d3436;
             --text-muted: #636e72;
+            --accent: #0984e3;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Heebo', sans-serif; /* פונט Heebo כברירת מחדל */
+            font-family: 'Heebo', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
             direction: rtl;
         }
 
         .container {
             background: white;
             border-radius: 16px;
-            padding: 50px 40px;
-            max-width: 480px;
+            padding: 40px;
+            max-width: 600px;
             width: 100%;
-            /* צל עמוק ומקצועי בין המלבן לרקע */
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1); 
         }
 
-        .logo {
-            text-align: center;
-            margin-bottom: 35px;
-        }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo img { width: 120px; height: auto; }
 
-        .logo img {
-            width: 140px; /* לוגו גדול יותר */
-            height: auto;
-            /* ללא פילטר שחור-לבן - הצבעים המקוריים יישמרו */
-        }
+        h1 { font-weight: 800; font-size: 1.6rem; text-align: center; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: var(--text-muted); margin-bottom: 30px; }
 
-        h1 {
-            font-weight: 800;
-            font-size: 1.7rem;
-            margin-bottom: 10px;
-            text-align: center;
-            color: var(--primary-color);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 40px;
-            font-size: 1rem;
-            font-weight: 400;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: var(--text-main);
-        }
-
+        /* Form Styles */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         .form-group input {
-            width: 100%;
-            padding: 15px;
-            border: 1.5px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 1rem;
-            font-family: 'Heebo', sans-serif;
-            transition: all 0.2s ease;
+            width: 100%; padding: 12px; border: 1.5px solid var(--border-color);
+            border-radius: 8px; font-family: inherit; font-size: 1rem;
         }
+        .form-group input:focus { border-color: var(--primary-color); outline: none; }
 
-        .form-group input:focus {
-            border-color: #1a1a1a;
-            outline: none;
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .address-section {
-            border-top: 1px solid var(--border-color);
-            padding-top: 30px;
-            margin-top: 35px;
-            margin-bottom: 30px;
-        }
-
-        .address-section h3 {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-
-        .address-row {
-            display: flex;
-            gap: 15px;
-        }
+        .address-row { display: flex; gap: 10px; }
 
         .btn-primary {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            font-family: 'Heebo', sans-serif;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
+            width: 100%; padding: 15px; background: var(--primary-color); color: white;
+            border: none; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem;
         }
 
-        .btn-primary:hover {
-            background-color: #333;
-            transform: translateY(-2px);
-        }
+        /* Info Cards Section */
+        .info-section { margin-top: 40px; border-top: 2px solid #eee; padding-top: 30px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 12px; border-right: 4px solid var(--primary-color); }
+        .stat-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; }
+        .stat-value { font-size: 1.4rem; font-weight: 800; }
 
-        .btn-primary:active {
-            transform: translateY(0);
+        .list-container { margin-top: 20px; }
+        .list-title { font-weight: 700; margin-bottom: 10px; font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        
+        .item-row { 
+            background: white; border: 1px solid #eee; padding: 12px; border-radius: 8px; 
+            margin-bottom: 10px; font-size: 0.9rem;
         }
+        .item-header { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 5px; }
+        .item-details { color: var(--text-muted); font-size: 0.85rem; }
 
-        /* הודעות */
-        .message {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
-            text-align: center;
-            display: none;
-            font-weight: 500;
-        }
+        .tag { padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+        .tag-success { background: #eafff2; color: #27ae60; }
+        .tag-pending { background: #fff5e6; color: #d35400; }
 
-        @media (max-width: 500px) {
-            .container {
-                padding: 40px 25px;
-                border-radius: 0; /* במובייל לפעמים יפה יותר בלי קימור בקצוות המסך */
-                box-shadow: none;
-                background: transparent;
-            }
-            body {
-                background-color: white;
-            }
-        }
+        .message { padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; display: none; }
+        .error { background: #fee; color: #c0392b; }
+        .success { background: #eafff2; color: #27ae60; }
+
+        @media (max-width: 500px) { .container { padding: 25px; box-shadow: none; } body { background: white; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
-        </div>
 
-        <h1>עדכון פרטי חשבון</h1>
-        <p class="subtitle">עדכן את הפרטים שלך במועדון VIP</p>
-
-        <div id="loading-state" class="loading">
-            <div class="loading-spinner"></div>
-            <p>טוען פרטים...</p>
-        </div>
-
-        <div id="message" class="message"></div>
-
-        <form id="customer-form" style="display: none;">
-            <div class="form-group">
-                <label>שם מלא *</label>
-                <input type="text" id="customer-name" required>
-            </div>
-
-            <div class="form-group">
-                <label>אימייל *</label>
-                <input type="email" id="customer-email" disabled>
-            </div>
-
-            <div class="form-group">
-                <label>טלפון *</label>
-                <input type="tel" id="customer-phone" required>
-            </div>
-
-            <div class="form-group">
-                <label>סיסמה חדשה (השאר ריק אם לא רוצה לשנות)</label>
-                <input type="password" id="customer-password" minlength="6">
-            </div>
-
-            <div class="address-section">
-                <h3>כתובת (אופציונלי)</h3>
-                
-                <div class="address-row">
-                    <div class="form-group">
-                        <label>רחוב</label>
-                        <input type="text" id="customer-street">
-                    </div>
-                    <div class="form-group small">
-                        <label>מספר</label>
-                        <input type="text" id="customer-house">
-                    </div>
-                </div>
-
-                <div class="address-row">
-                    <div class="form-group">
-                        <label>עיר</label>
-                        <input type="text" id="customer-city">
-                    </div>
-                    <div class="form-group small">
-                        <label>מיקוד</label>
-                        <input type="text" id="customer-zip">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>מדינה</label>
-                    <input type="text" id="customer-country" value="ישראל">
-                </div>
-            </div>
-
-            <button type="submit" class="btn-primary" id="submit-btn">עדכן פרטים</button>
-        </form>
+<div class="container">
+    <div class="logo">
+        <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
-            authDomain: "timetable-titus.firebaseapp.com",
-            projectId: "timetable-titus",
-            storageBucket: "timetable-titus.firebasestorage.app",
-            messagingSenderId: "199146911555",
-            appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
-            measurementId: "G-JQ02VEC325"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <div id="loading-state" style="text-align:center;">טוען נתונים...</div>
+    <div id="main-content" style="display:none;">
+        <h1>שלום, <span id="user-greeting">אורח</span></h1>
+        <p class="subtitle">עדכון פרטים וצפייה בפעילות</p>
 
-        let currentMember = null;
+        <div id="message-box" class="message"></div>
 
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
+        <form id="update-form">
+            <div class="form-group">
+                <label>שם מלא</label>
+                <input type="text" id="field-name" required>
+            </div>
+            <div class="form-group">
+                <label>טלפון</label>
+                <input type="tel" id="field-phone" required>
+            </div>
+            <div class="address-row">
+                <div class="form-group" style="flex:2">
+                    <label>עיר</label>
+                    <input type="text" id="field-city">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>מיקוד</label>
+                    <input type="text" id="field-zip">
+                </div>
+            </div>
+            <button type="submit" class="btn-primary" id="save-btn">שמור שינויים</button>
+        </form>
+
+        <div class="info-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>נקודות VIP שנצברו</h3>
+                    <div class="stat-value" id="stat-points">0</div>
+                </div>
+            </div>
+
+            <div class="list-container">
+                <div class="list-title">🛍️ הזמנות אחרונות</div>
+                <div id="orders-container"></div>
+            </div>
+
+            <div class="list-container">
+                <div class="list-title">💬 פניות לשירות</div>
+                <div id="leads-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+        authDomain: "timetable-titus.firebaseapp.com",
+        projectId: "timetable-titus",
+        storageBucket: "timetable-titus.firebasestorage.app",
+        messagingSenderId: "199146911555",
+        appId: "1:199146911555:web:5d9436d716dfc6de7361f6"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let userData = null;
+
+    async function init() {
+        const hash = window.location.hash.substring(1);
+        const msgBox = document.getElementById('message-box');
+        
+        if (!hash) {
+            document.getElementById('loading-state').innerHTML = '<p class="error" style="display:block">לקוח לא נבחר (חסר מזהה בקישור)</p>';
+            return;
         }
 
-        async function loadCustomerData() {
-            const hash = window.location.hash.substring(1);
-            const email = decodeURIComponent(hash);
+        const email = decodeURIComponent(hash);
 
-            if (!email) {
-                showMessage('לא נמצא אימייל בכתובת', 'error');
-                document.getElementById('loading-state').style.display = 'none';
+        try {
+            const snap = await db.collection('ClubMembers').where('email', '==', email).limit(1).get();
+            
+            if (snap.empty) {
+                document.getElementById('loading-state').innerHTML = '<p class="error" style="display:block">לקוח לא נמצא במערכת</p>';
                 return;
             }
 
-            try {
-                const membersSnapshot = await db.collection('ClubMembers')
-                    .where('email', '==', email)
-                    .limit(1)
-                    .get();
-
-                if (membersSnapshot.empty) {
-                    showMessage('לקוח לא נמצא במערכת', 'error');
-                    document.getElementById('loading-state').style.display = 'none';
-                    return;
-                }
-
-                const memberDoc = membersSnapshot.docs[0];
-                currentMember = { id: memberDoc.id, ...memberDoc.data() };
-
-                // Fill form
-                document.getElementById('customer-name').value = currentMember.name || '';
-                document.getElementById('customer-email').value = currentMember.email || '';
-                document.getElementById('customer-phone').value = currentMember.phone || '';
-
-                // Parse address
-                if (currentMember.address) {
-                    const addressParts = currentMember.address.split(',').map(p => p.trim());
-                    
-                    if (addressParts.length >= 3) {
-                        const streetHouse = addressParts[0].trim();
-                        const houseMatch = streetHouse.match(/\s+(\d+[א-ת]?)$/);
-                        
-                        if (houseMatch) {
-                            document.getElementById('customer-house').value = houseMatch[1];
-                            document.getElementById('customer-street').value = streetHouse.replace(/\s+\d+[א-ת]?$/, '').trim();
-                        } else {
-                            document.getElementById('customer-street').value = streetHouse;
-                        }
-                        
-                        document.getElementById('customer-city').value = addressParts[1] || '';
-                        
-                        const countryZip = addressParts[2].trim().split(/\s+/);
-                        const lastPart = countryZip[countryZip.length - 1];
-                        
-                        if (lastPart && /^\d+$/.test(lastPart)) {
-                            document.getElementById('customer-zip').value = lastPart;
-                            document.getElementById('customer-country').value = countryZip.slice(0, -1).join(' ') || 'ישראל';
-                        } else {
-                            document.getElementById('customer-country').value = addressParts[2] || 'ישראל';
-                        }
-                    }
-                }
-
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('customer-form').style.display = 'block';
-
-            } catch (error) {
-                console.error('Error loading customer:', error);
-                showMessage('שגיאה בטעינת נתונים', 'error');
-                document.getElementById('loading-state').style.display = 'none';
-            }
-        }
-
-        document.getElementById('customer-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+            userData = { id: snap.docs[0].id, ...snap.docs[0].data() };
             
-            if (!currentMember) return;
+            // מילוי שדות
+            document.getElementById('user-greeting').textContent = userData.name.split(' ')[0];
+            document.getElementById('field-name').value = userData.name || '';
+            document.getElementById('field-phone').value = userData.phone || '';
+            document.getElementById('stat-points').textContent = userData.points || 0;
+            
+            // הצגת התוכן
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
 
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'שומר...';
+            // טעינת מידע נוסף
+            loadOrders(userData.id);
+            loadLeads(userData.email);
 
-            try {
-                const name = document.getElementById('customer-name').value.trim();
-                const phone = document.getElementById('customer-phone').value.trim();
-                const password = document.getElementById('customer-password').value;
+        } catch (e) {
+            console.error(e);
+            msgBox.textContent = "שגיאה בטעינת נתונים";
+            msgBox.className = "message error";
+            msgBox.style.display = "block";
+        }
+    }
 
-                // Build address
-                const street = document.getElementById('customer-street').value.trim();
-                const house = document.getElementById('customer-house').value.trim();
-                const city = document.getElementById('customer-city').value.trim();
-                const zip = document.getElementById('customer-zip').value.trim();
-                const country = document.getElementById('customer-country').value.trim();
-                
-                let address = '';
-                if (street || house || city) {
-                    address = `${street} ${house}, ${city}, ${country} ${zip}`.trim();
-                }
-
-                const updateData = {
-                    name: name,
-                    phone: phone,
-                    address: address
-                };
-
-                // Update password only if provided
-                if (password && password.length >= 6) {
-                    updateData.password = password;
-                }
-
-                await db.collection('ClubMembers').doc(currentMember.id).update(updateData);
-
-                showMessage('הפרטים עודכנו בהצלחה!', 'success');
-                
-                // Clear password field
-                document.getElementById('customer-password').value = '';
-
-            } catch (error) {
-                console.error('Error updating customer:', error);
-                showMessage('שגיאה בעדכון פרטים', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'עדכן פרטים';
+    async function loadOrders(memberId) {
+        const container = document.getElementById('orders-container');
+        try {
+            const snap = await db.collection('orders').where('clubMemberId', '==', memberId).get();
+            if (snap.empty) {
+                container.innerHTML = '<p style="font-size:0.8rem; color:#999;">טרם בוצעו הזמנות.</p>';
+                return;
             }
-        });
 
-        // Load data on page load
-        window.addEventListener('load', loadCustomerData);
-        window.addEventListener('hashchange', loadCustomerData);
-    </script>
+            const orders = snap.docs.map(doc => ({id: doc.id, ...doc.data()}))
+                .sort((a,b) => (b.orderDate?.toDate() || 0) - (a.orderDate?.toDate() || 0));
+
+            container.innerHTML = orders.slice(0, 3).map(order => `
+                <div class="item-row">
+                    <div class="item-header">
+                        <span>הזמנה #${order.id.substring(0,6)}</span>
+                        <span class="tag ${order.completed ? 'tag-success' : 'tag-pending'}">
+                            ${order.completed ? 'הושלם' : 'בטיפול'}
+                        </span>
+                    </div>
+                    <div class="item-details">
+                        תאריך: ${order.orderDate ? order.orderDate.toDate().toLocaleDateString('he-IL') : '---'}<br>
+                        סה"כ: ₪${(order.totalAmount || 0).toFixed(2)}
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) { container.innerHTML = 'שגיאה בטעינת הזמנות'; }
+    }
+
+    async function loadLeads(email) {
+        const container = document.getElementById('leads-container');
+        try {
+            const snap = await db.collection('ContactLeads').where('email', '==', email).get();
+            if (snap.empty) {
+                container.innerHTML = '<p style="font-size:0.8rem; color:#999;">אין פניות קודמות.</p>';
+                return;
+            }
+
+            const leads = snap.docs.map(doc => ({id: doc.id, ...doc.data()}))
+                .sort((a,b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+
+            container.innerHTML = leads.slice(0, 2).map(lead => `
+                <div class="item-row">
+                    <div class="item-header">
+                        <span>פנייה מ-${lead.createdAt ? lead.createdAt.toDate().toLocaleDateString('he-IL') : ''}</span>
+                        <span style="font-size:0.7rem; color:${lead.status === 'closed' ? 'green' : 'orange'}">
+                            ${lead.status === 'closed' ? '✓ סגור' : '⏳ פתוח'}
+                        </span>
+                    </div>
+                    <div style="font-size:0.8rem; margin-top:5px; color:#444;">${lead.message || ''}</div>
+                </div>
+            `).join('');
+        } catch (e) { container.innerHTML = 'שגיאה בטעינת פניות'; }
+    }
+
+    document.getElementById('update-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true;
+        btn.textContent = "שומר...";
+
+        try {
+            await db.collection('ClubMembers').doc(userData.id).update({
+                name: document.getElementById('field-name').value,
+                phone: document.getElementById('field-phone').value
+                // ניתן להוסיף כאן עדכון כתובת אם תרצה
+            });
+            const msgBox = document.getElementById('message-box');
+            msgBox.textContent = "הפרטים עודכנו בהצלחה!";
+            msgBox.className = "message success";
+            msgBox.style.display = "block";
+            setTimeout(() => msgBox.style.display = 'none', 3000);
+        } catch (e) {
+            alert("שגיאה בעדכון");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "שמור שינויים";
+        }
+    };
+
+    window.onload = init;
+</script>
+
 </body>
 </html>
