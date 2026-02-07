@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>עדכון פרטים - VIP Shirts</title>
     <style>
+        :root {
+            --primary-color: #1a1a1a; /* שחור מקצועי */
+            --accent-color: #3498db;  /* כחול עדין לפוקוס */
+            --bg-color: #fcfcfc;      /* לבן כמעט מלא */
+            --border-color: #eaeaea;  /* גבולות עדינים מאוד */
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -12,164 +21,164 @@
         }
 
         body {
-            font-family: 'Heebo', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Heebo', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            direction: rtl;
         }
 
         .container {
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            max-width: 500px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px; /* קימור מעודן יותר */
+            padding: 48px;
+            max-width: 460px;
             width: 100%;
+            /* צללית "רכה" (Soft UI) */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.03); 
         }
 
         .logo {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
         }
 
         .logo img {
-            width: 100px;
+            width: 80px; /* קטן ואלגנטי יותר */
             height: auto;
+            filter: grayscale(1); /* אופציונלי: הופך את הלוגו לשחור לבן למראה נקי */
+            opacity: 0.9;
         }
 
         h1 {
-            color: #333;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 1.8em;
         }
 
         .subtitle {
             text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            font-size: 0.95rem;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            text-transform: uppercase; /* מראה יותר "בוטיקי" */
+            letter-spacing: 0.5px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: all 0.3s;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: all 0.2s ease-in-out;
+            color: var(--text-main);
         }
 
         .form-group input:focus {
-            border-color: #667eea;
+            border-color: var(--primary-color); /* פוקוס שחור סולידי */
             outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: #fff;
         }
 
-        .form-group input:disabled {
-            background: #f5f5f5;
-            cursor: not-allowed;
+        .form-group input::placeholder {
+            color: #bdc3c7;
         }
 
+        /* עיצוב מחדש של אזור הכתובת */
         .address-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 24px;
+            margin-top: 32px;
+            margin-bottom: 32px;
         }
 
         .address-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.1em;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-weight: 600;
         }
 
         .address-row {
             display: flex;
-            gap: 10px;
-        }
-
-        .address-row .form-group {
-            flex: 1;
-        }
-
-        .address-row .form-group.small {
-            flex: 0 0 100px;
+            gap: 16px;
         }
 
         .btn-primary {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: opacity 0.2s;
+            letter-spacing: 0.5px;
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            opacity: 0.9;
         }
 
         .btn-primary:disabled {
-            background: #ccc;
+            background-color: #dfe6e9;
+            color: #b2bec3;
             cursor: not-allowed;
-            transform: none;
         }
 
+        /* הודעות מערכת נקיות */
         .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
             text-align: center;
-            font-weight: 600;
             display: none;
         }
 
         .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background-color: #f1fcf4;
+            color: #1b5e20;
+            border: 1px solid #c8e6c9;
         }
 
         .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #667eea;
+            background-color: #fff5f5;
+            color: #c0392b;
+            border: 1px solid #fadbd8;
         }
 
         .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+            margin: 20px auto;
         }
 
         @keyframes spin {
@@ -177,17 +186,11 @@
             100% { transform: rotate(360deg); }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
             .container {
-                padding: 20px;
-            }
-
-            .address-row {
-                flex-direction: column;
-            }
-
-            .address-row .form-group.small {
-                flex: 1;
+                padding: 32px 24px;
+                border: none;
+                box-shadow: none;
             }
         }
     </style>
