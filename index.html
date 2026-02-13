@@ -1530,7 +1530,7 @@
                             <div class="points-value">שווי: <span id="member-points-value">0.00</span> ₪</div>
                         </div>
                         <div style="text-align: center; color: #666; font-size: 0.95em;">
-                            <p>🎁 צבור 2% נקודות מכל קנייה</p>
+                            <p>🎁 צבור 1% נקודות מכל קנייה</p>
                             <p>💰 כל נקודה שווה 1₪</p>
                             <p>✨ מינימום שימוש: 10 נקודות</p>
                         </div>
@@ -1724,7 +1724,7 @@
                     <div class="join-club-checkbox">
                         <label>
                             <input type="checkbox" id="join-club-checkbox">
-                            <span>הצטרף למועדון VIP וקבל 2% נקודות מההזמנה!</span>
+                            <span>הצטרף למועדון VIP וקבל 1% נקודות מההזמנה!</span>
                         </label>
                     </div>
                     <div id="club-registration-fields" style="display: none;">
@@ -3233,7 +3233,7 @@ function renderPayPalButton() {
                     }
 
                     // Calculate points earned (2% of total)
-                    const pointsEarned = Math.floor(total * 0.02);
+                    const pointsEarned = Math.floor(total * 0.01);
 
                     // Create the order
                     const orderRef = await db.collection('orders').add({
