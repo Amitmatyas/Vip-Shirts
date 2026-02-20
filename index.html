@@ -2795,15 +2795,16 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
             }
         }
 
-        async function fetchProducts() {
-            try {
-                const productsSnapshot = await db.collection('soccer_shirts').get();
-                products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                applyFilters();
-            } catch (error) {
-                alert("שגיאה בטעינת חולצות.");
-            }
-        }
+async function fetchProducts() {
+    try {
+        const productsSnapshot = await db.collection('soccer_shirts').get();
+        products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        applyFilters();
+        handleDeepLink(); // ← הוסף את זה כאן
+    } catch (error) {
+        alert("שגיאה בטעינת חולצות.");
+    }
+}
 
         function calculateShipping() {
             if (!settings || !settings.Shipping) { shippingCost = 0; return; }
@@ -3569,30 +3570,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateCartDisplay();
 });
 
-        // ===== DEEP LINK SUPPORT =====
         function handleDeepLink() {
-            const hash = window.location.hash;
-            if (hash && hash.startsWith('#')) {
-                const productName = decodeURIComponent(hash.substring(1));
-                
-                // חפש מוצר לפי שם
-                const product = products.find(p => p.name === productName);
-                if (product) {
-                    // המתן קצת שהכל ייטען
-                    setTimeout(() => {
-                        openProductModal(product.id);
-                    }, 500);
-                }
-            }
-        }
-
-        // האזן לשינויים ב-hash
-        window.addEventListener('hashchange', handleDeepLink);
-
-        // בדוק deep link בטעינה ראשונית
-        window.addEventListener('load', () => {
-            setTimeout(handleDeepLink, 1000);
-        });
+    const hash = window.location.hash;
+    if (!hash || !hash.startsWith('#')) return;
+    
+    const productName = decodeURIComponent(hash.substring(1)).trim();
+    if (!productName) return;
+    
+    const product = products.find(p => 
+        p.name.trim() === productName || 
+        p.name.trim().toLowerCase() === productName.toLowerCase()
+    );
+    
+    if (product) {
+        openProductModal(product.id);
+    }
+}
         
     </script>
 </body>
