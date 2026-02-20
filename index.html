@@ -540,13 +540,13 @@
 .carousel-track {
     display: flex;
     transition: transform 0.3s ease;
+    width: 100%;
 }
 
 .carousel-track img {
     min-width: 100%;
     width: 100%;
     flex-shrink: 0;
-    height: 250px;
     max-height: 300px;
     object-fit: contain;
     background: #fafafa;
@@ -3144,7 +3144,8 @@ product.sizeCharts.forEach((chart, i) => {
             carouselSection.appendChild(controls);
 
             function updateCarousel() {
-                track.style.transform = `translateX(${currentSlide * -100}%)`;
+                const slideWidth = trackContainer.offsetWidth;
+track.style.transform = `translateX(${currentSlide * -slideWidth}px)`;
                 counter.textContent = `${currentSlide + 1} / ${total}`;
                 prevBtn.disabled = currentSlide === 0;
                 nextBtn.disabled = currentSlide === total - 1;
