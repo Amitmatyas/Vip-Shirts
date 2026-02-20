@@ -3089,110 +3089,108 @@ function updateCartDisplay() {
     if (existingCarousel) existingCarousel.remove();
 
     if (product.sizeCharts && product.sizeCharts.length > 0) {
-        const carouselSection = document.createElement('div');
-        carouselSection.id = 'size-charts-carousel-section';
-        carouselSection.className = 'size-charts-carousel';
+    const carouselSection = document.createElement('div');
+    carouselSection.id = 'size-charts-carousel-section';
+    carouselSection.className = 'size-charts-carousel';
 
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'size-charts-carousel-title';
+    titleDiv.textContent = `📏 טבלאות מידות (${product.sizeCharts.length})`;
+    carouselSection.appendChild(titleDiv);
+
+    // Container עם scroll-snap - ללא JavaScript לחישוב רוחב
+    const trackContainer = document.createElement('div');
+    trackContainer.style.cssText = `
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        display: flex;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    `;
+    
+    product.sizeCharts.forEach((chart, i) => {
+        const slide = document.createElement('div');
+        slide.style.cssText = `
+            min-width: 100%;
+            scroll-snap-align: start;
+            flex-shrink: 0;
+        `;
+        
+        const img = document.createElement('img');
+        img.src = chart;
+        img.alt = `טבלת מידות ${i + 1}`;
+        img.style.cssText = `
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            background: #fafafa;
+            cursor: zoom-in;
+            display: block;
+        `;
+        img.addEventListener('click', () => openSizeChartZoom(chart));
+        
+        slide.appendChild(img);
+        trackContainer.appendChild(slide);
+    });
+
+    carouselSection.appendChild(trackContainer);
+
+    // כפתורים רק אם יש יותר מתמונה אחת
+    if (product.sizeCharts.length > 1) {
         let currentSlide = 0;
         const total = product.sizeCharts.length;
 
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'size-charts-carousel-title';
-        titleDiv.textContent = `📏 טבלאות מידות (${total})`;
-        carouselSection.appendChild(titleDiv);
+        const controls = document.createElement('div');
+        controls.className = 'carousel-controls';
 
-        const trackContainer = document.createElement('div');
-        trackContainer.className = 'carousel-track-container';
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'carousel-btn';
+        prevBtn.textContent = '‹';
+        prevBtn.type = 'button';
 
-        const track = document.createElement('div');
-        track.className = 'carousel-track';
+        const counter = document.createElement('span');
+        counter.className = 'carousel-counter';
+        counter.textContent = `1 / ${total}`;
 
-let loadedCount = 0;
-const totalImages = product.sizeCharts.length;
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'carousel-btn';
+        nextBtn.textContent = '›';
+        nextBtn.type = 'button';
 
-product.sizeCharts.forEach((chart, i) => {
-    const img = document.createElement('img');
-    img.style.cursor = 'zoom-in';
-    img.alt = `טבלת מידות ${i + 1}`;
-    img.addEventListener('click', () => openSizeChartZoom(chart));
-    
-    img.onload = () => {
-        loadedCount++;
-        if (loadedCount === totalImages) {
-            // כל התמונות נטענו - עכשיו אפשר לחשב רוחב נכון
-            // מאלץ reflow לפני החישוב
-            requestAnimationFrame(() => {
-                if (total > 1) {
-                    function updateCarouselAfterLoad() {
-                        const slideWidth = trackContainer.offsetWidth;
-                        if (slideWidth === 0) {
-                            requestAnimationFrame(updateCarouselAfterLoad);
-                            return;
-                        }
-                        track.style.transform = `translateX(0px)`;
-                        // עדכן את כל התמונות לרוחב הנכון
-                        track.querySelectorAll('img').forEach(img => {
-                            img.style.minWidth = slideWidth + 'px';
-                            img.style.width = slideWidth + 'px';
-                        });
-                    }
-                    updateCarouselAfterLoad();
-                }
-                track.querySelectorAll('img').forEach(img => img.style.opacity = '1');
-            });
-        }
-    };
-    
-    img.onerror = () => { loadedCount++; img.style.opacity = '1'; };
-    img.style.opacity = '0';
-    img.style.transition = 'opacity 0.3s';
-    img.src = chart;
-    track.appendChild(img);
-});
-
-        trackContainer.appendChild(track);
-        carouselSection.appendChild(trackContainer);
-
-        if (total > 1) {
-            const controls = document.createElement('div');
-            controls.className = 'carousel-controls';
-
-            const prevBtn = document.createElement('button');
-            prevBtn.className = 'carousel-btn';
-            prevBtn.textContent = '‹';
-
-            const counter = document.createElement('span');
-            counter.className = 'carousel-counter';
-            counter.textContent = `1 / ${total}`;
-
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'carousel-btn';
-            nextBtn.textContent = '›';
-
-            controls.appendChild(prevBtn);
-            controls.appendChild(counter);
-            controls.appendChild(nextBtn);
-            carouselSection.appendChild(controls);
-
-function updateCarousel() {
-    const slideWidth = trackContainer.offsetWidth;
-    track.style.transform = `translateX(${currentSlide * -slideWidth}px)`;
-    counter.textContent = `${currentSlide + 1} / ${total}`;
-    prevBtn.disabled = currentSlide === 0;
-    nextBtn.disabled = currentSlide === total - 1;
-}
-
-            prevBtn.addEventListener('click', () => {
-                if (currentSlide > 0) { currentSlide--; updateCarousel(); }
-            });
-            nextBtn.addEventListener('click', () => {
-                if (currentSlide < total - 1) { currentSlide++; updateCarousel(); }
-            });
-            updateCarousel();
+        function goToSlide(index) {
+            currentSlide = index;
+            const slideWidth = trackContainer.offsetWidth;
+            trackContainer.scrollTo({ left: currentSlide * slideWidth, behavior: 'smooth' });
+            counter.textContent = `${currentSlide + 1} / ${total}`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === total - 1;
         }
 
-        modalProductDescription.parentNode.insertBefore(carouselSection, customOptionsContainer);
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) goToSlide(currentSlide - 1); });
+        nextBtn.addEventListener('click', () => { if (currentSlide < total - 1) goToSlide(currentSlide + 1); });
+
+        // עדכון counter בגלילה ידנית
+        trackContainer.addEventListener('scroll', () => {
+            const slideWidth = trackContainer.offsetWidth;
+            if (slideWidth > 0) {
+                currentSlide = Math.round(trackContainer.scrollLeft / slideWidth);
+                counter.textContent = `${currentSlide + 1} / ${total}`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === total - 1;
+            }
+        });
+
+        prevBtn.disabled = true;
+        controls.appendChild(prevBtn);
+        controls.appendChild(counter);
+        controls.appendChild(nextBtn);
+        carouselSection.appendChild(controls);
     }
+
+    modalProductDescription.parentNode.insertBefore(carouselSection, customOptionsContainer);
+}
 
     currentProductOptions = {};
     customOptionsContainer.innerHTML = '';
