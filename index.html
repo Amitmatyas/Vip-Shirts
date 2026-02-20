@@ -3060,82 +3060,106 @@ function updateCartDisplay() {
         });
 
         function openProductModal(productId, isCouponFreebie = false) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
 
-            modalProductImage.src = product.image;
-            modalProductImage.alt = product.name;
-            modalProductTitle.textContent = product.name;
+    modalProductImage.src = product.image;
+    modalProductImage.alt = product.name;
+    modalProductTitle.textContent = product.name;
 
-            const onSale = isProductOnSale(product);
-            const effectivePrice = getEffectivePrice(product);
-            currentProductPrice = isCouponFreebie ? 0 : effectivePrice;
+    const onSale = isProductOnSale(product);
+    const effectivePrice = getEffectivePrice(product);
+    currentProductPrice = isCouponFreebie ? 0 : effectivePrice;
 
-            if (isCouponFreebie) {
-                modalProductPrice.innerHTML = '<span style="color: #28a745; font-weight: 900;">מתנה - 0.00 ₪</span>';
-            } else if (onSale) {
-                modalProductPrice.innerHTML = `
-                    <span class="price on-sale">
-                        <span class="original-price">${product.price.toFixed(2)} ₪</span>
-                        <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
-                    </span>`;
-            } else {
-                modalProductPrice.textContent = `${currentProductPrice.toFixed(2)} ₪`;
+    if (isCouponFreebie) {
+        modalProductPrice.innerHTML = '<span style="color: #28a745; font-weight: 900;">מתנה - 0.00 ₪</span>';
+    } else if (onSale) {
+        modalProductPrice.innerHTML = `
+            <span class="price on-sale">
+                <span class="original-price">${product.price.toFixed(2)} ₪</span>
+                <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
+            </span>`;
+    } else {
+        modalProductPrice.textContent = `${currentProductPrice.toFixed(2)} ₪`;
+    }
+
+    // הצגת קרוסלת טבלאות מידות
+    const existingCarousel = document.getElementById('size-charts-carousel-section');
+    if (existingCarousel) existingCarousel.remove();
+
+    if (product.sizeCharts && product.sizeCharts.length > 0) {
+        const carouselSection = document.createElement('div');
+        carouselSection.id = 'size-charts-carousel-section';
+        carouselSection.className = 'size-charts-carousel';
+
+        let currentSlide = 0;
+        const total = product.sizeCharts.length;
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'size-charts-carousel-title';
+        titleDiv.textContent = `📏 טבלאות מידות (${total})`;
+        carouselSection.appendChild(titleDiv);
+
+        const trackContainer = document.createElement('div');
+        trackContainer.className = 'carousel-track-container';
+
+        const track = document.createElement('div');
+        track.className = 'carousel-track';
+
+        product.sizeCharts.forEach((chart, i) => {
+            const img = document.createElement('img');
+            img.src = chart;
+            img.alt = `טבלת מידות ${i + 1}`;
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', () => openSizeChartZoom(chart));
+            track.appendChild(img);
+        });
+
+        trackContainer.appendChild(track);
+        carouselSection.appendChild(trackContainer);
+
+        if (total > 1) {
+            const controls = document.createElement('div');
+            controls.className = 'carousel-controls';
+
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'carousel-btn';
+            prevBtn.textContent = '‹';
+
+            const counter = document.createElement('span');
+            counter.className = 'carousel-counter';
+            counter.textContent = `1 / ${total}`;
+
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'carousel-btn';
+            nextBtn.textContent = '›';
+
+            controls.appendChild(prevBtn);
+            controls.appendChild(counter);
+            controls.appendChild(nextBtn);
+            carouselSection.appendChild(controls);
+
+            function updateCarousel() {
+                track.style.transform = `translateX(${currentSlide * -100}%)`;
+                counter.textContent = `${currentSlide + 1} / ${total}`;
+                prevBtn.disabled = currentSlide === 0;
+                nextBtn.disabled = currentSlide === total - 1;
             }
 
-            // הצגת קרוסלת טבלאות מידות
-const existingCarousel = document.getElementById('size-charts-carousel-section');
-if (existingCarousel) existingCarousel.remove();
-
-if (product.sizeCharts && product.sizeCharts.length > 0) {
-    const carouselSection = document.createElement('div');
-    carouselSection.id = 'size-charts-carousel-section';
-    carouselSection.className = 'size-charts-carousel';
-    
-    let currentSlide = 0;
-    const total = product.sizeCharts.length;
-    
-    carouselSection.innerHTML = `
-        <div class="size-charts-carousel-title">📏 טבלאות מידות (${total})</div>
-        <div class="carousel-track-container">
-            <div class="carousel-track" id="carousel-track-inner">
-                ${product.sizeCharts.map((chart, i) => 
-                    `<img src="${chart}" alt="טבלת מידות ${i+1}" onclick="openSizeChartZoom('${chart}')">`
-                ).join('')}
-            </div>
-        </div>
-        ${total > 1 ? `
-        <div class="carousel-controls">
-            <button class="carousel-btn" id="carousel-prev">‹</button>
-            <span class="carousel-counter" id="carousel-counter">1 / ${total}</span>
-            <button class="carousel-btn" id="carousel-next">›</button>
-        </div>` : ''}
-    `;
-    
-    // הוסף אחרי תיאור המוצר
-    modalProductDescription.parentNode.insertBefore(carouselSection, customOptionsContainer);
-    
-    if (total > 1) {
-        const track = document.getElementById('carousel-track-inner');
-        const counter = document.getElementById('carousel-counter');
-        const prevBtn = document.getElementById('carousel-prev');
-        const nextBtn = document.getElementById('carousel-next');
-        
-        function updateCarousel() {
-            track.style.transform = `translateX(${currentSlide * -100}%)`;
-            counter.textContent = `${currentSlide + 1} / ${total}`;
-            prevBtn.disabled = currentSlide === 0;
-            nextBtn.disabled = currentSlide === total - 1;
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) { currentSlide--; updateCarousel(); }
+            });
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < total - 1) { currentSlide++; updateCarousel(); }
+            });
+            updateCarousel();
         }
-        
-        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; updateCarousel(); } });
-        nextBtn.addEventListener('click', () => { if (currentSlide < total - 1) { currentSlide++; updateCarousel(); } });
-        updateCarousel();
-    }
-}
-            currentProductOptions = {};
-            customOptionsContainer.innerHTML = '';
 
+        modalProductDescription.parentNode.insertBefore(carouselSection, customOptionsContainer);
+    }
+
+    currentProductOptions = {};
+    customOptionsContainer.innerHTML = '';
 
 
             if (product.customFields && product.customFields.length > 0) {
