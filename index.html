@@ -3160,13 +3160,15 @@ function updateCartDisplay() {
         nextBtn.type = 'button';
 
         function goToSlide(index) {
-            currentSlide = index;
-            const slideWidth = trackContainer.offsetWidth;
-            trackContainer.scrollTo({ left: currentSlide * slideWidth, behavior: 'smooth' });
-            counter.textContent = `${currentSlide + 1} / ${total}`;
-            prevBtn.disabled = currentSlide === 0;
-            nextBtn.disabled = currentSlide === total - 1;
-        }
+    currentSlide = index;
+    const slides = trackContainer.querySelectorAll('div');
+    if (slides[currentSlide]) {
+        slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+    }
+    counter.textContent = `${currentSlide + 1} / ${total}`;
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === total - 1;
+}
 
         prevBtn.addEventListener('click', () => { if (currentSlide > 0) goToSlide(currentSlide - 1); });
         nextBtn.addEventListener('click', () => { if (currentSlide < total - 1) goToSlide(currentSlide + 1); });
