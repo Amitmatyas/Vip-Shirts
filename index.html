@@ -517,6 +517,103 @@
             text-align: center;
         }
 
+        /* ===== SIZE CHARTS CAROUSEL ===== */
+.size-charts-carousel {
+    margin-top: 15px;
+    position: relative;
+}
+
+.size-charts-carousel-title {
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+}
+
+.carousel-track-container {
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.carousel-track img {
+    min-width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    background: #fafafa;
+    cursor: zoom-in;
+}
+
+.carousel-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.carousel-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-btn:hover { background: #c82333; }
+.carousel-btn:disabled { background: #ccc; cursor: default; }
+
+.carousel-counter {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* מודאל תמונה מוגדלת */
+#size-chart-zoom-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+#size-chart-zoom-modal.active { display: flex; }
+#size-chart-zoom-modal img {
+    max-width: 95vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+}
+#size-chart-zoom-modal .close-zoom {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.5em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+        
         .cart-totals {
             background: #f8f9fa;
             padding: 15px;
@@ -1745,7 +1842,7 @@
         </div>
     </div> </div> ```
 
-    <!-- ===== PRODUCT MODAL ===== -->
+    <!-- ===== מודאל מוצר ===== -->
     <div id="product-modal">
         <div class="modal-content">
             <button class="close-product-modal" type="button">&times;</button>
@@ -1756,10 +1853,20 @@
                 <h2 id="modal-product-title"></h2>
                 <div class="price" id="modal-product-price"></div>
                 <div class="description" id="modal-product-description"></div>
+
+                <!-- ===== קרוסלת טבלאות מידות ===== -->
+                <!-- נוצרת דינמית ע"י JS ומוכנסת כאן, לפני custom-options-container -->
+
                 <div id="custom-options-container"></div>
                 <button id="modal-add-to-cart">הוסף לעגלה</button>
             </div>
         </div>
+    </div>
+
+    <!-- ===== מודאל זום טבלת מידות ===== -->
+    <div id="size-chart-zoom-modal">
+        <button class="close-zoom" id="close-zoom-btn">&times;</button>
+        <img id="size-chart-zoom-img" src="" alt="טבלת מידות">
     </div>
 
     <!-- Contact Section -->
@@ -2972,9 +3079,60 @@ function updateCartDisplay() {
                 modalProductPrice.textContent = `${currentProductPrice.toFixed(2)} ₪`;
             }
 
-            modalProductDescription.textContent = product.description || '';
+            // הצגת קרוסלת טבלאות מידות
+const existingCarousel = document.getElementById('size-charts-carousel-section');
+if (existingCarousel) existingCarousel.remove();
+
+if (product.sizeCharts && product.sizeCharts.length > 0) {
+    const carouselSection = document.createElement('div');
+    carouselSection.id = 'size-charts-carousel-section';
+    carouselSection.className = 'size-charts-carousel';
+    
+    let currentSlide = 0;
+    const total = product.sizeCharts.length;
+    
+    carouselSection.innerHTML = `
+        <div class="size-charts-carousel-title">📏 טבלאות מידות (${total})</div>
+        <div class="carousel-track-container">
+            <div class="carousel-track" id="carousel-track-inner">
+                ${product.sizeCharts.map((chart, i) => 
+                    `<img src="${chart}" alt="טבלת מידות ${i+1}" onclick="openSizeChartZoom('${chart}')">`
+                ).join('')}
+            </div>
+        </div>
+        ${total > 1 ? `
+        <div class="carousel-controls">
+            <button class="carousel-btn" id="carousel-prev">‹</button>
+            <span class="carousel-counter" id="carousel-counter">1 / ${total}</span>
+            <button class="carousel-btn" id="carousel-next">›</button>
+        </div>` : ''}
+    `;
+    
+    // הוסף אחרי תיאור המוצר
+    modalProductDescription.parentNode.insertBefore(carouselSection, customOptionsContainer);
+    
+    if (total > 1) {
+        const track = document.getElementById('carousel-track-inner');
+        const counter = document.getElementById('carousel-counter');
+        const prevBtn = document.getElementById('carousel-prev');
+        const nextBtn = document.getElementById('carousel-next');
+        
+        function updateCarousel() {
+            track.style.transform = `translateX(${currentSlide * -100}%)`;
+            counter.textContent = `${currentSlide + 1} / ${total}`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === total - 1;
+        }
+        
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; updateCarousel(); } });
+        nextBtn.addEventListener('click', () => { if (currentSlide < total - 1) { currentSlide++; updateCarousel(); } });
+        updateCarousel();
+    }
+}
             currentProductOptions = {};
             customOptionsContainer.innerHTML = '';
+
+
 
             if (product.customFields && product.customFields.length > 0) {
                 product.customFields.forEach((field, index) => {
@@ -3432,6 +3590,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('load', () => {
             setTimeout(handleDeepLink, 1000);
         });
+        
     </script>
 </body>
 </html>
