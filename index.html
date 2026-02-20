@@ -3161,10 +3161,8 @@ function updateCartDisplay() {
 
         function goToSlide(index) {
     currentSlide = index;
-    const slides = trackContainer.querySelectorAll('div');
-    if (slides[currentSlide]) {
-        slides[currentSlide].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    }
+    const slideWidth = trackContainer.getBoundingClientRect().width;
+    trackContainer.scrollLeft = currentSlide * slideWidth;
     counter.textContent = `${currentSlide + 1} / ${total}`;
     prevBtn.disabled = currentSlide === 0;
     nextBtn.disabled = currentSlide === total - 1;
@@ -3174,15 +3172,15 @@ function updateCartDisplay() {
         nextBtn.addEventListener('click', () => { if (currentSlide < total - 1) goToSlide(currentSlide + 1); });
 
         // עדכון counter בגלילה ידנית
-        trackContainer.addEventListener('scroll', () => {
-            const slideWidth = trackContainer.offsetWidth;
-            if (slideWidth > 0) {
-                currentSlide = Math.round(trackContainer.scrollLeft / slideWidth);
-                counter.textContent = `${currentSlide + 1} / ${total}`;
-                prevBtn.disabled = currentSlide === 0;
-                nextBtn.disabled = currentSlide === total - 1;
-            }
-        });
+trackContainer.addEventListener('scroll', () => {
+    const slideWidth = trackContainer.getBoundingClientRect().width;
+    if (slideWidth > 0) {
+        currentSlide = Math.round(trackContainer.scrollLeft / slideWidth);
+        counter.textContent = `${currentSlide + 1} / ${total}`;
+        prevBtn.disabled = currentSlide === 0;
+        nextBtn.disabled = currentSlide === total - 1;
+    }
+});
 
         prevBtn.disabled = true;
         controls.appendChild(prevBtn);
