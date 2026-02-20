@@ -3159,8 +3159,8 @@ track.style.transform = `translateX(${currentSlide * slideWidth}px)`;
         carouselSection.appendChild(controls);
     }
 
-    modalProductDescription.parentNode.insertBefore(carouselSection, customOptionsContainer);
-}
+customOptionsContainer.parentNode.insertBefore(carouselSection, modalAddToCartBtn);
+   }
 
     currentProductOptions = {};
     customOptionsContainer.innerHTML = '';
