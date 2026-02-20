@@ -3107,15 +3107,46 @@ function updateCartDisplay() {
         const track = document.createElement('div');
         track.className = 'carousel-track';
 
+let loadedCount = 0;
+const totalImages = product.sizeCharts.length;
+
 product.sizeCharts.forEach((chart, i) => {
     const img = document.createElement('img');
     img.style.cursor = 'zoom-in';
     img.alt = `טבלת מידות ${i + 1}`;
     img.addEventListener('click', () => openSizeChartZoom(chart));
-    img.onload = () => { img.style.opacity = '1'; };
+    
+    img.onload = () => {
+        loadedCount++;
+        if (loadedCount === totalImages) {
+            // כל התמונות נטענו - עכשיו אפשר לחשב רוחב נכון
+            // מאלץ reflow לפני החישוב
+            requestAnimationFrame(() => {
+                if (total > 1) {
+                    function updateCarouselAfterLoad() {
+                        const slideWidth = trackContainer.offsetWidth;
+                        if (slideWidth === 0) {
+                            requestAnimationFrame(updateCarouselAfterLoad);
+                            return;
+                        }
+                        track.style.transform = `translateX(0px)`;
+                        // עדכן את כל התמונות לרוחב הנכון
+                        track.querySelectorAll('img').forEach(img => {
+                            img.style.minWidth = slideWidth + 'px';
+                            img.style.width = slideWidth + 'px';
+                        });
+                    }
+                    updateCarouselAfterLoad();
+                }
+                track.querySelectorAll('img').forEach(img => img.style.opacity = '1');
+            });
+        }
+    };
+    
+    img.onerror = () => { loadedCount++; img.style.opacity = '1'; };
     img.style.opacity = '0';
     img.style.transition = 'opacity 0.3s';
-    img.src = chart; // ← src אחרון בכוונה, אחרי שה-onload רשום
+    img.src = chart;
     track.appendChild(img);
 });
 
@@ -3143,13 +3174,13 @@ product.sizeCharts.forEach((chart, i) => {
             controls.appendChild(nextBtn);
             carouselSection.appendChild(controls);
 
-            function updateCarousel() {
-                const slideWidth = trackContainer.offsetWidth;
-track.style.transform = `translateX(${currentSlide * -slideWidth}px)`;
-                counter.textContent = `${currentSlide + 1} / ${total}`;
-                prevBtn.disabled = currentSlide === 0;
-                nextBtn.disabled = currentSlide === total - 1;
-            }
+function updateCarousel() {
+    const slideWidth = trackContainer.offsetWidth;
+    track.style.transform = `translateX(${currentSlide * -slideWidth}px)`;
+    counter.textContent = `${currentSlide + 1} / ${total}`;
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === total - 1;
+}
 
             prevBtn.addEventListener('click', () => {
                 if (currentSlide > 0) { currentSlide--; updateCarousel(); }
