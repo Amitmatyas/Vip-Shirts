@@ -546,6 +546,7 @@
     min-width: 100%;
     width: 100%;
     flex-shrink: 0;
+    height: 250px;
     max-height: 300px;
     object-fit: contain;
     background: #fafafa;
@@ -3106,14 +3107,17 @@ function updateCartDisplay() {
         const track = document.createElement('div');
         track.className = 'carousel-track';
 
-        product.sizeCharts.forEach((chart, i) => {
-            const img = document.createElement('img');
-            img.src = chart;
-            img.alt = `טבלת מידות ${i + 1}`;
-            img.style.cursor = 'zoom-in';
-            img.addEventListener('click', () => openSizeChartZoom(chart));
-            track.appendChild(img);
-        });
+product.sizeCharts.forEach((chart, i) => {
+    const img = document.createElement('img');
+    img.style.cursor = 'zoom-in';
+    img.alt = `טבלת מידות ${i + 1}`;
+    img.addEventListener('click', () => openSizeChartZoom(chart));
+    img.onload = () => { img.style.opacity = '1'; };
+    img.style.opacity = '0';
+    img.style.transition = 'opacity 0.3s';
+    img.src = chart; // ← src אחרון בכוונה, אחרי שה-onload רשום
+    track.appendChild(img);
+});
 
         trackContainer.appendChild(track);
         carouselSection.appendChild(trackContainer);
