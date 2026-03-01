@@ -2177,15 +2177,6 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
     }
 
     const orderDetailsModal = document.getElementById('order-details-modal');
-
-        function openSizeChartZoom(src) {
-    document.getElementById('size-chart-zoom-img').src = src;
-    document.getElementById('size-chart-zoom-modal').classList.add('active');
-}
-
-document.getElementById('size-chart-zoom-modal').addEventListener('click', function(e) {
-    if (e.target === this) this.classList.remove('active');
-});
         
     function showOrderDetails(order) {
         document.getElementById('modal-customer-name').textContent = order.customerName || 'לא ידוע';
