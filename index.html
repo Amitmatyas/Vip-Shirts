@@ -2825,10 +2825,9 @@ function calculateShipping() {
         }
     });
 
-    // סכום המשלוח המותאם (מכל מוצר עם הגדרה)
-    const customShippingTotal = itemsWithCustomShipping.reduce((sum, { product }) => {
-        return sum + product.customShipping;
-    }, 0);
+const customShippingTotal = itemsWithCustomShipping.reduce((sum, { item, product }) => {
+    return sum + product.customShipping * item.quantity; // ← כופל ב-quantity
+}, 0);
 
     // --- חישוב משלוח גלובלי רק על מוצרים ללא הגדרה ---
     let globalShipping = 0;
