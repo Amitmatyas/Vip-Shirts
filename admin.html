@@ -971,13 +971,13 @@
             <div class="content-section" id="products-section">
                 <div class="content-header"><h2>ניהול מוצרים</h2></div>
                 <form id="add-product-form">
-                    <h3 style="margin-bottom: 20px; color: #2c3e50;">הוסף חולצה חדשה</h3>
+                    <h3 style="margin-bottom: 20px; color: #2c3e50;">הוסף מוצר חדש</h3>
                     <div class="form-group">
-                        <label for="product-name">שם החולצה: *</label>
+                        <label for="product-name">שם המוצר: *</label>
                         <input type="text" id="product-name" required>
                     </div>
                     <div class="form-group">
-                        <label for="product-description">תיאור החולצה: *</label>
+                        <label for="product-description">תיאור המוצר: *</label>
                         <textarea id="product-description" required></textarea>
                     </div>
                     <div class="form-group">
@@ -1034,11 +1034,11 @@
                             <div id="size-charts-status"></div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-dark">הוסף חולצה</button>
+                    <button type="submit" class="btn btn-dark">הוסף מוצר</button>
                 </form>
                 
 <div class="section-divider"></div>
-                <h3 style="margin-bottom: 20px; color: #2c3e50;">כל החולצות</h3>
+                <h3 style="margin-bottom: 20px; color: #2c3e50;">כל המוצרים</h3>
                 
                 <!-- חיפוש מוצרים -->
                 <div class="search-container">
@@ -1211,7 +1211,7 @@
     <div id="edit-product-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h3>עריכת חולצה</h3>
+            <h3>עריכת מוצר</h3>
             <div id="edit-form-container"></div>
         </div>
     </div>
@@ -1464,7 +1464,7 @@
 
             const productsContainer = document.getElementById(`products-${category}`);
             if (categoryProducts.length === 0) {
-                productsContainer.innerHTML = '<p style="color: #666;">אין חולצות בקטגוריה זו</p>';
+                productsContainer.innerHTML = '<p style="color: #666;">אין מוצרים בקטגוריה זו</p>';
             } else {
                 categoryProducts.forEach(product => {
                     const productCard = document.createElement('div');
@@ -1580,9 +1580,12 @@ document.querySelectorAll('.btn-edit-product').forEach(btn => {
             // Check if any product is ONLY in this category — those will be deleted
             const onlyInThis = productsInCategory.filter(p => getProductCategories(p).length === 1);
             const inOthers = productsInCategory.filter(p => getProductCategories(p).length > 1);
-            let msg = `קטגוריה זו מכילה ${productsInCategory.length} חולצות.\n`;
-            if (onlyInThis.length > 0) msg += `${onlyInThis.length} חולצות נמצאות רק בקטגוריה זו ותמחקנה.\n`;
-            if (inOthers.length > 0) msg += `${inOthers.length} חולצות נמצאות גם בקטגוריות אחרות — הן תשמרנה ורק קטגוריה זו תהסיר מהן.\n`;
+            let msg = `קטגוריה זו מכילה ${productsInCategory.length} מוצרים.\n`;
+if (onlyInThis.length > 0)
+    msg += `${onlyInThis.length} מוצרים שייכים רק לקטגוריה זו ולכן יימחקו.\n`;
+
+if (inOthers.length > 0)
+    msg += `${inOthers.length} מוצרים שייכים גם לקטגוריות אחרות — הם לא יימחקו אלא רק יוסרו מהקטגוריה הנוכחית.\n`;
             msg += 'האם אתה בטוח?';
             if (!confirm(msg)) return;
         } else {
@@ -1657,8 +1660,8 @@ document.querySelectorAll('.btn-edit-product').forEach(btn => {
 
         if (filteredProducts.length === 0) {
             allProductsGrid.innerHTML = searchTerm 
-                ? '<p style="grid-column: 1/-1; text-align: center; color: #666;">לא נמצאו חולצות התואמות לחיפוש.</p>'
-                : '<p style="grid-column: 1/-1; text-align: center; color: #666;">אין חולצות. הוסף חולצה חדשה למעלה.</p>';
+                ? '<p style="grid-column: 1/-1; text-align: center; color: #666;">לא נמצאו מוצרים התואמים לחיפוש.</p>'
+                : '<p style="grid-column: 1/-1; text-align: center; color: #666;">אין מוצרים. הוסף מוצר חדש למעלה.</p>';
             updateCouponProductSelect();
             return;
         }
@@ -1746,14 +1749,14 @@ document.querySelectorAll('.btn-edit-product').forEach(btn => {
     }
 
     async function deleteProductDirect(productId) {
-        if (!confirm('האם אתה בטוח שברצונך למחוק חולצה זו?')) return;
+        if (!confirm('האם אתה בטוח שברצונך למחוק מוצר זה?')) return;
         try {
             await db.collection('soccer_shirts').doc(productId).delete();
-            alert('החולצה נמחקה בהצלחה!');
+            alert('המוצר נמחק בהצלחה!');
             await loadCategories();
             await loadAllProducts();
             await loadCoupons();
-        } catch (error) { alert('שגיאה במחיקת החולצה. נסה שוב.'); console.error(error); }
+        } catch (error) { alert('שגיאה במחיקת המוצר. נסה שוב.'); console.error(error); }
     }
 
     // ============================================
@@ -1898,7 +1901,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
 
     try {
         await db.collection('soccer_shirts').add(productData);
-        alert('החולצה נוספה בהצלחה!');
+        alert('המוצר נוסף בהצלחה!');
         document.getElementById('add-product-form').reset();
         document.getElementById('product-image-preview').classList.remove('show');
         document.getElementById('product-upload-status').textContent = '';
@@ -1907,7 +1910,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
         await loadCategories();
         await loadAllProducts();
         await loadCoupons();
-    } catch (error) { alert('שגיאה בהוספת החולצה. נסה שוב.'); console.error(error); }
+    } catch (error) { alert('שגיאה בהוספת המוצר. נסה שוב.'); console.error(error); }
 });
 
     // ============================================
@@ -1923,11 +1926,11 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
 editFormContainer.innerHTML = `
     <form id="edit-product-form">
         <div class="form-group">
-            <label for="edit-product-name">שם החולצה:</label>
+            <label for="edit-product-name">שם המוצר:</label>
             <input type="text" id="edit-product-name" value="${product.name}" required>
         </div>
         <div class="form-group">
-            <label for="edit-product-description">תיאור החולצה:</label>
+            <label for="edit-product-description">תיאור המוצר:</label>
             <textarea id="edit-product-description" required>${product.description}</textarea>
         </div>
         <div class="form-group">
@@ -1987,7 +1990,7 @@ editFormContainer.innerHTML = `
             <div id="edit-custom-fields-container"></div>
         </div>
         <button type="submit" class="btn btn-dark">שמור שינויים</button>
-        <button type="button" id="delete-product-btn" class="btn btn-danger" style="width: 100%; margin-top: 10px;">מחק חולצה</button>
+        <button type="button" id="delete-product-btn" class="btn btn-danger" style="width: 100%; margin-top: 10px;">מחק מוצר</button>
     </form>
 `;
 
@@ -2074,24 +2077,24 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
             
             try {
                 await db.collection('soccer_shirts').doc(productId).update(updateData);
-                alert('החולצה עודכנה בהצלחה!');
+                alert('המוצר עודכן בהצלחה!');
                 editProductModal.classList.remove('active');
                 await loadCategories();
                 await loadAllProducts();
                 await loadCoupons();
-            } catch (error) { alert('שגיאה בעדכון החולצה. נסה שוב.'); console.error(error); }
+            } catch (error) { alert('שגיאה בעדכון המוצר. נסה שוב.'); console.error(error); }
         });
 
         document.getElementById('delete-product-btn').addEventListener('click', async () => {
-            if (confirm('האם אתה בטוח שברצונך למחוק חולצה זו?')) {
+            if (confirm('האם אתה בטוח שברצונך למחוק מוצר זה?')) {
                 try {
                     await db.collection('soccer_shirts').doc(productId).delete();
-                    alert('החולצה נמחקה בהצלחה!');
+                    alert('המוצר נמחק בהצלחה!');
                     editProductModal.classList.remove('active');
                     await loadCategories();
                     await loadAllProducts();
                     await loadCoupons();
-                } catch (error) { alert('שגיאה במחיקת החולצה. נסה שוב.'); console.error(error); }
+                } catch (error) { alert('שגיאה במחיקת המוצר. נסה שוב.'); console.error(error); }
             }
         });
 
