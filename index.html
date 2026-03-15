@@ -1851,7 +1851,7 @@
         <div class="modal-content">
             <button class="close-product-modal" type="button">&times;</button>
             <div class="modal-image">
-                <img src="" alt="חולצה" id="modal-product-image">
+                <img src="" alt="תמונת המוצר" id="modal-product-image">
             </div>
             <div class="modal-details">
                 <h2 id="modal-product-title"></h2>
@@ -2803,7 +2803,7 @@ async function fetchProducts() {
         applyFilters();
         handleDeepLink(); // ← הוסף את זה כאן
     } catch (error) {
-        alert("שגיאה בטעינת חולצות.");
+        alert("שגיאה בטעינת מוצרים.");
     }
 }
 
@@ -3436,7 +3436,7 @@ function renderPayPalButton() {
             return actions.order.create({
                 purchase_units: [{
                     amount: { value: total.toFixed(2), currency_code: 'ILS' },
-                    description: 'רכישת חולצות כדורגל'
+                    description: 'רכישה בVIP Shirts'
                 }]
             });
         },
