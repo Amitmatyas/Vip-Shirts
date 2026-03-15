@@ -1762,10 +1762,10 @@
                 <span>סה"כ מוצרים:</span>
                 <span><span id="cart-subtotal">0.00</span> ₪</span>
             </div>
-            <div class="total-row">
-                <span>דמי משלוח:</span>
-                <span><span id="shipping-cost">0.00</span> ₪</span>
-            </div>
+<div class="total-row">
+            <span>דמי משלוח:${buildShippingBreakdown()}</span>
+            <span>${shippingCost.toFixed(2)} ₪</span>
+        </div>
             <div class="total-row grand-total">
                 <span>סה"כ לתשלום:</span>
                 <span><span id="cart-total">0.00</span> ₪</span>
@@ -2807,31 +2807,71 @@ async function fetchProducts() {
     }
 }
 
-        function calculateShipping() {
-            if (!settings || !settings.Shipping) { shippingCost = 0; return; }
-            const shipping = settings.Shipping;
-            if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
-                shippingCost = 0;
-                shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
-                return;
-            }
-            if (shipping.Method === 'percentage') {
-                shippingCost = (subtotal * shipping.Value) / 100;
-            } else if (shipping.Method === 'per_item') {
-                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                shippingCost = shipping.Value * totalItems;
-            } else {
-                shippingCost = shipping.Value;
-            }
-            if (shipping.FreeThreshold > 0) {
-                const remaining = shipping.FreeThreshold - subtotal;
-                if (remaining > 0) {
-                    shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
-                }
-            } else {
-                shippingInfoElement.innerHTML = '';
-            }
+function calculateShipping() {
+    if (!settings || !settings.Shipping) { shippingCost = 0; return; }
+    const shipping = settings.Shipping;
+
+    // --- חישוב משלוח מותאם אישית ---
+    // מפריד את הפריטים בעגלה: עם/בלי הגדרת משלוח מותאמת
+    const itemsWithCustomShipping = [];
+    const itemsWithoutCustomShipping = [];
+
+    cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product && product.customShipping !== undefined && product.customShipping >= 0) {
+            itemsWithCustomShipping.push({ item, product });
+        } else {
+            itemsWithoutCustomShipping.push({ item, product });
         }
+    });
+
+    // סכום המשלוח המותאם (מכל מוצר עם הגדרה)
+    const customShippingTotal = itemsWithCustomShipping.reduce((sum, { product }) => {
+        return sum + product.customShipping;
+    }, 0);
+
+    // --- חישוב משלוח גלובלי רק על מוצרים ללא הגדרה ---
+    let globalShipping = 0;
+
+    if (itemsWithoutCustomShipping.length > 0) {
+        const subtotalWithoutCustom = itemsWithoutCustomShipping.reduce((sum, { item }) => {
+            return sum + item.price * item.quantity;
+        }, 0);
+
+        if (shipping.Method === 'percentage') {
+            globalShipping = (subtotalWithoutCustom * shipping.Value) / 100;
+        } else if (shipping.Method === 'per_item') {
+            const countWithout = itemsWithoutCustomShipping.reduce((sum, { item }) => sum + item.quantity, 0);
+            globalShipping = shipping.Value * countWithout;
+        } else {
+            // fixed — חל פעם אחת אם יש בכלל מוצרים ללא הגדרה
+            globalShipping = shipping.Value;
+        }
+    } else if (itemsWithCustomShipping.length > 0 && shipping.Method === 'fixed') {
+        // כל המוצרים עם הגדרה מותאמת — לא מוסיפים משלוח קבוע
+        globalShipping = 0;
+    }
+
+    shippingCost = customShippingTotal + globalShipping;
+
+    // --- הודעת משלוח חינם ---
+    if (shipping.FreeThreshold > 0 && subtotal >= shipping.FreeThreshold) {
+        shippingCost = 0;
+        shippingInfoElement.innerHTML = '<strong style="color: #28a745;">✓ זכאי למשלוח חינם!</strong>';
+        return;
+    }
+
+    if (shipping.FreeThreshold > 0) {
+        const remaining = shipping.FreeThreshold - subtotal;
+        if (remaining > 0) {
+            shippingInfoElement.innerHTML = `הוסף עוד ${remaining.toFixed(2)}₪ וקבל משלוח חינם!`;
+        } else {
+            shippingInfoElement.innerHTML = '';
+        }
+    } else {
+        shippingInfoElement.innerHTML = '';
+    }
+}
 
 function applyCouponDiscount() {
     if (!appliedCoupon) return 0;
@@ -2847,6 +2887,24 @@ function applyCouponDiscount() {
     return discount;
 }
 
+function buildShippingBreakdown() {
+    if (!settings || !settings.Shipping || cart.length === 0) return '';
+    
+    const lines = [];
+    
+    cart.forEach(item => {
+        const product = products.find(p => p.id === item.id);
+        if (product && product.customShipping !== undefined && product.customShipping >= 0) {
+            lines.push(`<div style="font-size:0.8em;color:#888;margin-top:3px;">• ${item.name}: ${product.customShipping.toFixed(2)}₪</div>`);
+        } else if (settings.Shipping.Method === 'per_item') {
+            lines.push(`<div style="font-size:0.8em;color:#888;margin-top:3px;">• ${item.name}: ${(settings.Shipping.Value * item.quantity).toFixed(2)}₪</div>`);
+        }
+    });
+    
+    if (lines.length === 0) return '';
+    return '<div style="margin-top:4px;">' + lines.join('') + '</div>';
+}
+        
 function updateCartDisplay() {
     cartItemsList.innerHTML = '';
     subtotal = 0;
