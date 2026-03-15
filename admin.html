@@ -984,19 +984,28 @@
                         <label for="product-price">מחיר רגיל: *</label>
                         <input type="number" id="product-price" step="0.01" min="0" required>
                     </div>
-                    <div class="sale-info-box">
-                        <h4>הגדרות מבצע (אופציונלי)</h4>
-                        <div class="form-group">
-                            <label for="product-sale-price">מחיר מבצע:</label>
-                            <input type="number" id="product-sale-price" step="0.01" min="0" placeholder="השאר ריק אם אין מבצע">
-                            <small>אם תזין מחיר מבצע, המוצר יוצג עם תג הנחה</small>
-                        </div>
-                        <div class="form-group">
-                            <label for="product-sale-end">תאריך סיום מבצע:</label>
-                            <input type="date" id="product-sale-end">
-                            <small>אם ריק, המבצע לא יפוג. אם מלא, המבצע יסתיים בתאריך זה</small>
-                        </div>
-                    </div>
+<div class="sale-info-box">
+    <h4>הגדרות מבצע (אופציונלי)</h4>
+    <div class="form-group">
+        <label for="product-sale-price">מחיר מבצע:</label>
+        <input type="number" id="product-sale-price" step="0.01" min="0" placeholder="השאר ריק אם אין מבצע">
+        <small>אם תזין מחיר מבצע, המוצר יוצג עם תג הנחה</small>
+    </div>
+    <div class="form-group">
+        <label for="product-sale-end">תאריך סיום מבצע:</label>
+        <input type="date" id="product-sale-end">
+        <small>אם ריק, המבצע לא יפוג. אם מלא, המבצע יסתיים בתאריך זה</small>
+    </div>
+</div>
+
+<div class="sale-info-box">
+    <h4>הגדרות משלוח מותאם אישית (אופציונלי)</h4>
+    <div class="form-group">
+        <label for="product-custom-shipping">עלות משלוח מותאמת (₪):</label>
+        <input type="number" id="product-custom-shipping" step="0.01" min="0" placeholder="השאר ריק להשתמש בהגדרות הגלובליות">
+        <small>אם תזין ערך, עלות משלוח זו תתווסף לעגלה בנוסף למשלוח הרגיל של שאר המוצרים</small>
+    </div>
+</div>
                     <div class="form-group">
                         <label>קטגוריות: *</label>
                         <div class="category-checkboxes" id="product-category-checkboxes"></div>
@@ -1855,53 +1864,51 @@ document.querySelectorAll('.btn-edit-product').forEach(btn => {
     // ============================================
     // ADD PRODUCT
     // ============================================
-    document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('product-name').value.trim();
-        const description = document.getElementById('product-description').value.trim();
-        const price = parseFloat(document.getElementById('product-price').value);
-        const salePrice = parseFloat(document.getElementById('product-sale-price').value) || null;
-        const saleEndDate = document.getElementById('product-sale-end').value || null;
-        const selectedCats = getSelectedCategories('product-category-checkboxes');
-        const image = document.getElementById('product-image-url').value.trim();
+document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('product-name').value.trim();
+    const description = document.getElementById('product-description').value.trim();
+    const price = parseFloat(document.getElementById('product-price').value);
+    const salePrice = parseFloat(document.getElementById('product-sale-price').value) || null;
+    const saleEndDate = document.getElementById('product-sale-end').value || null;
+    const customShipping = parseFloat(document.getElementById('product-custom-shipping').value);
+    const selectedCats = getSelectedCategories('product-category-checkboxes');
+    const image = document.getElementById('product-image-url').value.trim();
 
-if (!name || !description || isNaN(price) || price < 0 || !image) {
-    alert('אנא מלא את כל השדות החובה.');
-    return;
-}
-        if (salePrice && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
+    if (!name || !description || isNaN(price) || price < 0 || !image) {
+        alert('אנא מלא את כל השדות החובה.');
+        return;
+    }
+    if (salePrice && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
 
-        const customFields = extractCustomFields(customFieldsContainer);
-        const productData = {
-            name, description, price,
-            categories: selectedCats,
-            image,
-            customFields: customFields.length > 0 ? customFields : null,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        if (salePrice && salePrice > 0) productData.salePrice = salePrice;
-        if (saleEndDate) productData.saleEndDate = saleEndDate;
+    const customFields = extractCustomFields(customFieldsContainer);
+    const productData = {
+        name, description, price,
+        categories: selectedCats,
+        image,
+        customFields: customFields.length > 0 ? customFields : null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    if (salePrice && salePrice > 0) productData.salePrice = salePrice;
+    if (saleEndDate) productData.saleEndDate = saleEndDate;
+    if (!isNaN(customShipping) && customShipping >= 0) productData.customShipping = customShipping;
 
-        // שמירת טבלאות מידות
-const sizeCharts = await processSizeChartFiles('size-charts-input', 'size-charts-preview', 'size-charts-status');
-if (sizeCharts.length > 0) {
-    productData.sizeCharts = sizeCharts;
-}
-        
-        try {
-            await db.collection('soccer_shirts').add(productData);
-            alert('החולצה נוספה בהצלחה!');
-            document.getElementById('add-product-form').reset();
-            document.getElementById('product-image-preview').classList.remove('show');
-            document.getElementById('product-upload-status').textContent = '';
-            customFieldsContainer.innerHTML = '';
-            // Uncheck all category checkboxes
-            document.querySelectorAll('#product-category-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
-            await loadCategories();
-            await loadAllProducts();
-            await loadCoupons();
-        } catch (error) { alert('שגיאה בהוספת החולצה. נסה שוב.'); console.error(error); }
-    });
+    const sizeCharts = await processSizeChartFiles('size-charts-input', 'size-charts-preview', 'size-charts-status');
+    if (sizeCharts.length > 0) productData.sizeCharts = sizeCharts;
+
+    try {
+        await db.collection('soccer_shirts').add(productData);
+        alert('החולצה נוספה בהצלחה!');
+        document.getElementById('add-product-form').reset();
+        document.getElementById('product-image-preview').classList.remove('show');
+        document.getElementById('product-upload-status').textContent = '';
+        customFieldsContainer.innerHTML = '';
+        document.querySelectorAll('#product-category-checkboxes input[type="checkbox"]').forEach(cb => cb.checked = false);
+        await loadCategories();
+        await loadAllProducts();
+        await loadCoupons();
+    } catch (error) { alert('שגיאה בהוספת החולצה. נסה שוב.'); console.error(error); }
+});
 
     // ============================================
     // EDIT PRODUCT MODAL
@@ -1913,66 +1920,76 @@ if (sizeCharts.length > 0) {
         currentProductToEdit = productId;
         const currentCats = getProductCategories(product);
 
-        editFormContainer.innerHTML = `
-            <form id="edit-product-form">
-                <div class="form-group">
-                    <label for="edit-product-name">שם החולצה:</label>
-                    <input type="text" id="edit-product-name" value="${product.name}" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-product-description">תיאור החולצה:</label>
-                    <textarea id="edit-product-description" required>${product.description}</textarea>
-                </div>
-                <div class="form-group">
-                    <label for="edit-product-price">מחיר רגיל:</label>
-                    <input type="number" id="edit-product-price" step="0.01" min="0" value="${product.price}" required>
-                </div>
-                <div class="sale-info-box">
-                    <h4>הגדרות מבצע (אופציונלי)</h4>
-                    <div class="form-group">
-                        <label for="edit-product-sale-price">מחיר מבצע:</label>
-                        <input type="number" id="edit-product-sale-price" step="0.01" min="0" value="${product.salePrice || ''}" placeholder="השאר ריק אם אין מבצע">
-                        <small>אם תזין מחיר מבצע, המוצר יוצג עם תג הנחה</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-product-sale-end">תאריך סיום מבצע:</label>
-                        <input type="date" id="edit-product-sale-end" value="${product.saleEndDate || ''}">
-                        <small>אם ריק, המבצע לא יפוג</small>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>קטגוריות:</label>
-                    <div class="category-checkboxes" id="edit-category-checkboxes"></div>
-                    <small>בחר קטגוריה</small>
-                </div>
-                <div class="form-group">
-                    <label>תמונה נוכחית:</label>
-                    <img src="${product.image}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px;">
-                    <div class="image-upload-container" id="edit-product-image-upload">
-                        <p>לחץ או גרור תמונה חדשה (אופציונלי)</p>
-                        <input type="file" id="edit-product-image-file" accept="image/*" style="display: none;">
-                        <img id="edit-product-image-preview" class="image-preview">
-                        <div id="edit-product-upload-status" class="upload-status"></div>
-                        <input type="hidden" id="edit-product-image-url" value="${product.image}">
-                    </div>
-                </div>
-                <div class="form-group">
-    <label>טבלאות מידות קיימות:</label>
-    <div id="edit-size-charts-existing" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-    <label style="margin-top:10px;">הוסף טבלאות מידות חדשות:</label>
-    <input type="file" id="edit-size-charts-input" accept="image/*" multiple>
-    <div id="edit-size-charts-preview" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;"></div>
-    <div id="edit-size-charts-status"></div>
-</div>
-                <div class="form-group">
-                    <label>שדות מותאמים אישית:</label>
-                    <button type="button" class="btn btn-success" id="edit-add-custom-field">הוסף שדה חדש</button>
-                    <div id="edit-custom-fields-container"></div>
-                </div>
-                <button type="submit" class="btn btn-dark">שמור שינויים</button>
-                <button type="button" id="delete-product-btn" class="btn btn-danger" style="width: 100%; margin-top: 10px;">מחק חולצה</button>
-            </form>
-        `;
+editFormContainer.innerHTML = `
+    <form id="edit-product-form">
+        <div class="form-group">
+            <label for="edit-product-name">שם החולצה:</label>
+            <input type="text" id="edit-product-name" value="${product.name}" required>
+        </div>
+        <div class="form-group">
+            <label for="edit-product-description">תיאור החולצה:</label>
+            <textarea id="edit-product-description" required>${product.description}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="edit-product-price">מחיר רגיל:</label>
+            <input type="number" id="edit-product-price" step="0.01" min="0" value="${product.price}" required>
+        </div>
+        <div class="sale-info-box">
+            <h4>הגדרות מבצע (אופציונלי)</h4>
+            <div class="form-group">
+                <label for="edit-product-sale-price">מחיר מבצע:</label>
+                <input type="number" id="edit-product-sale-price" step="0.01" min="0" value="${product.salePrice || ''}" placeholder="השאר ריק אם אין מבצע">
+                <small>אם תזין מחיר מבצע, המוצר יוצג עם תג הנחה</small>
+            </div>
+            <div class="form-group">
+                <label for="edit-product-sale-end">תאריך סיום מבצע:</label>
+                <input type="date" id="edit-product-sale-end" value="${product.saleEndDate || ''}">
+                <small>אם ריק, המבצע לא יפוג</small>
+            </div>
+        </div>
+        <div class="sale-info-box">
+            <h4>הגדרות משלוח מותאם אישית (אופציונלי)</h4>
+            <div class="form-group">
+                <label for="edit-product-custom-shipping">עלות משלוח מותאמת (₪):</label>
+                <input type="number" id="edit-product-custom-shipping" step="0.01" min="0"
+                       value="${product.customShipping !== undefined ? product.customShipping : ''}"
+                       placeholder="השאר ריק להשתמש בהגדרות הגלובליות">
+                <small>אם תזין ערך, עלות משלוח זו תתווסף לעגלה בנוסף למשלוח הרגיל של שאר המוצרים</small>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>קטגוריות:</label>
+            <div class="category-checkboxes" id="edit-category-checkboxes"></div>
+            <small>בחר קטגוריה</small>
+        </div>
+        <div class="form-group">
+            <label>תמונה נוכחית:</label>
+            <img src="${product.image}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px;">
+            <div class="image-upload-container" id="edit-product-image-upload">
+                <p>לחץ או גרור תמונה חדשה (אופציונלי)</p>
+                <input type="file" id="edit-product-image-file" accept="image/*" style="display: none;">
+                <img id="edit-product-image-preview" class="image-preview">
+                <div id="edit-product-upload-status" class="upload-status"></div>
+                <input type="hidden" id="edit-product-image-url" value="${product.image}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label>טבלאות מידות קיימות:</label>
+            <div id="edit-size-charts-existing" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+            <label style="margin-top:10px;">הוסף טבלאות מידות חדשות:</label>
+            <input type="file" id="edit-size-charts-input" accept="image/*" multiple>
+            <div id="edit-size-charts-preview" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;"></div>
+            <div id="edit-size-charts-status"></div>
+        </div>
+        <div class="form-group">
+            <label>שדות מותאמים אישית:</label>
+            <button type="button" class="btn btn-success" id="edit-add-custom-field">הוסף שדה חדש</button>
+            <div id="edit-custom-fields-container"></div>
+        </div>
+        <button type="submit" class="btn btn-dark">שמור שינויים</button>
+        <button type="button" id="delete-product-btn" class="btn btn-danger" style="width: 100%; margin-top: 10px;">מחק חולצה</button>
+    </form>
+`;
 
         // הצגת טבלאות מידות קיימות
 const existingChartsDiv = document.getElementById('edit-size-charts-existing');
@@ -2016,6 +2033,7 @@ window.removeExistingChart = function(idx) {
             const price = parseFloat(document.getElementById('edit-product-price').value);
             const salePrice = parseFloat(document.getElementById('edit-product-sale-price').value) || null;
             const saleEndDate = document.getElementById('edit-product-sale-end').value || null;
+            const customShipping = parseFloat(document.getElementById('edit-product-custom-shipping').value);
             const selectedCats = getSelectedCategories('edit-category-checkboxes');
             const image = document.getElementById('edit-product-image-url').value.trim();
 
@@ -2047,6 +2065,12 @@ const existingCharts = product.sizeCharts || [];
 // הוספת חדשות
 const newCharts = await processSizeChartFiles('edit-size-charts-input', 'edit-size-charts-preview', 'edit-size-charts-status');
 updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
+
+            if (!isNaN(customShipping) && customShipping >= 0) {
+    updateData.customShipping = customShipping;
+} else {
+    updateData.customShipping = firebase.firestore.FieldValue.delete();
+}
             
             try {
                 await db.collection('soccer_shirts').doc(productId).update(updateData);
