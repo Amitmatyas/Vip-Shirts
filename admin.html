@@ -905,7 +905,7 @@
             }
         }
 
-        @media (max-width: 480px) {
+@media (max-width: 480px) {
             .content-header h2 {
                 font-size: 1.5em;
             }
@@ -923,6 +923,132 @@
                 flex: 1;
             }
         }
+
+        /* ===== SKELETON LOADER ===== */
+        @keyframes shimmer {
+            0% { background-position: -800px 0; }
+            100% { background-position: 800px 0; }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+
+        .skeleton-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .skeleton-img { width: 100%; height: 200px; margin-bottom: 15px; }
+        .skeleton-line { height: 16px; margin-bottom: 10px; }
+        .skeleton-line.short { width: 60%; }
+        .skeleton-line.medium { width: 80%; }
+        .skeleton-line.full { width: 100%; }
+        .skeleton-badge { height: 24px; width: 80px; margin-bottom: 10px; border-radius: 4px; }
+        .skeleton-btn { height: 40px; border-radius: 6px; }
+
+        /* ===== BULK EDIT ===== */
+        .bulk-select-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .bulk-product-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bulk-product-item:hover { border-color: #dc3545; background: #fff5f5; }
+
+        .bulk-product-item.selected {
+            border-color: #dc3545;
+            background: #fff0f0;
+        }
+
+        .bulk-product-item input[type="checkbox"] {
+            width: 18px; height: 18px; cursor: pointer; flex-shrink: 0;
+        }
+
+        .bulk-product-item img {
+            width: 45px; height: 45px; object-fit: cover; border-radius: 4px; flex-shrink: 0;
+        }
+
+        .bulk-product-item span {
+            font-size: 0.9em; font-weight: 500; color: #2c3e50;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        .bulk-selected-count {
+            background: #dc3545; color: white; padding: 6px 14px;
+            border-radius: 20px; font-weight: bold; font-size: 0.95em;
+        }
+
+        .bulk-field-mode {
+            display: flex; gap: 15px; align-items: center;
+            background: #f8f9fa; padding: 12px 15px; border-radius: 6px;
+            margin-bottom: 10px; border: 1px solid #e9ecef;
+        }
+
+        .bulk-field-mode label {
+            display: flex; align-items: center; gap: 6px;
+            cursor: pointer; font-weight: 500; color: #2c3e50;
+        }
+
+        .bulk-field-mode input[type="radio"] { width: 16px; height: 16px; cursor: pointer; }
+
+        .bulk-section-box {
+            border: 2px solid #e9ecef; border-radius: 8px;
+            padding: 20px; margin-bottom: 20px; background: #fff;
+        }
+
+        .bulk-section-box h4 {
+            color: #2c3e50; margin-bottom: 15px;
+            padding-bottom: 10px; border-bottom: 2px solid #ecf0f1;
+            font-size: 1.1em;
+        }
+
+        .bulk-enable-field {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px; cursor: pointer;
+        }
+
+        .bulk-enable-field input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+        .bulk-enable-field label { cursor: pointer; font-weight: 600; color: #555; }
+
+        .bulk-field-content { margin-top: 10px; padding-right: 26px; }
+
+        .bulk-progress {
+            background: #f0f0f0; border-radius: 20px; height: 12px;
+            margin: 10px 0; overflow: hidden; display: none;
+        }
+
+        .bulk-progress-bar {
+            background: linear-gradient(90deg, #dc3545, #e74c3c);
+            height: 100%; border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .bulk-progress-text { font-size: 0.9em; color: #666; text-align: center; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -952,7 +1078,7 @@
     <div class="menu-item" data-section="leads">פניות</div>
     <div class="menu-item" data-section="customers">מועדון לקוחות</div>
     <div class="menu-item" data-section="settings">הגדרות</div>
-            </div>
+</div>
         </div>
 
         <div class="main-content">
@@ -1086,6 +1212,124 @@
                 <div id="customers-list"><p>טוען לקוחות...</p></div>
             </div>
         
+<!-- עריכה מרובה -->
+            <div class="content-section" id="bulk-edit-section">
+                <div class="content-header"><h2>עריכת מוצרים מרובים</h2></div>
+
+                <!-- בחירת מוצרים -->
+                <div class="bulk-section-box">
+                    <h4>שלב 1 — בחר מוצרים לעריכה</h4>
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+                        <input type="text" id="bulk-search-input" placeholder="סינון מוצרים לפי שם..." style="flex:1;min-width:200px;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:1em;">
+                        <button class="btn btn-secondary" id="bulk-select-all-btn">בחר הכל</button>
+                        <button class="btn btn-secondary" id="bulk-deselect-all-btn">בטל הכל</button>
+                        <span class="bulk-selected-count" id="bulk-selected-count">0 נבחרו</span>
+                    </div>
+                    <div class="bulk-select-grid" id="bulk-select-grid">
+                        <p style="color:#999;grid-column:1/-1;text-align:center;">טוען מוצרים...</p>
+                    </div>
+                </div>
+
+                <!-- טופס עריכה -->
+                <div class="bulk-section-box">
+                    <h4>שלב 2 — בחר שדות לעריכה</h4>
+
+                    <!-- מחיר רגיל -->
+                    <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+                        <div class="bulk-enable-field">
+                            <input type="checkbox" id="bulk-enable-price">
+                            <label for="bulk-enable-price">מחיר רגיל (₪)</label>
+                        </div>
+                        <div class="bulk-field-content" id="bulk-price-content" style="display:none;">
+                            <input type="number" id="bulk-price" step="0.01" min="0" placeholder="מחיר חדש" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                        </div>
+                    </div>
+
+                    <!-- מחיר מבצע -->
+                    <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+                        <div class="bulk-enable-field">
+                            <input type="checkbox" id="bulk-enable-sale">
+                            <label for="bulk-enable-sale">מחיר מבצע</label>
+                        </div>
+                        <div class="bulk-field-content" id="bulk-sale-content" style="display:none;">
+                            <div class="form-group" style="margin-bottom:10px;">
+                                <label style="font-size:0.9em;color:#555;">מחיר מבצע (₪) — ריק להסרת המבצע:</label>
+                                <input type="number" id="bulk-sale-price" step="0.01" min="0" placeholder="ריק = הסר מבצע" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:0.9em;color:#555;">תאריך סיום מבצע (ריק = ללא תפוגה):</label>
+                                <input type="date" id="bulk-sale-end" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- קטגוריות -->
+                    <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+                        <div class="bulk-enable-field">
+                            <input type="checkbox" id="bulk-enable-categories">
+                            <label for="bulk-enable-categories">קטגוריות</label>
+                        </div>
+                        <div class="bulk-field-content" id="bulk-categories-content" style="display:none;">
+                            <div class="bulk-field-mode">
+                                <label><input type="radio" name="bulk-categories-mode" value="replace" checked> החלף קטגוריות קיימות</label>
+                                <label><input type="radio" name="bulk-categories-mode" value="add"> הוסף לקטגוריות קיימות</label>
+                            </div>
+                            <div class="category-checkboxes" id="bulk-categories-checkboxes"></div>
+                        </div>
+                    </div>
+
+                    <!-- משלוח מותאם -->
+                    <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+                        <div class="bulk-enable-field">
+                            <input type="checkbox" id="bulk-enable-shipping">
+                            <label for="bulk-enable-shipping">עלות משלוח מותאמת (₪)</label>
+                        </div>
+                        <div class="bulk-field-content" id="bulk-shipping-content" style="display:none;">
+                            <input type="number" id="bulk-shipping" step="0.01" min="0" placeholder="ריק = מחק הגדרת משלוח מותאמת" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                        </div>
+                    </div>
+
+                    <!-- שדות מותאמים -->
+                    <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+                        <div class="bulk-enable-field">
+                            <input type="checkbox" id="bulk-enable-customfields">
+                            <label for="bulk-enable-customfields">שדות מותאמים אישית</label>
+                        </div>
+                        <div class="bulk-field-content" id="bulk-customfields-content" style="display:none;">
+                            <div class="bulk-field-mode">
+                                <label><input type="radio" name="bulk-cf-mode" value="replace" checked> החלף שדות קיימים</label>
+                                <label><input type="radio" name="bulk-cf-mode" value="add"> הוסף לשדות קיימים</label>
+                            </div>
+                            <button type="button" class="btn btn-success" id="bulk-add-custom-field" style="margin-bottom:10px;">הוסף שדה</button>
+                            <div id="bulk-custom-fields-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- תיאור -->
+                    <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+                        <div class="bulk-enable-field">
+                            <input type="checkbox" id="bulk-enable-description">
+                            <label for="bulk-enable-description">תיאור המוצר</label>
+                        </div>
+                        <div class="bulk-field-content" id="bulk-description-content" style="display:none;">
+                            <textarea id="bulk-description" rows="4" placeholder="תיאור חדש לכל המוצרים הנבחרים" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-family:inherit;resize:vertical;"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- כפתור שמירה + progress -->
+                <div class="bulk-section-box">
+                    <h4>שלב 3 — החל שינויים</h4>
+                    <div class="bulk-progress" id="bulk-progress">
+                        <div class="bulk-progress-bar" id="bulk-progress-bar" style="width:0%"></div>
+                    </div>
+                    <p class="bulk-progress-text" id="bulk-progress-text"></p>
+                    <button class="btn btn-dark" id="bulk-apply-btn" style="width:100%;font-size:1.1em;padding:15px;">
+                        ✅ החל שינויים על המוצרים הנבחרים
+                    </button>
+                </div>
+            </div>
+
             <!-- הגדרות -->
             <div class="content-section" id="settings-section">
                 <div class="content-header"><h2>הגדרות</h2></div>
@@ -1359,6 +1603,7 @@
             await loadShippingSettings();
             await loadCoupons();
             await loadAnnouncements();
+            await fetchCustomers();
             setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
         } else {
             loginErrorMessage.textContent = 'שם משתמש או סיסמה שגויים.';
@@ -1433,12 +1678,11 @@
         if (!container) return [];
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
     }
-
-    async function displayCategoriesWithProducts() {
+        
+async function displayCategoriesWithProducts() {
         const categoriesGrid = document.getElementById('categories-grid');
-        categoriesGrid.innerHTML = '';
+        showSkeletonCategories();
         const productsSnapshot = await db.collection('soccer_shirts').get();
-        products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         if (categories.length === 0) {
             categoriesGrid.innerHTML = '<p>אין קטגוריות. הוסף קטגוריה חדשה למעלה.</p>';
@@ -1532,137 +1776,79 @@ document.querySelectorAll('.btn-edit-product').forEach(btn => {
         });
     }
 
-    function isProductOnSale(product) {
-        if (!product.salePrice || product.salePrice <= 0) return false;
-        if (product.saleEndDate) { const endDate = new Date(product.saleEndDate); return endDate >= new Date(); }
-        return true;
-    }
-
-    function getEffectivePrice(product) {
-        if (product.salePrice && product.salePrice > 0) {
-            if (product.saleEndDate) { const endDate = new Date(product.saleEndDate); if (endDate >= new Date()) return product.salePrice; }
-            else return product.salePrice;
-        }
-        return product.price;
-    }
-
-    async function editCategoryName(oldName) {
-        const newName = prompt('הזן שם חדש לקטגוריה:', oldName);
-        if (newName && newName.trim() && newName !== oldName) {
-            const trimmedName = newName.trim();
-            const index = categories.indexOf(oldName);
-            categories[index] = trimmedName;
-            try {
-                await db.collection('Settings').doc('main').update({ Categories: categories });
-                // Update all products that have this category in their categories array
-                const productsSnapshot = await db.collection('soccer_shirts').get();
-                const batch = db.batch();
-                productsSnapshot.forEach(doc => {
-                    const data = doc.data();
-                    const cats = getProductCategories(data);
-                    if (cats.includes(oldName)) {
-                        const newCats = cats.map(c => c === oldName ? trimmedName : c);
-                        batch.update(doc.ref, { categories: newCats, category: firebase.firestore.FieldValue.delete() });
-                    }
-                });
-                await batch.commit();
-                alert('קטגוריה עודכנה בהצלחה!');
-                await loadCategories();
-                await loadAllProducts();
-            } catch (error) { console.error('Error editing category:', error); alert('שגיאה בעדכון קטגוריה'); }
+    // ============================================
+    // SKELETON LOADERS
+    // ============================================
+    function showSkeletonProducts(containerId, count = 6) {
+        const grid = document.getElementById(containerId);
+        if (!grid) return;
+        grid.innerHTML = '';
+        for (let i = 0; i < count; i++) {
+            grid.innerHTML += `
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-img"></div>
+                    <div class="skeleton skeleton-badge"></div>
+                    <div class="skeleton skeleton-line medium"></div>
+                    <div class="skeleton skeleton-line short"></div>
+                    <div style="display:flex;gap:8px;margin-top:10px;">
+                        <div class="skeleton skeleton-btn" style="flex:1;"></div>
+                        <div class="skeleton skeleton-btn" style="flex:1;"></div>
+                    </div>
+                </div>`;
         }
     }
 
-    async function deleteCategory(categoryName) {
-        const productsInCategory = products.filter(p => getProductCategories(p).includes(categoryName));
-
-        if (productsInCategory.length > 0) {
-            // Check if any product is ONLY in this category — those will be deleted
-            const onlyInThis = productsInCategory.filter(p => getProductCategories(p).length === 1);
-            const inOthers = productsInCategory.filter(p => getProductCategories(p).length > 1);
-            let msg = `קטגוריה זו מכילה ${productsInCategory.length} מוצרים.\n`;
-if (onlyInThis.length > 0)
-    msg += `${onlyInThis.length} מוצרים שייכים רק לקטגוריה זו ולכן יימחקו.\n`;
-
-if (inOthers.length > 0)
-    msg += `${inOthers.length} מוצרים שייכים גם לקטגוריות אחרות — הם לא יימחקו אלא רק יוסרו מהקטגוריה הנוכחית.\n`;
-            msg += 'האם אתה בטוח?';
-            if (!confirm(msg)) return;
-        } else {
-            if (!confirm('האם אתה בטוח שברצונך למחוק קטגוריה זו?')) return;
+    function showSkeletonCategories() {
+        const grid = document.getElementById('categories-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            grid.innerHTML += `
+                <div class="skeleton-card" style="padding:25px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <div class="skeleton skeleton-line" style="width:150px;height:22px;"></div>
+                        <div style="display:flex;gap:8px;">
+                            <div class="skeleton skeleton-btn" style="width:80px;height:36px;"></div>
+                            <div class="skeleton skeleton-btn" style="width:60px;height:36px;"></div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;">
+                        ${[1,2,3].map(() => `
+                            <div class="skeleton-card" style="padding:12px;">
+                                <div class="skeleton skeleton-img" style="height:120px;"></div>
+                                <div class="skeleton skeleton-line medium" style="margin-top:8px;"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>`).join('')}
+                    </div>
+                </div>`;
         }
-
-        try {
-            const index = categories.indexOf(categoryName);
-            categories.splice(index, 1);
-            await db.collection('Settings').doc('main').update({ Categories: categories });
-
-            // For each product in this category:
-            // - if only category → delete the product
-            // - if multiple categories → remove this one from the array
-            const productsSnapshot = await db.collection('soccer_shirts').get();
-            const batch = db.batch();
-            productsSnapshot.forEach(doc => {
-                const data = doc.data();
-                const cats = getProductCategories(data);
-                if (cats.includes(categoryName)) {
-                    if (cats.length === 1) {
-                        batch.delete(doc.ref);
-                    } else {
-                        const newCats = cats.filter(c => c !== categoryName);
-                        batch.update(doc.ref, { categories: newCats, category: firebase.firestore.FieldValue.delete() });
-                    }
-                }
-            });
-            await batch.commit();
-
-            alert('קטגוריה נמחקה בהצלחה!');
-            await loadCategories();
-            await loadAllProducts();
-            await loadCoupons();
-            updateCategoryCheckboxes();
-        } catch (error) { console.error('Error deleting category:', error); alert('שגיאה במחיקת קטגוריה'); }
     }
-
-    document.getElementById('add-category-btn').addEventListener('click', async () => {
-        const categoryName = document.getElementById('category-name').value.trim();
-        if (!categoryName) { alert('אנא הזן שם קטגוריה'); return; }
-        if (categories.includes(categoryName)) { alert('קטגוריה זו כבר קיימת'); return; }
-        try {
-            categories.push(categoryName);
-            await db.collection('Settings').doc('main').update({ Categories: categories });
-            alert('קטגוריה נוספה בהצלחה!');
-            document.getElementById('category-name').value = '';
-            await loadCategories();
-            updateCategoryCheckboxes();
-        } catch (error) { console.error('Error adding category:', error); alert('שגיאה בהוספת קטגוריה'); }
-    });
 
     // ============================================
-    // PRODUCTS - LOAD ALL
-    // ============================================
-// ============================================
     // PRODUCTS - LOAD ALL
     // ============================================
     async function loadAllProducts(searchTerm = '') {
         const allProductsGrid = document.getElementById('all-products-grid');
-        allProductsGrid.innerHTML = '';
+        showSkeletonProducts('all-products-grid', 6);
+
         const productsSnapshot = await db.collection('soccer_shirts').get();
         products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Filter by search term (חיפוש כללי)
         let filteredProducts = products;
         if (searchTerm) {
-            filteredProducts = products.filter(p => 
+            filteredProducts = products.filter(p =>
                 p.name.toLowerCase().includes(searchTerm)
             );
         }
 
+        allProductsGrid.innerHTML = '';
+
         if (filteredProducts.length === 0) {
-            allProductsGrid.innerHTML = searchTerm 
+            allProductsGrid.innerHTML = searchTerm
                 ? '<p style="grid-column: 1/-1; text-align: center; color: #666;">לא נמצאו מוצרים התואמים לחיפוש.</p>'
                 : '<p style="grid-column: 1/-1; text-align: center; color: #666;">אין מוצרים. הוסף מוצר חדש למעלה.</p>';
             updateCouponProductSelect();
+            renderBulkProductGrid();
             return;
         }
 
@@ -1682,16 +1868,13 @@ if (inOthers.length > 0)
                 </div>`;
             }
 
-            // Show all category badges
             const cats = getProductCategories(product);
             const catBadges = cats.map(c => `<span class="product-category">${c}</span>`).join('');
-
-            // Create deep link (קישור ישיר למוצר)
             const productLink = `${window.location.origin.replace('/admin.html', '')}/#${encodeURIComponent(product.name)}`;
 
             productCard.innerHTML = `
                 ${saleBadge}
-                <img src="${product.image}" alt="${product.name}">
+                <img src="${product.image}" alt="${product.name}" loading="lazy">
                 <div>${catBadges || '<span style="color:#999;font-size:0.9em;">ללא קטגוריה</span>'}</div>
                 <h3>${product.name}</h3>
                 ${priceHTML}
@@ -1713,28 +1896,19 @@ if (inOthers.length > 0)
         document.querySelectorAll('.btn-delete-product-main').forEach(btn => {
             btn.addEventListener('click', () => deleteProductDirect(btn.dataset.productId));
         });
-
-        // Copy link functionality (העתקת קישור)
         document.querySelectorAll('.btn-copy-link-main').forEach(btn => {
             btn.addEventListener('click', () => {
                 const link = btn.dataset.productLink;
                 navigator.clipboard.writeText(link).then(() => {
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '✓';
-                    btn.style.background = '#27ae60';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = '';
-                    }, 2000);
-                }).catch(err => {
-                    alert('שגיאה בהעתקת הקישור');
-                    console.error(err);
-                });
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '✓'; btn.style.background = '#27ae60';
+                    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+                }).catch(() => alert('שגיאה בהעתקת הקישור'));
             });
         });
 
-        // Also refresh coupon product select
         updateCouponProductSelect();
+        renderBulkProductGrid();
     }
 
     function updateCouponProductSelect() {
@@ -2153,8 +2327,9 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
                     const address = (order.customerAddress || '').toLowerCase();
                     return name.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm) || address.includes(searchTerm);
                 });
-            } else {
-                orders = orders.filter(order => !order.completed);
+} else {
+                const active = orders.filter(order => !order.completed);
+                orders = active.length > 0 ? active : orders;
             }
 
             if (orders.length === 0) {
@@ -2260,15 +2435,16 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
                     const phone = (lead.phone || '').toLowerCase();
                     return name.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm);
                 });
-            } else {
-                leads = leads.filter(lead => lead.status !== 'closed');
+} else {
+                const active = leads.filter(lead => lead.status !== 'closed');
+                leads = active.length > 0 ? active : leads;
             }
 
             if (leads.length === 0) {
                 leadsList.innerHTML = searchTerm ? '<p>לא נמצאו פניות התואמות לחיפוש.</p>' : '<p>אין פניות פעילות.</p>';
                 return;
             }
-
+            
             leadsList.innerHTML = '';
             leads.forEach(lead => {
                 const leadDate = lead.createdAt ? new Date(lead.createdAt.toDate()).toLocaleString('he-IL') : 'לא ידוע';
@@ -3081,6 +3257,259 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
             alert('שגיאה במחיקת לקוח');
         }
     }
+
+// ============================================
+    // BULK EDIT
+    // ============================================
+    let bulkSelectedIds = new Set();
+
+    function renderBulkProductGrid(filterText = '') {
+        const grid = document.getElementById('bulk-select-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const filtered = products.filter(p =>
+            !filterText || p.name.toLowerCase().includes(filterText.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">אין מוצרים.</p>';
+            return;
+        }
+
+        filtered.forEach(product => {
+            const item = document.createElement('div');
+            item.className = 'bulk-product-item' + (bulkSelectedIds.has(product.id) ? ' selected' : '');
+            item.dataset.productId = product.id;
+            item.innerHTML = `
+                <input type="checkbox" ${bulkSelectedIds.has(product.id) ? 'checked' : ''}>
+                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <span title="${product.name}">${product.name}</span>
+            `;
+            const cb = item.querySelector('input[type="checkbox"]');
+            const toggle = () => {
+                if (bulkSelectedIds.has(product.id)) {
+                    bulkSelectedIds.delete(product.id);
+                    item.classList.remove('selected');
+                    cb.checked = false;
+                } else {
+                    bulkSelectedIds.add(product.id);
+                    item.classList.add('selected');
+                    cb.checked = true;
+                }
+                updateBulkCount();
+            };
+            item.addEventListener('click', (e) => { if (e.target !== cb) toggle(); });
+            cb.addEventListener('change', toggle);
+            grid.appendChild(item);
+        });
+
+        updateBulkCount();
+    }
+
+    function updateBulkCount() {
+        const el = document.getElementById('bulk-selected-count');
+        if (el) el.textContent = `${bulkSelectedIds.size} נבחרו`;
+    }
+
+    function updateBulkCategoryCheckboxes() {
+        const container = document.getElementById('bulk-categories-checkboxes');
+        if (!container) return;
+        container.innerHTML = '';
+        categories.forEach(cat => {
+            const label = document.createElement('label');
+            const cb = document.createElement('input');
+            cb.type = 'checkbox'; cb.value = cat;
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(cat));
+            container.appendChild(label);
+        });
+    }
+
+    // Toggle field visibility
+    [
+        ['bulk-enable-price', 'bulk-price-content'],
+        ['bulk-enable-sale', 'bulk-sale-content'],
+        ['bulk-enable-categories', 'bulk-categories-content'],
+        ['bulk-enable-shipping', 'bulk-shipping-content'],
+        ['bulk-enable-customfields', 'bulk-customfields-content'],
+        ['bulk-enable-description', 'bulk-description-content'],
+    ].forEach(([cbId, contentId]) => {
+        const cb = document.getElementById(cbId);
+        const content = document.getElementById(contentId);
+        if (cb && content) {
+            cb.addEventListener('change', () => {
+                content.style.display = cb.checked ? 'block' : 'none';
+                if (cbId === 'bulk-enable-categories' && cb.checked) updateBulkCategoryCheckboxes();
+            });
+        }
+    });
+
+    // Bulk custom fields
+    const bulkCFBtn = document.getElementById('bulk-add-custom-field');
+    if (bulkCFBtn) {
+        bulkCFBtn.addEventListener('click', () => {
+            createCustomFieldUI(null, document.getElementById('bulk-custom-fields-container'));
+        });
+    }
+
+    // Select / Deselect all
+    document.getElementById('bulk-select-all-btn').addEventListener('click', () => {
+        const filterText = document.getElementById('bulk-search-input').value.toLowerCase();
+        products
+            .filter(p => !filterText || p.name.toLowerCase().includes(filterText))
+            .forEach(p => bulkSelectedIds.add(p.id));
+        renderBulkProductGrid(filterText);
+    });
+
+    document.getElementById('bulk-deselect-all-btn').addEventListener('click', () => {
+        bulkSelectedIds.clear();
+        renderBulkProductGrid(document.getElementById('bulk-search-input').value.toLowerCase());
+    });
+
+    document.getElementById('bulk-search-input').addEventListener('input', (e) => {
+        renderBulkProductGrid(e.target.value);
+    });
+
+    // Apply bulk changes
+    document.getElementById('bulk-apply-btn').addEventListener('click', async () => {
+        if (bulkSelectedIds.size === 0) { alert('אנא בחר לפחות מוצר אחד.'); return; }
+
+        const enablePrice = document.getElementById('bulk-enable-price').checked;
+        const enableSale = document.getElementById('bulk-enable-sale').checked;
+        const enableCats = document.getElementById('bulk-enable-categories').checked;
+        const enableShipping = document.getElementById('bulk-enable-shipping').checked;
+        const enableCF = document.getElementById('bulk-enable-customfields').checked;
+        const enableDesc = document.getElementById('bulk-enable-description').checked;
+
+        if (!enablePrice && !enableSale && !enableCats && !enableShipping && !enableCF && !enableDesc) {
+            alert('אנא בחר לפחות שדה אחד לעריכה.');
+            return;
+        }
+
+        // Collect values
+        const newPrice = enablePrice ? parseFloat(document.getElementById('bulk-price').value) : null;
+        const newSalePrice = enableSale ? (parseFloat(document.getElementById('bulk-sale-price').value) || null) : undefined;
+        const newSaleEnd = enableSale ? (document.getElementById('bulk-sale-end').value || null) : undefined;
+
+        const catMode = document.querySelector('input[name="bulk-categories-mode"]:checked')?.value || 'replace';
+        const newCats = enableCats
+            ? Array.from(document.querySelectorAll('#bulk-categories-checkboxes input:checked')).map(c => c.value)
+            : null;
+
+        const newShipping = enableShipping
+            ? (parseFloat(document.getElementById('bulk-shipping').value) ?? null)
+            : undefined;
+
+        const cfMode = document.querySelector('input[name="bulk-cf-mode"]:checked')?.value || 'replace';
+        const newCF = enableCF
+            ? extractCustomFields(document.getElementById('bulk-custom-fields-container'))
+            : null;
+
+        const newDesc = enableDesc ? document.getElementById('bulk-description').value.trim() : null;
+
+        // Validation
+        if (enablePrice && (isNaN(newPrice) || newPrice < 0)) { alert('מחיר לא תקין'); return; }
+
+        const ids = Array.from(bulkSelectedIds);
+        const total = ids.length;
+
+        const progressBar = document.getElementById('bulk-progress-bar');
+        const progressText = document.getElementById('bulk-progress-text');
+        const progressDiv = document.getElementById('bulk-progress');
+        progressDiv.style.display = 'block';
+        progressBar.style.width = '0%';
+        progressText.textContent = `0 / ${total}`;
+        document.getElementById('bulk-apply-btn').disabled = true;
+
+        let done = 0;
+        const BATCH_SIZE = 400; // Firestore batch limit is 500
+        let batch = db.batch();
+        let batchCount = 0;
+
+        for (const productId of ids) {
+            const product = products.find(p => p.id === productId);
+            if (!product) continue;
+
+            const updateData = {};
+
+            if (enablePrice && !isNaN(newPrice) && newPrice >= 0) updateData.price = newPrice;
+
+            if (enableSale) {
+                if (newSalePrice && newSalePrice > 0) {
+                    updateData.salePrice = newSalePrice;
+                } else {
+                    updateData.salePrice = firebase.firestore.FieldValue.delete();
+                }
+                if (newSaleEnd) updateData.saleEndDate = newSaleEnd;
+                else updateData.saleEndDate = firebase.firestore.FieldValue.delete();
+            }
+
+            if (enableCats && newCats !== null) {
+                if (catMode === 'replace') {
+                    updateData.categories = newCats;
+                } else {
+                    const existing = getProductCategories(product);
+                    const merged = [...new Set([...existing, ...newCats])];
+                    updateData.categories = merged;
+                }
+                updateData.category = firebase.firestore.FieldValue.delete();
+            }
+
+            if (enableShipping) {
+                const sv = parseFloat(document.getElementById('bulk-shipping').value);
+                if (!isNaN(sv) && sv >= 0) updateData.customShipping = sv;
+                else updateData.customShipping = firebase.firestore.FieldValue.delete();
+            }
+
+            if (enableCF && newCF !== null) {
+                if (cfMode === 'replace') {
+                    updateData.customFields = newCF.length > 0 ? newCF : null;
+                } else {
+                    const existing = product.customFields || [];
+                    updateData.customFields = [...existing, ...newCF];
+                }
+            }
+
+            if (enableDesc && newDesc) updateData.description = newDesc;
+
+            const ref = db.collection('soccer_shirts').doc(productId);
+            batch.update(ref, updateData);
+            batchCount++;
+
+            if (batchCount >= BATCH_SIZE) {
+                await batch.commit();
+                batch = db.batch();
+                batchCount = 0;
+            }
+
+            done++;
+            const pct = Math.round((done / total) * 100);
+            progressBar.style.width = pct + '%';
+            progressText.textContent = `${done} / ${total} מוצרים עודכנו...`;
+        }
+
+        if (batchCount > 0) await batch.commit();
+
+        progressText.textContent = `✅ הושלם! ${total} מוצרים עודכנו בהצלחה.`;
+        document.getElementById('bulk-apply-btn').disabled = false;
+
+        await loadCategories();
+        await loadAllProducts();
+        await loadCoupons();
+
+        alert(`✅ ${total} מוצרים עודכנו בהצלחה!`);
+    });
+
+    // Trigger bulk grid render when navigating to bulk-edit section
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (item.dataset.section === 'bulk-edit') {
+                updateBulkCategoryCheckboxes();
+                renderBulkProductGrid(document.getElementById('bulk-search-input').value);
+            }
+        });
+    });
 
     </script>
 </body>
