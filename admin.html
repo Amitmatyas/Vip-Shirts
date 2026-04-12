@@ -1079,6 +1079,7 @@
     <div class="menu-item" data-section="customers">מועדון לקוחות</div>
     <div class="menu-item" data-section="bulk-edit">עריכה מרובה</div>
     <div class="menu-item" data-section="settings">הגדרות</div>
+    <div class="menu-item" id="logout-btn" style="margin-top: auto; color: #e74c3c; border-top: 1px solid #34495e; margin-top: 20px;">התנתק</div>
 </div>
         </div>
 
@@ -1603,28 +1604,43 @@ const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const loginErrorMessage = document.getElementById('login-error-message');
 
+async function doLogin() {
+    loginOverlay.style.display = 'none';
+    adminLayout.classList.add('active');
+    loginErrorMessage.style.display = 'none';
+    try {
+        await initializeSettings();
+        await loadAllProducts();
+        await loadCategories();
+        await fetchOrders();
+        await fetchContactLeads();
+        await fetchCustomers();
+        await loadShippingSettings();
+        await loadCoupons();
+        await loadAnnouncements();
+        setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
+    } catch (err) {
+        console.error('שגיאה בטעינה:', err);
+        alert('שגיאה בטעינת הנתונים: ' + err.message);
+    }
+}
+
+// בדוק אם כבר מחובר
+if (localStorage.getItem('adminLoggedIn') === 'true') {
+    doLogin();
+}
+
 loginButton.addEventListener('click', async () => {
     const u = usernameInput.value.trim();
     const p = passwordInput.value;
     if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
-        loginOverlay.style.display = 'none';
-        adminLayout.classList.add('active');
-        loginErrorMessage.style.display = 'none';
-        try {
-            await initializeSettings();
-            await loadAllProducts();
-            await loadCategories();
-            await fetchOrders();
-            await fetchContactLeads();
-            await fetchCustomers();
-            await loadShippingSettings();
-            await loadCoupons();
-            await loadAnnouncements();
-            setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
-        } catch (err) {
-            console.error('שגיאה בטעינה:', err);
-            alert('שגיאה בטעינת הנתונים: ' + err.message);
+        // שאל רק אם זו הפעם הראשונה
+        if (!localStorage.getItem('adminAutoLoginAsked')) {
+            localStorage.setItem('adminAutoLoginAsked', 'true');
+            const autoLogin = confirm('האם להתחבר אוטומטית בפעם הבאה?');
+            if (autoLogin) localStorage.setItem('adminLoggedIn', 'true');
         }
+        await doLogin();
     } else {
         loginErrorMessage.textContent = 'שם משתמש או סיסמה שגויים.';
         loginErrorMessage.style.display = 'block';
@@ -2664,39 +2680,43 @@ async function processSizeChartFiles(inputId, previewId, statusId) {
                 optionsContainer.appendChild(fieldDiv);
             }
         });
-    });
+async function loadCoupons() {
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (settingsDoc.exists) {
+            const data = settingsDoc.data();
+            const coupons = data.Coupons || [];
+            const couponsList = document.getElementById('coupons-list');
+            couponsList.innerHTML = '';
+            if (coupons.length === 0) { couponsList.innerHTML = '<p style="color: #666;">אין קופונים.</p>'; return; }
 
-    async function loadCoupons() {
-        try {
-            const settingsDoc = await db.collection('Settings').doc('main').get();
-            if (settingsDoc.exists) {
-                const data = settingsDoc.data();
-                const coupons = data.Coupons || [];
-                const couponsList = document.getElementById('coupons-list');
-                couponsList.innerHTML = '';
-                if (coupons.length === 0) { couponsList.innerHTML = '<p style="color: #666;">אין קופונים.</p>'; return; }
-
-                coupons.forEach((coupon, index) => {
-                    const couponItem = document.createElement('div');
-                    couponItem.className = 'list-item';
-                    let typeText = '';
-                    switch (coupon.Type) {
-                        case 'free_product':
-                            const product = products.find(p => p.id === coupon.ProductId);
-                            typeText = product ? `מוצר חינם: ${product.name}` : 'מוצר חינם';
-                            if (coupon.SelectedOptions && Object.keys(coupon.SelectedOptions).length > 0) typeText += ' (עם הגדרות)';
-                            break;
-                        case 'fixed_discount': typeText = `הנחה ${coupon.Value}₪`; break;
-                        case 'percentage_discount': typeText = `הנחה ${coupon.Value}%`; break;
-                        case 'free_shipping': typeText = 'משלוח חינם'; break;
-                    }
-                    const expiryText = coupon.ExpiryDate ? ` | תוקף עד: ${coupon.ExpiryDate}` : '';
-                    couponItem.innerHTML = `<div><strong>${coupon.Code}</strong> - ${typeText}${expiryText}</div><div class="list-item-actions"><button class="btn btn-danger" onclick="deleteCoupon(${index})">מחק</button></div>`;
-                    couponsList.appendChild(couponItem);
-                });
-            }
-        } catch (error) { console.error('Error loading coupons:', error); }
-    }
+            coupons.forEach((coupon, index) => {
+                const couponItem = document.createElement('div');
+                couponItem.className = 'list-item';
+                let typeText = '';
+                switch (coupon.Type) {
+                    case 'free_product':
+                        const product = products.find(p => p.id === coupon.ProductId);
+                        typeText = product ? `מוצר חינם: ${product.name}` : 'מוצר חינם';
+                        if (coupon.SelectedOptions && Object.keys(coupon.SelectedOptions).length > 0) typeText += ' (עם הגדרות)';
+                        break;
+                    case 'fixed_discount': typeText = `הנחה ${coupon.Value}₪`; break;
+                    case 'percentage_discount': typeText = `הנחה ${coupon.Value}%`; break;
+                    case 'free_shipping': typeText = 'משלוח חינם'; break;
+                }
+                const expiryText = coupon.ExpiryDate ? ` | תוקף עד: ${coupon.ExpiryDate}` : '';
+                couponItem.innerHTML = `
+                    <div><strong>${coupon.Code}</strong> - ${typeText}${expiryText}</div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-dark" onclick="editCoupon(${index})">ערוך</button>
+                        <button class="btn btn-danger" onclick="deleteCoupon(${index})">מחק</button>
+                    </div>
+                `;
+                couponsList.appendChild(couponItem);
+            });
+        }
+    } catch (error) { console.error('Error loading coupons:', error); }
+}
 
     document.getElementById('add-coupon-btn').addEventListener('click', async () => {
         const code = document.getElementById('coupon-code').value.trim();
@@ -2749,24 +2769,30 @@ async function processSizeChartFiles(inputId, previewId, statusId) {
     // ============================================
     let announcements = [];
 
-    async function loadAnnouncements() {
-        try {
-            const settingsDoc = await db.collection('Settings').doc('main').get();
-            if (settingsDoc.exists) {
-                const data = settingsDoc.data();
-                announcements = data.Announcements || [];
-                const announcementsList = document.getElementById('announcements-list');
-                announcementsList.innerHTML = '';
-                if (announcements.length === 0) { announcementsList.innerHTML = '<p style="color: #666;">אין הודעות.</p>'; return; }
-                announcements.forEach((announcement, index) => {
-                    const announcementItem = document.createElement('div');
-                    announcementItem.className = 'list-item';
-                    announcementItem.innerHTML = `<div><strong>הודעה ${index + 1}:</strong> ${announcement}</div><div class="list-item-actions"><button class="btn btn-danger" onclick="deleteAnnouncement(${index})">מחק</button></div>`;
-                    announcementsList.appendChild(announcementItem);
-                });
-            }
-        } catch (error) { console.error('Error loading announcements:', error); }
-    }
+async function loadAnnouncements() {
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (settingsDoc.exists) {
+            const data = settingsDoc.data();
+            announcements = data.Announcements || [];
+            const announcementsList = document.getElementById('announcements-list');
+            announcementsList.innerHTML = '';
+            if (announcements.length === 0) { announcementsList.innerHTML = '<p style="color: #666;">אין הודעות.</p>'; return; }
+            announcements.forEach((announcement, index) => {
+                const announcementItem = document.createElement('div');
+                announcementItem.className = 'list-item';
+                announcementItem.innerHTML = `
+                    <div><strong>הודעה ${index + 1}:</strong> ${announcement}</div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-dark" onclick="editAnnouncement(${index})">ערוך</button>
+                        <button class="btn btn-danger" onclick="deleteAnnouncement(${index})">מחק</button>
+                    </div>
+                `;
+                announcementsList.appendChild(announcementItem);
+            });
+        }
+    } catch (error) { console.error('Error loading announcements:', error); }
+}
 
     document.getElementById('add-announcement-btn').addEventListener('click', async () => {
         const text = document.getElementById('announcement-text').value.trim();
@@ -3533,6 +3559,63 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
         });
     });
 
+    document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('adminLoggedIn');
+    localStorage.removeItem('adminAutoLoginAsked');
+    location.reload();
+});
+
+    window.editCoupon = async function(index) {
+    const settingsDoc = await db.collection('Settings').doc('main').get();
+    const coupons = settingsDoc.data().Coupons || [];
+    const coupon = coupons[index];
+
+    const newCode = prompt('קוד קופון:', coupon.Code);
+    if (newCode === null) return;
+
+    const types = ['free_product', 'fixed_discount', 'percentage_discount', 'free_shipping'];
+    const typeLabels = ['מוצר חינם', 'הנחה בשקלים', 'הנחה באחוזים', 'משלוח חינם'];
+    const currentTypeIndex = types.indexOf(coupon.Type);
+    const newTypeStr = prompt(
+        `סוג הטבה:\n0 - מוצר חינם\n1 - הנחה בשקלים\n2 - הנחה באחוזים\n3 - משלוח חינם\n\nהזן מספר (נוכחי: ${currentTypeIndex}):`,
+        currentTypeIndex
+    );
+    if (newTypeStr === null) return;
+    const newType = types[parseInt(newTypeStr)] || coupon.Type;
+
+    let newValue = coupon.Value;
+    if (newType !== 'free_product' && newType !== 'free_shipping') {
+        const valueStr = prompt('ערך הטבה:', coupon.Value);
+        if (valueStr === null) return;
+        newValue = parseFloat(valueStr) || 0;
+    }
+
+    const newExpiry = prompt('תאריך תפוגה (YYYY-MM-DD) — ריק אם אין:', coupon.ExpiryDate || '');
+    if (newExpiry === null) return;
+
+    coupons[index] = {
+        ...coupon,
+        Code: newCode.trim(),
+        Type: newType,
+        Value: newValue,
+        ExpiryDate: newExpiry.trim() || null
+    };
+
+    await db.collection('Settings').doc('main').update({ Coupons: coupons });
+    alert('קופון עודכן בהצלחה!');
+    await loadCoupons();
+};
+
+    window.editAnnouncement = async function(index) {
+    const newText = prompt('ערוך הודעה:', announcements[index]);
+    if (newText === null || newText.trim() === '') return;
+    announcements[index] = newText.trim();
+    try {
+        await db.collection('Settings').doc('main').update({ Announcements: announcements });
+        alert('הודעה עודכנה בהצלחה!');
+        await loadAnnouncements();
+    } catch (error) { console.error('Error editing announcement:', error); alert('שגיאה בעדכון הודעה'); }
+};
     </script>
 </body>
 </html>
