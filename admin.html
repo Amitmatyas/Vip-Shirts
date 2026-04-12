@@ -1707,9 +1707,12 @@ loginButton.addEventListener('click', async () => {
         
 async function displayCategoriesWithProducts() {
     const categoriesGrid = document.getElementById('categories-grid');
-    categoriesGrid.innerHTML = '';
+    showSkeletonCategories();
 
     if (categories.length === 0) {
+        categoriesGrid.innerHTML = '<p>אין קטגוריות. הוסף קטגוריה חדשה למעלה.</p>';
+        return;
+    }
 
         for (const category of categories) {
             const categoryProducts = products.filter(p => getProductCategories(p).includes(category));
