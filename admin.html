@@ -3598,16 +3598,22 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
     await loadCoupons();
 };
 
-    window.editAnnouncement = async function(index) {
-    const newText = prompt('ערוך הודעה:', announcements[index]);
-    if (newText === null || newText.trim() === '') return;
-    announcements[index] = newText.trim();
-    try {
-        await db.collection('Settings').doc('main').update({ Announcements: announcements });
-        alert('הודעה עודכנה בהצלחה!');
-        await loadAnnouncements();
-    } catch (error) { console.error('Error editing announcement:', error); alert('שגיאה בעדכון הודעה'); }
-};
-    </script>
+   window.editAnnouncement = async function(index) {
+        const newText = prompt('ערוך הודעה:', announcements[index]);
+        if (newText === null || newText.trim() === '') return;
+        announcements[index] = newText.trim();
+        try {
+            await db.collection('Settings').doc('main').update({ Announcements: announcements });
+            alert('הודעה עודכנה בהצלחה!');
+            await loadAnnouncements();
+        } catch (error) { 
+            console.error('Error editing announcement:', error); 
+            alert('שגיאה בעדכון הודעה'); 
+        }
+    };
+
+} // <--- הסוגר הזה כנראה היה חסר! הוא סוגר את הבלוק הראשי של הקוד
+
+</script>
 </body>
 </html>
