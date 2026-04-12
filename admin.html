@@ -2644,33 +2644,42 @@ async function processSizeChartFiles(inputId, previewId, statusId) {
         optionsContainer.innerHTML = '<h4 style="margin-bottom: 10px;">בחר אפשרויות מוגדרות מראש (אופציונלי):</h4>';
         selectedCouponOptions = {};
 
-        product.customFields.forEach(field => {
-            if (field.type === 'select') {
-                const fieldDiv = document.createElement('div');
-                fieldDiv.className = 'coupon-option-field';
-                const label = document.createElement('label');
-                label.textContent = field.name + ':';
-                label.style.cssText = 'display:block;margin-bottom:5px;font-weight:bold;';
-                const select = document.createElement('select');
-                select.style.cssText = 'width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;';
-                const emptyOption = document.createElement('option');
-                emptyOption.value = '';
-                emptyOption.textContent = 'לא מוגדר (הלקוח יבחר)';
-                select.appendChild(emptyOption);
-                field.options.forEach(opt => {
-                    const option = document.createElement('option');
-                    option.value = opt.value;
-                    option.textContent = opt.value;
-                    select.appendChild(option);
-                });
-select.addEventListener('change', function () {
-    if (this.value) selectedCouponOptions[field.name] = this.value;
-    else delete selectedCouponOptions[field.name];
-});
-fieldDiv.appendChild(label);
-fieldDiv.appendChild(select);
-optionsContainer.appendChild(fieldDiv);
-}
+product.customFields.forEach(field => {
+    if (field.type === 'select') {
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'coupon-option-field';
+
+        const label = document.createElement('label');
+        label.textContent = field.name + ':';
+        label.style.cssText = 'display:block;margin-bottom:5px;font-weight:bold;';
+
+        const select = document.createElement('select');
+        select.style.cssText = 'width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;';
+
+        const emptyOption = document.createElement('option');
+        emptyOption.value = '';
+        emptyOption.textContent = 'לא מוגדר (הלקוח יבחר)';
+        select.appendChild(emptyOption);
+
+        field.options.forEach(opt => {
+            const option = document.createElement('option');
+            option.value = opt.value;
+            option.textContent = opt.value;
+            select.appendChild(option);
+        });
+
+        select.addEventListener('change', function () {
+            if (this.value) {
+                selectedCouponOptions[field.name] = this.value;
+            } else {
+                delete selectedCouponOptions[field.name];
+            }
+        });
+
+        fieldDiv.appendChild(label);
+        fieldDiv.appendChild(select);
+        optionsContainer.appendChild(fieldDiv);
+    }
 });
 async function loadCoupons() {
     try {
