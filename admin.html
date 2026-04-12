@@ -1633,8 +1633,8 @@ if (localStorage.getItem('adminLoggedIn') === 'true') {
 loginButton.addEventListener('click', async () => {
     const u = usernameInput.value.trim();
     const p = passwordInput.value;
+    
     if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
-        // שאל רק אם זו הפעם הראשונה
         if (!localStorage.getItem('adminAutoLoginAsked')) {
             localStorage.setItem('adminAutoLoginAsked', 'true');
             const autoLogin = confirm('האם להתחבר אוטומטית בפעם הבאה?');
