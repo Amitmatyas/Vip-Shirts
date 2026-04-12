@@ -1579,38 +1579,49 @@
         }
     }
 
-    // ============================================
-    // LOGIN
-    // ============================================
-    const loginOverlay = document.getElementById('login-overlay');
-    const adminLayout = document.getElementById('admin-layout');
-    const loginButton = document.getElementById('login-button');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginErrorMessage = document.getElementById('login-error-message');
+// ============================================
+// LOGIN
+// ============================================
+const loginOverlay = document.getElementById('login-overlay');
+const adminLayout = document.getElementById('admin-layout');
+const loginButton = document.getElementById('login-button');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const loginErrorMessage = document.getElementById('login-error-message');
 
-    loginButton.addEventListener('click', async () => {
-        const u = usernameInput.value.trim();
-        const p = passwordInput.value;
-        if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
-            loginOverlay.style.display = 'none';
-            adminLayout.classList.add('active');
-            loginErrorMessage.style.display = 'none';
+loginButton.addEventListener('click', async () => {
+    const u = usernameInput.value.trim();
+    const p = passwordInput.value;
+    if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
+        loginOverlay.style.display = 'none';
+        adminLayout.classList.add('active');
+        loginErrorMessage.style.display = 'none';
+        try {
             await initializeSettings();
             await loadCategories();
             await loadAllProducts();
             await fetchOrders();
             await fetchContactLeads();
+            await fetchCustomers();
             await loadShippingSettings();
             await loadCoupons();
             await loadAnnouncements();
-            await fetchCustomers();
             setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
-        } else {
-            loginErrorMessage.textContent = 'שם משתמש או סיסמה שגויים.';
-            loginErrorMessage.style.display = 'block';
+        } catch (err) {
+            console.error('שגיאה בטעינה:', err);
+            alert('שגיאה בטעינת הנתונים: ' + err.message);
         }
+    } else {
+        loginErrorMessage.textContent = 'שם משתמש או סיסמה שגויים.';
+        loginErrorMessage.style.display = 'block';
+    }
+});
+
+[usernameInput, passwordInput].forEach(input => {
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') loginButton.click();
     });
+});
 
     // ============================================
     // NAVIGATION
