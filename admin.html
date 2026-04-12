@@ -2663,15 +2663,15 @@ async function processSizeChartFiles(inputId, previewId, statusId) {
                     option.textContent = opt.value;
                     select.appendChild(option);
                 });
-                select.addEventListener('change', function () {
-                    if (this.value) selectedCouponOptions[field.name] = this.value;
-                    else delete selectedCouponOptions[field.name];
-                });
-                fieldDiv.appendChild(label);
-                fieldDiv.appendChild(select);
-                optionsContainer.appendChild(fieldDiv);
-            }
-        });
+select.addEventListener('change', function () {
+    if (this.value) selectedCouponOptions[field.name] = this.value;
+    else delete selectedCouponOptions[field.name];
+});
+fieldDiv.appendChild(label);
+fieldDiv.appendChild(select);
+optionsContainer.appendChild(fieldDiv);
+}
+});
 async function loadCoupons() {
     try {
         const settingsDoc = await db.collection('Settings').doc('main').get();
@@ -3611,9 +3611,7 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
             alert('שגיאה בעדכון הודעה'); 
         }
     };
-
-} // <--- הסוגר הזה כנראה היה חסר! הוא סוגר את הבלוק הראשי של הקוד
-
+        
 </script>
 </body>
 </html>
