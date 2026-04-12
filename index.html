@@ -1927,8 +1927,10 @@
             appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
             measurementId: "G-JQ02VEC325"
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true })
+  .catch(err => console.log('Persistence unavailable:', err.code));
 
         const productsContainer = document.getElementById('products-container');
         const cartItemsList = document.getElementById('cart-items');
@@ -1974,8 +1976,16 @@
         let currentClubMember = null;
         let clubModalOpen = false;
         let pointsToUse = 0;
-        let pointsDiscount = 0;
+let pointsDiscount = 0;
 
+function withTimeout(promise, ms = 10000) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), ms)
+        )
+    ]);
+}
         function getProductCategories(product) {
             if (Array.isArray(product.categories) && product.categories.length > 0) {
                 return product.categories;
@@ -2798,12 +2808,24 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
 
 async function fetchProducts() {
     try {
-        const productsSnapshot = await db.collection('soccer_shirts').get();
+        const productsSnapshot = await withTimeout(
+            db.collection('soccer_shirts').get(),
+            10000
+        );
         products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         applyFilters();
-        handleDeepLink(); // ← הוסף את זה כאן
+        handleDeepLink();
     } catch (error) {
-        alert("שגיאה בטעינת מוצרים.");
+        console.error('שגיאת טעינת מוצרים:', error);
+        productsContainer.innerHTML = `
+            <div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
+                <div style="font-size:3em;margin-bottom:15px;">⚠️</div>
+                <p style="font-size:1.1em;color:#dc3545;font-weight:bold;">שגיאה בטעינת המוצרים</p>
+                <p style="color:#666;margin-bottom:20px;">בדוק את חיבור האינטרנט ונסה שוב</p>
+                <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">
+                    רענן דף
+                </button>
+            </div>`;
     }
 }
 
@@ -3647,12 +3669,29 @@ closeCart();
         }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadSettings(); // ← חובה ראשון!
-    loadCartFromStorage(); // ← עכשיו settings קיים
-    await loadAnnouncements();
-    await fetchProducts();
-    await loadClubMember();
-    updateCartDisplay();
+    // הצג סקלטון מיד
+    productsContainer.innerHTML = `
+        <div style="text-align:center;padding:80px 20px;width:100%;grid-column:1/-1;">
+            <div style="font-size:3em;margin-bottom:15px;">⏳</div>
+            <p style="font-size:1.1em;color:#666;">טוען מוצרים...</p>
+        </div>`;
+
+    try {
+        // settings חייב להיות ראשון כי fetchProducts תלוי בו
+        await loadSettings();
+
+        // כל השאר במקביל
+        loadCartFromStorage();
+        await Promise.all([
+            loadAnnouncements(),
+            fetchProducts(),
+            loadClubMember()
+        ]);
+
+        updateCartDisplay();
+    } catch (error) {
+        console.error('שגיאת אתחול:', error);
+    }
 });
 
         function handleDeepLink() {
