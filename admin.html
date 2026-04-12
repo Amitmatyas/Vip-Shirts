@@ -1079,6 +1079,12 @@
     <div class="menu-item" data-section="customers">מועדון לקוחות</div>
     <div class="menu-item" data-section="bulk-edit">עריכה מרובה</div>
     <div class="menu-item" data-section="settings">הגדרות</div>
+    <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+    <button id="logout-button" class="btn btn-danger" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <span>התנתקות</span>
+        <span style="font-size: 1.2em;">logout;</span>
+    </button>
+</div>
 </div>
         </div>
 
@@ -1594,40 +1600,69 @@ function getEffectivePrice(product) {
     }
 
 // ============================================
-// LOGIN
+// LOGIN & AUTO-AUTH LOGIC
 // ============================================
 const loginOverlay = document.getElementById('login-overlay');
 const adminLayout = document.getElementById('admin-layout');
 const loginButton = document.getElementById('login-button');
+const logoutButton = document.getElementById('logout-button');
 const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const loginErrorMessage = document.getElementById('login-error-message');
 
+// פונקציית עזר להרצת כל הטעינות לאחר התחברות מוצלחת
+async function onSuccessfulLogin() {
+    loginOverlay.style.display = 'none';
+    adminLayout.classList.add('active');
+    loginErrorMessage.style.display = 'none';
+    try {
+        await initializeSettings();
+        await loadAllProducts();
+        await loadCategories();
+        await fetchOrders();
+        await fetchContactLeads();
+        await fetchCustomers();
+        await loadShippingSettings();
+        await loadCoupons();
+        await loadAnnouncements();
+        setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
+    } catch (err) {
+        console.error('שגיאה בטעינה:', err);
+        alert('שגיאה בטעינת הנתונים: ' + err.message);
+    }
+}
+
+// בדיקה האם המשתמש כבר מחובר (Auto-login)
+window.addEventListener('DOMContentLoaded', () => {
+    const isLogged = localStorage.getItem('vip_admin_logged');
+    if (isLogged === 'true') {
+        onSuccessfulLogin();
+    }
+});
+
 loginButton.addEventListener('click', async () => {
     const u = usernameInput.value.trim();
     const p = passwordInput.value;
+
     if (u === ADMIN_USERNAME && p === ADMIN_PASSWORD) {
-        loginOverlay.style.display = 'none';
-        adminLayout.classList.add('active');
-        loginErrorMessage.style.display = 'none';
-        try {
-            await initializeSettings();
-            await loadAllProducts();
-            await loadCategories();
-            await fetchOrders();
-            await fetchContactLeads();
-            await fetchCustomers();
-            await loadShippingSettings();
-            await loadCoupons();
-            await loadAnnouncements();
-            setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
-        } catch (err) {
-            console.error('שגיאה בטעינה:', err);
-            alert('שגיאה בטעינת הנתונים: ' + err.message);
+        // שאלה לגבי התחברות אוטומטית
+        const rememberMe = confirm("האם תרצה להיכנס אוטומטית לפאנל הניהול בפעמים הבאות?");
+        if (rememberMe) {
+            localStorage.setItem('vip_admin_logged', 'true');
         }
+        
+        onSuccessfulLogin();
     } else {
         loginErrorMessage.textContent = 'שם משתמש או סיסמה שגויים.';
         loginErrorMessage.style.display = 'block';
+    }
+});
+
+// כפתור התנתקות
+logoutButton.addEventListener('click', () => {
+    if (confirm("האם אתה בטוח שברצונך להתנתק?")) {
+        localStorage.removeItem('vip_admin_logged');
+        location.reload(); // רענון הדף מחזיר למסך ההתחברות
     }
 });
 
