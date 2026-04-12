@@ -1726,93 +1726,85 @@ async function displayCategoriesWithProducts() {
     categoriesGrid.innerHTML = '';
 
     if (categories.length === 0) {
-
-        for (const category of categories) {
-            const categoryProducts = products.filter(p => getProductCategories(p).includes(category));
-
-            const categoryBox = document.createElement('div');
-            categoryBox.className = 'category-box';
-            categoryBox.innerHTML = `
-                <div class="category-box-header">
-                    <h3>${category}</h3>
-                    <div class="category-actions">
-                        <button class="btn btn-primary btn-edit-category" data-category="${category}">ערוך שם</button>
-                        <button class="btn btn-danger btn-delete-category" data-category="${category}">מחק</button>
-                    </div>
-                </div>
-                <div class="products-in-category" id="products-${category}"></div>
-            `;
-            categoriesGrid.appendChild(categoryBox);
-
-            const productsContainer = document.getElementById(`products-${category}`);
-            if (categoryProducts.length === 0) {
-                productsContainer.innerHTML = '<p style="color: #666;">אין מוצרים בקטגוריה זו</p>';
-            } else {
-                categoryProducts.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'product-mini-card';
-
-                    const onSale = isProductOnSale(product);
-                    const effectivePrice = getEffectivePrice(product);
-                    let priceHTML = `<div class="product-price">${effectivePrice.toFixed(2)} ₪</div>`;
-                    let saleBadge = '';
-                    if (onSale) {
-                        const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
-                        saleBadge = `<div class="sale-badge-mini">-${discount}%</div>`;
-                        priceHTML = `<div class="product-price on-sale">
-                            <span class="original-price">${product.price.toFixed(2)} ₪</span>
-                            <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
-                        </div>`;
-                    }
-
-const productLink = `${window.location.origin.replace('/admin.html', '')}/#${encodeURIComponent(product.name)}`;
-
-                    productCard.innerHTML = `
-                        ${saleBadge}
-                        <img src="${product.image}" alt="${product.name}">
-                        <h4>${product.name}</h4>
-                        ${priceHTML}
-                        <div class="product-mini-actions">
-                            <button class="btn btn-dark btn-edit-product" data-product-id="${product.id}">ערוך</button>
-                            <button class="btn btn-success btn-copy-link" data-product-link="${productLink}" title="העתק קישור" style="padding: 6px 10px; font-size: 0.85em;">🔗</button>
-                        </div>
-                    `;
-                    productsContainer.appendChild(productCard);
-                });
-            }
-        }
-
-        document.querySelectorAll('.btn-edit-category').forEach(btn => {
-            btn.addEventListener('click', () => editCategoryName(btn.dataset.category));
-        });
-        document.querySelectorAll('.btn-delete-category').forEach(btn => {
-            btn.addEventListener('click', () => deleteCategory(btn.dataset.category));
-        });
-document.querySelectorAll('.btn-edit-product').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const product = products.find(p => p.id === btn.dataset.productId);
-                openEditProductModal(btn.dataset.productId, product);
-            });
-        });
-
-        document.querySelectorAll('.btn-copy-link').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const link = btn.dataset.productLink;
-                navigator.clipboard.writeText(link).then(() => {
-                    const originalText = btn.innerHTML;
-                    btn.innerHTML = '✓';
-                    btn.style.background = '#27ae60';
-                    setTimeout(() => {
-                        btn.innerHTML = originalText;
-                        btn.style.background = '';
-                    }, 2000);
-                }).catch(err => {
-                    alert('שגיאה בהעתקת הקישור');
-                    console.error(err);
-                });
-            });
-        });
+        categoriesGrid.innerHTML = '<p>אין קטגוריות. הוסף קטגוריה חדשה למעלה.</p>';
+        return;
     }
+
+    for (const category of categories) {
+        const categoryProducts = products.filter(p => getProductCategories(p).includes(category));
+        const categoryBox = document.createElement('div');
+        categoryBox.className = 'category-box';
+        categoryBox.innerHTML = `
+            <div class="category-box-header">
+                <h3>${category}</h3>
+                <div class="category-actions">
+                    <button class="btn btn-primary btn-edit-category" data-category="${category}">ערוך שם</button>
+                    <button class="btn btn-danger btn-delete-category" data-category="${category}">מחק</button>
+                </div>
+            </div>
+            <div class="products-in-category" id="products-${category}"></div>
+        `;
+        categoriesGrid.appendChild(categoryBox);
+
+        const productsContainer = document.getElementById(`products-${category}`);
+        if (categoryProducts.length === 0) {
+            productsContainer.innerHTML = '<p style="color: #666;">אין מוצרים בקטגוריה זו</p>';
+        } else {
+            categoryProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-mini-card';
+                const onSale = isProductOnSale(product);
+                const effectivePrice = getEffectivePrice(product);
+                let priceHTML = `<div class="product-price">${effectivePrice.toFixed(2)} ₪</div>`;
+                let saleBadge = '';
+                if (onSale) {
+                    const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
+                    saleBadge = `<div class="sale-badge-mini">-${discount}%</div>`;
+                    priceHTML = `<div class="product-price on-sale">
+                        <span class="original-price">${product.price.toFixed(2)} ₪</span>
+                        <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
+                    </div>`;
+                }
+                const productLink = `${window.location.origin.replace('/admin.html', '')}/#${encodeURIComponent(product.name)}`;
+                productCard.innerHTML = `
+                    ${saleBadge}
+                    <img src="${product.image}" alt="${product.name}">
+                    <h4>${product.name}</h4>
+                    ${priceHTML}
+                    <div class="product-mini-actions">
+                        <button class="btn btn-dark btn-edit-product" data-product-id="${product.id}">ערוך</button>
+                        <button class="btn btn-success btn-copy-link" data-product-link="${productLink}" title="העתק קישור" style="padding: 6px 10px; font-size: 0.85em;">🔗</button>
+                    </div>
+                `;
+                productsContainer.appendChild(productCard);
+            });
+        }
+    }
+
+    document.querySelectorAll('.btn-edit-category').forEach(btn => {
+        btn.addEventListener('click', () => editCategoryName(btn.dataset.category));
+    });
+    document.querySelectorAll('.btn-delete-category').forEach(btn => {
+        btn.addEventListener('click', () => deleteCategory(btn.dataset.category));
+    });
+    document.querySelectorAll('.btn-edit-product').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const product = products.find(p => p.id === btn.dataset.productId);
+            openEditProductModal(btn.dataset.productId, product);
+        });
+    });
+    document.querySelectorAll('.btn-copy-link').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const link = btn.dataset.productLink;
+            navigator.clipboard.writeText(link).then(() => {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✓';
+                btn.style.background = '#27ae60';
+                setTimeout(() => { btn.innerHTML = originalText; btn.style.background = ''; }, 2000);
+            }).catch(err => { alert('שגיאה בהעתקת הקישור'); console.error(err); });
+        });
+    });
+}
 
     // ============================================
     // SKELETON LOADERS
