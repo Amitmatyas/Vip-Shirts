@@ -1522,6 +1522,20 @@
         return [];
     }
 
+        function isProductOnSale(product) {
+    if (!product.salePrice || product.salePrice <= 0) return false;
+    if (product.saleEndDate) { const endDate = new Date(product.saleEndDate); return endDate >= new Date(); }
+    return true;
+}
+
+function getEffectivePrice(product) {
+    if (product.salePrice && product.salePrice > 0) {
+        if (product.saleEndDate) { const endDate = new Date(product.saleEndDate); if (endDate >= new Date()) return product.salePrice; }
+        else return product.salePrice;
+    }
+    return product.price;
+}
+        
     // ============================================
     // IMAGE UPLOAD
     // ============================================
