@@ -2743,11 +2743,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                     </p>`;
                 }
 
-                const cats = getProductCategories(product);
-                let badgeHTML = '';
-                if (showBadges && cats.length === 1) {
-                    badgeHTML = `<div class="category-badge">${cats[0]}</div>`;
-                }
+let badgeHTML = '';
 
                 card.innerHTML = `
                     ${saleBadge}
