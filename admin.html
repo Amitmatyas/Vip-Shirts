@@ -1612,8 +1612,8 @@ loginButton.addEventListener('click', async () => {
         loginErrorMessage.style.display = 'none';
         try {
             await initializeSettings();
-            await loadAllProducts();
             await loadCategories();
+            await loadAllProducts();
             await fetchOrders();
             await fetchContactLeads();
             await fetchCustomers();
