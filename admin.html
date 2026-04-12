@@ -1619,11 +1619,11 @@ async function doLogin() {
         await loadCoupons();
         await loadAnnouncements();
         setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
-    } catch (err) {
+} catch (err) {
         console.error('שגיאה בטעינה:', err);
         alert('שגיאה בטעינת הנתונים: ' + err.message);
-    }
-}
+    } // סגירת ה-catch
+} // סגירת הפונקציה doLogin - זה מה שחסר לך בתמונה!
 
 // בדוק אם כבר מחובר
 if (localStorage.getItem('adminLoggedIn') === 'true') {
