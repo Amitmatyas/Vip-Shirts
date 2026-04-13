@@ -3108,61 +3108,55 @@ function updateCartDisplay() {
                 else if (event.target.classList.contains('remove-from-cart')) removeFromCart(cartIndex);
             }
         });
+applyCouponBtn.addEventListener('click', async () => {
+    const code = couponInput.value.trim();
+    if (!code) { couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>'; return; }
+    if (!settings || !settings.Coupons) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>'; return; }
+    
+    const coupon = settings.Coupons.find(c => c.Code === code);
+    if (!coupon) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>'; return; }
+    
+    if (coupon.ExpiryDate) {
+        const expiry = new Date(coupon.ExpiryDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (expiry < today) { couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>'; return; }
+    }
 
-        applyCouponBtn.addEventListener('click', async () => {
-            const code = couponInput.value.trim();
-            if (!code) { couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>'; return; }
-            if (!settings || !settings.Coupons) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>'; return; }
+    // נקה קופון קיים לפני הוספת חדש
+    if (appliedCoupon && appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
+        cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
+    }
+    appliedCoupon = coupon;
 
-            const coupon = settings.Coupons.find(c => c.Code === code);
-            if (!coupon) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>'; return; }
-
-            if (coupon.ExpiryDate) {
-                const expiry = new Date(coupon.ExpiryDate);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                if (expiry < today) { couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>'; return; }
-            }
-
-// נקה קופון קיים לפני הוספת חדש
-if (appliedCoupon && appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
-    cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
-}
-appliedCoupon = null;
-
-            appliedCoupon = coupon;
-
-            if (coupon.Type === 'free_product' && coupon.ProductId) {
-                const freeProduct = products.find(p => p.id === coupon.ProductId);
-                if (freeProduct) {
-                    const exists = cart.find(item => item.id === coupon.ProductId && item.isFreebie);
-                    if (!exists) {
-                        if (freeProduct.customFields && freeProduct.customFields.length > 0) {
-                            const hasUnfilledRequired = freeProduct.customFields.some(field => {
-                                if (!field.required) return false;
-                                if (coupon.SelectedOptions && coupon.SelectedOptions[field.name]) return false;
-                                return true;
-                            });
-                            const hasTextFields = freeProduct.customFields.some(field => field.type === 'text');
-
-                            if (hasUnfilledRequired || hasTextFields) {
-                                couponLockedOptions = coupon.SelectedOptions || {};
-                                isCouponProduct = true;
-                                openProductModal(coupon.ProductId, true);
-                                couponMessage.innerHTML = '<span style="color: #3498db;">אנא מלא את הפרטים החסרים למוצר המתנה</span>';
-                                return;
-                            }
-                        }
-                        addToCart(coupon.ProductId, coupon.SelectedOptions || {}, freeProduct.image, 0, true);
+    if (coupon.Type === 'free_product' && coupon.ProductId) {
+        const freeProduct = products.find(p => p.id === coupon.ProductId);
+        if (freeProduct) {
+            const exists = cart.find(item => item.id === coupon.ProductId && item.isFreebie);
+            if (!exists) {
+                if (freeProduct.customFields && freeProduct.customFields.length > 0) {
+                    const hasUnfilledRequired = freeProduct.customFields.some(field => {
+                        if (!field.required) return false;
+                        if (coupon.SelectedOptions && coupon.SelectedOptions[field.name]) return false;
+                        return true;
+                    });
+                    const hasTextFields = freeProduct.customFields.some(field => field.type === 'text');
+                    if (hasUnfilledRequired || hasTextFields) {
+                        couponLockedOptions = coupon.SelectedOptions || {};
+                        isCouponProduct = true;
+                        openProductModal(coupon.ProductId, true);
+                        couponMessage.innerHTML = '<span style="color: #3498db;">אנא מלא את הפרטים החסרים למוצר המתנה</span>';
+                        return;
                     }
                 }
+                addToCart(coupon.ProductId, coupon.SelectedOptions || {}, freeProduct.image, 0, true);
             }
+        }
+    }
 
-            updateCartDisplay();
-            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
-            couponInput.disabled = true;
-            applyCouponBtn.disabled = true;
-        });
+    updateCartDisplay();
+    couponMessage.innerHTML = '<span class="coupon-applied">קופון הוחל!</span>';
+});
 
         function openProductModal(productId, isCouponFreebie = false) {
     const product = products.find(p => p.id === productId);
