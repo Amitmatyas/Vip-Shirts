@@ -2636,23 +2636,24 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                         today.setHours(0, 0, 0, 0);
                         if (expiry) expiry.setHours(0, 0, 0, 0);
 
-                        if (expiry && expiry >= today) {
-                            appliedCoupon = couponData;
-                            couponInput.value = couponData.Code;
-                            couponInput.disabled = true;
-                            applyCouponBtn.disabled = true;
-                            couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
-                        } else {
-                            localStorage.removeItem('vipshirts_coupon');
-                            appliedCoupon = null;
-                        }
-                    } else {
-                        appliedCoupon = couponData;
-                        couponInput.value = couponData.Code;
-                        couponInput.disabled = true;
-                        applyCouponBtn.disabled = true;
-                        couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
-                    }
+if (expiry && expiry >= today) {
+    appliedCoupon = couponData;
+    couponInput.value = couponData.Code;
+    // couponInput.disabled = true;   ← מחק
+    // applyCouponBtn.disabled = true; ← מחק
+    couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+} else {
+    localStorage.removeItem('vipshirts_coupon');
+    appliedCoupon = null;
+}
+} else {
+    appliedCoupon = couponData;
+    couponInput.value = couponData.Code;
+    // couponInput.disabled = true;   ← מחק
+    // applyCouponBtn.disabled = true; ← מחק
+    couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+}
+                    
                 } catch (e) {
                     console.error("שגיאה בטעינת קופון:", e);
                     appliedCoupon = null;
@@ -3155,7 +3156,7 @@ applyCouponBtn.addEventListener('click', async () => {
     }
 
     updateCartDisplay();
-    couponMessage.innerHTML = '<span class="coupon-applied">קופון הוחל!</span>';
+    couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
 });
 
         function openProductModal(productId, isCouponFreebie = false) {
@@ -3392,13 +3393,13 @@ customOptionsContainer.parentNode.insertBefore(carouselSection, modalAddToCartBt
             const currentDisplayImage = modalProductImage.src;
             addToCart(currentModalProductId, { ...currentProductOptions }, currentDisplayImage, currentProductPrice, isCouponProduct);
 
-            if (isCouponProduct) {
-                couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
-                couponInput.disabled = true;
-                applyCouponBtn.disabled = true;
-                isCouponProduct = false;
-                couponLockedOptions = null;
-            }
+if (isCouponProduct) {
+    couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
+    // couponInput.disabled = true;   ← מחק
+    // applyCouponBtn.disabled = true; ← מחק
+    isCouponProduct = false;
+    couponLockedOptions = null;
+}
 
             productModal.style.display = 'none';
             currentProductOptions = {};
