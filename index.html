@@ -1731,6 +1731,13 @@
             <ul id="cart-items"></ul>
         </div>
 
+        <!-- הוסף אחרי </ul> ולפני shipping-info -->
+<div style="text-align: left; margin-top: 8px;">
+    <button id="clear-cart-btn" onclick="clearCart()" style="background: none; border: none; color: #999; font-size: 0.85em; cursor: pointer; padding: 4px 8px; text-decoration: underline;">
+        🗑 נקה עגלה
+    </button>
+</div>
+        
         <div class="shipping-info" id="shipping-info"></div>
 
         <div class="cart-section">
@@ -1986,6 +1993,29 @@ function withTimeout(promise, ms = 10000) {
         )
     ]);
 }
+
+        function clearCart() {
+    if (!confirm('האם לנקות את העגלה?')) return;
+    
+    cart = [];
+    appliedCoupon = null;
+    pointsToUse = 0;
+    pointsDiscount = 0;
+    
+    couponInput.value = '';
+    couponInput.disabled = false;
+    applyCouponBtn.disabled = false;
+    couponMessage.innerHTML = '';
+    
+    const pointsSlider = document.getElementById('points-slider');
+    if (pointsSlider) pointsSlider.value = pointsSlider.min || 10;
+    
+    localStorage.removeItem('vipshirts_cart');
+    localStorage.removeItem('vipshirts_coupon');
+    
+    updateCartDisplay();
+}
+        
         function getProductCategories(product) {
             if (Array.isArray(product.categories) && product.categories.length > 0) {
                 return product.categories;
@@ -3094,12 +3124,11 @@ function updateCartDisplay() {
                 if (expiry < today) { couponMessage.innerHTML = '<span style="color: red;">תוקף הקופון עבר</span>'; return; }
             }
 
-            if (appliedCoupon) {
-                if (appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
-                    cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
-                }
-                couponMessage.innerHTML = '<span style="color: #ff9800;">הקופון הקודם הוחלף</span>';
-            }
+// נקה קופון קיים לפני הוספת חדש
+if (appliedCoupon && appliedCoupon.Type === 'free_product' && appliedCoupon.ProductId) {
+    cart = cart.filter(item => !(item.id === appliedCoupon.ProductId && item.isFreebie));
+}
+appliedCoupon = null;
 
             appliedCoupon = coupon;
 
