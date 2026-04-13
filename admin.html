@@ -1392,15 +1392,15 @@
                         <div class="item-list" id="coupons-list"></div>
                     </div>
 
-                    <div class="settings-section">
-                        <h3>הודעות (עד 5 הודעות)</h3>
-                        <div class="form-group">
-                            <label for="announcement-text">הודעה חדשה:</label>
-                            <input type="text" id="announcement-text" placeholder="הזן הודעה...">
-                        </div>
-                        <button class="btn btn-success" id="add-announcement-btn">הוסף הודעה</button>
-                        <div class="item-list" id="announcements-list"></div>
-                    </div>
+<div class="settings-section">
+    <h3>הודעות (עד 5 הודעות)</h3>
+    <div class="form-group">
+        <label for="announcement-text">הודעה חדשה:</label>
+        <input type="text" id="announcement-text" placeholder="הזן הודעה...">
+    </div>
+    <button class="btn btn-success" id="add-announcement-btn">הוסף הודעה</button>
+    <div class="item-list" id="announcements-list"></div>
+</div>
 
                     <div class="settings-section">
                         <h3>הגדרות משלוח</h3>
@@ -2741,36 +2741,131 @@ async function processSizeChartFiles(inputId, previewId, statusId) {
     });
 
     async function loadCoupons() {
-        try {
-            const settingsDoc = await db.collection('Settings').doc('main').get();
-            if (settingsDoc.exists) {
-                const data = settingsDoc.data();
-                const coupons = data.Coupons || [];
-                const couponsList = document.getElementById('coupons-list');
-                couponsList.innerHTML = '';
-                if (coupons.length === 0) { couponsList.innerHTML = '<p style="color: #666;">אין קופונים.</p>'; return; }
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (settingsDoc.exists) {
+            const data = settingsDoc.data();
+            const coupons = data.Coupons || [];
+            const couponsList = document.getElementById('coupons-list');
+            couponsList.innerHTML = '';
+            if (coupons.length === 0) { couponsList.innerHTML = '<p style="color: #666;">אין קופונים.</p>'; return; }
 
-                coupons.forEach((coupon, index) => {
-                    const couponItem = document.createElement('div');
-                    couponItem.className = 'list-item';
-                    let typeText = '';
-                    switch (coupon.Type) {
-                        case 'free_product':
-                            const product = products.find(p => p.id === coupon.ProductId);
-                            typeText = product ? `מוצר חינם: ${product.name}` : 'מוצר חינם';
-                            if (coupon.SelectedOptions && Object.keys(coupon.SelectedOptions).length > 0) typeText += ' (עם הגדרות)';
-                            break;
-                        case 'fixed_discount': typeText = `הנחה ${coupon.Value}₪`; break;
-                        case 'percentage_discount': typeText = `הנחה ${coupon.Value}%`; break;
-                        case 'free_shipping': typeText = 'משלוח חינם'; break;
-                    }
-                    const expiryText = coupon.ExpiryDate ? ` | תוקף עד: ${coupon.ExpiryDate}` : '';
-                    couponItem.innerHTML = `<div><strong>${coupon.Code}</strong> - ${typeText}${expiryText}</div><div class="list-item-actions"><button class="btn btn-danger" onclick="deleteCoupon(${index})">מחק</button></div>`;
-                    couponsList.appendChild(couponItem);
-                });
-            }
-        } catch (error) { console.error('Error loading coupons:', error); }
-    }
+            coupons.forEach((coupon, index) => {
+                let typeText = '';
+                switch (coupon.Type) {
+                    case 'free_product':
+                        const product = products.find(p => p.id === coupon.ProductId);
+                        typeText = product ? `מוצר חינם: ${product.name}` : 'מוצר חינם';
+                        if (coupon.SelectedOptions && Object.keys(coupon.SelectedOptions).length > 0) typeText += ' (עם הגדרות)';
+                        break;
+                    case 'fixed_discount': typeText = `הנחה ${coupon.Value}₪`; break;
+                    case 'percentage_discount': typeText = `הנחה ${coupon.Value}%`; break;
+                    case 'free_shipping': typeText = 'משלוח חינם'; break;
+                }
+                const expiryText = coupon.ExpiryDate ? ` | תוקף עד: ${coupon.ExpiryDate}` : '';
+
+                // בנה אפשרויות למוצרים
+                const productOptionsHTML = products.map(p =>
+                    `<option value="${p.id}" ${coupon.ProductId === p.id ? 'selected' : ''}>${p.name}</option>`
+                ).join('');
+
+                const couponItem = document.createElement('div');
+                couponItem.className = 'list-item';
+                couponItem.style.flexDirection = 'column';
+                couponItem.style.alignItems = 'stretch';
+                couponItem.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:150px;">
+                            <strong>${coupon.Code}</strong> — ${typeText}${expiryText}
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn btn-dark" onclick="startEditCoupon(${index})">ערוך</button>
+                            <button class="btn btn-danger" onclick="deleteCoupon(${index})">מחק</button>
+                        </div>
+                    </div>
+                    <div id="coupon-edit-${index}" style="display:none; margin-top:15px; background:#f8f9fa; border-radius:8px; padding:15px;">
+                        <div class="form-group">
+                            <label>קוד קופון:</label>
+                            <input type="text" id="cedit-code-${index}" value="${coupon.Code}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                        </div>
+                        <div class="form-group">
+                            <label>סוג הטבה:</label>
+                            <select id="cedit-type-${index}" onchange="onEditCouponTypeChange(${index})" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                                <option value="free_product" ${coupon.Type==='free_product'?'selected':''}>מוצר חינם</option>
+                                <option value="fixed_discount" ${coupon.Type==='fixed_discount'?'selected':''}>הנחה בשקלים</option>
+                                <option value="percentage_discount" ${coupon.Type==='percentage_discount'?'selected':''}>הנחה באחוזים</option>
+                                <option value="free_shipping" ${coupon.Type==='free_shipping'?'selected':''}>משלוח חינם</option>
+                            </select>
+                        </div>
+                        <div id="cedit-value-group-${index}" class="form-group" style="display:${coupon.Type==='free_product'||coupon.Type==='free_shipping'?'none':'block'};">
+                            <label>ערך הטבה:</label>
+                            <input type="number" id="cedit-value-${index}" value="${coupon.Value||0}" step="0.01" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                        </div>
+                        <div id="cedit-product-group-${index}" class="form-group" style="display:${coupon.Type==='free_product'?'block':'none'};">
+                            <label>בחר מוצר:</label>
+                            <select id="cedit-product-${index}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                                <option value="">בחר מוצר</option>
+                                ${productOptionsHTML}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>תאריך תפוגה:</label>
+                            <input type="date" id="cedit-expiry-${index}" value="${coupon.ExpiryDate||''}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                        </div>
+                        <div style="display:flex; gap:8px; margin-top:5px;">
+                            <button class="btn btn-success" onclick="saveEditCoupon(${index})">שמור</button>
+                            <button class="btn btn-secondary" onclick="cancelEditCoupon(${index})">ביטול</button>
+                        </div>
+                    </div>
+                `;
+                couponsList.appendChild(couponItem);
+            });
+        }
+    } catch (error) { console.error('Error loading coupons:', error); }
+}
+
+window.startEditCoupon = function(index) {
+    document.getElementById(`coupon-edit-${index}`).style.display = 'block';
+};
+
+window.cancelEditCoupon = function(index) {
+    document.getElementById(`coupon-edit-${index}`).style.display = 'none';
+};
+
+window.onEditCouponTypeChange = function(index) {
+    const type = document.getElementById(`cedit-type-${index}`).value;
+    document.getElementById(`cedit-value-group-${index}`).style.display =
+        (type === 'free_product' || type === 'free_shipping') ? 'none' : 'block';
+    document.getElementById(`cedit-product-group-${index}`).style.display =
+        type === 'free_product' ? 'block' : 'none';
+};
+
+window.saveEditCoupon = async function(index) {
+    const code = document.getElementById(`cedit-code-${index}`).value.trim();
+    const type = document.getElementById(`cedit-type-${index}`).value;
+    const value = parseFloat(document.getElementById(`cedit-value-${index}`).value) || 0;
+    const productId = document.getElementById(`cedit-product-${index}`).value;
+    const expiry = document.getElementById(`cedit-expiry-${index}`).value;
+
+    if (!code) { alert('אנא הזן קוד קופון'); return; }
+    if (type === 'free_product' && !productId) { alert('אנא בחר מוצר'); return; }
+
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const coupons = settingsDoc.data().Coupons || [];
+        coupons[index] = {
+            Code: code,
+            Type: type,
+            Value: (type === 'free_shipping' || type === 'free_product') ? 0 : value,
+            ProductId: type === 'free_product' ? productId : null,
+            SelectedOptions: coupons[index].SelectedOptions || null,
+            ExpiryDate: expiry || null
+        };
+        await db.collection('Settings').doc('main').update({ Coupons: coupons });
+        alert('קופון עודכן בהצלחה!');
+        await loadCoupons();
+    } catch (error) { console.error('Error saving coupon:', error); alert('שגיאה בשמירת קופון'); }
+};
 
     document.getElementById('add-coupon-btn').addEventListener('click', async () => {
         const code = document.getElementById('coupon-code').value.trim();
@@ -2823,24 +2918,62 @@ async function processSizeChartFiles(inputId, previewId, statusId) {
     // ============================================
     let announcements = [];
 
-    async function loadAnnouncements() {
-        try {
-            const settingsDoc = await db.collection('Settings').doc('main').get();
-            if (settingsDoc.exists) {
-                const data = settingsDoc.data();
-                announcements = data.Announcements || [];
-                const announcementsList = document.getElementById('announcements-list');
-                announcementsList.innerHTML = '';
-                if (announcements.length === 0) { announcementsList.innerHTML = '<p style="color: #666;">אין הודעות.</p>'; return; }
-                announcements.forEach((announcement, index) => {
-                    const announcementItem = document.createElement('div');
-                    announcementItem.className = 'list-item';
-                    announcementItem.innerHTML = `<div><strong>הודעה ${index + 1}:</strong> ${announcement}</div><div class="list-item-actions"><button class="btn btn-danger" onclick="deleteAnnouncement(${index})">מחק</button></div>`;
-                    announcementsList.appendChild(announcementItem);
-                });
-            }
-        } catch (error) { console.error('Error loading announcements:', error); }
-    }
+async function loadAnnouncements() {
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (settingsDoc.exists) {
+            const data = settingsDoc.data();
+            announcements = data.Announcements || [];
+            const announcementsList = document.getElementById('announcements-list');
+            announcementsList.innerHTML = '';
+            if (announcements.length === 0) { announcementsList.innerHTML = '<p style="color: #666;">אין הודעות.</p>'; return; }
+            announcements.forEach((announcement, index) => {
+                const announcementItem = document.createElement('div');
+                announcementItem.className = 'list-item';
+                announcementItem.style.flexDirection = 'column';
+                announcementItem.style.alignItems = 'stretch';
+                announcementItem.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <strong style="flex:1; min-width:150px;" id="announcement-label-${index}">הודעה ${index + 1}: ${announcement}</strong>
+                        <div class="list-item-actions">
+                            <button class="btn btn-dark" onclick="startEditAnnouncement(${index})">ערוך</button>
+                            <button class="btn btn-danger" onclick="deleteAnnouncement(${index})">מחק</button>
+                        </div>
+                    </div>
+                    <div id="announcement-edit-${index}" style="display:none; margin-top:10px; display:none;">
+                        <input type="text" id="announcement-edit-input-${index}" value="${announcement.replace(/"/g, '&quot;')}"
+                               style="width:100%; padding:10px; border:2px solid #ddd; border-radius:6px; font-size:1em; margin-bottom:8px;">
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-success" onclick="saveEditAnnouncement(${index})">שמור</button>
+                            <button class="btn btn-secondary" onclick="cancelEditAnnouncement(${index})">ביטול</button>
+                        </div>
+                    </div>
+                `;
+                announcementsList.appendChild(announcementItem);
+            });
+        }
+    } catch (error) { console.error('Error loading announcements:', error); }
+}
+
+window.startEditAnnouncement = function(index) {
+    document.getElementById(`announcement-edit-${index}`).style.display = 'block';
+    document.getElementById(`announcement-edit-input-${index}`).focus();
+};
+
+window.cancelEditAnnouncement = function(index) {
+    document.getElementById(`announcement-edit-${index}`).style.display = 'none';
+};
+
+window.saveEditAnnouncement = async function(index) {
+    const newText = document.getElementById(`announcement-edit-input-${index}`).value.trim();
+    if (!newText) { alert('ההודעה לא יכולה להיות ריקה'); return; }
+    try {
+        announcements[index] = newText;
+        await db.collection('Settings').doc('main').update({ Announcements: announcements });
+        alert('הודעה עודכנה בהצלחה!');
+        await loadAnnouncements();
+    } catch (error) { console.error('Error updating announcement:', error); alert('שגיאה בעדכון ההודעה'); }
+};
 
     document.getElementById('add-announcement-btn').addEventListener('click', async () => {
         const text = document.getElementById('announcement-text').value.trim();
