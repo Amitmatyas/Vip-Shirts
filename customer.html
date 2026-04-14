@@ -36,7 +36,7 @@
             padding: 40px;
             max-width: 600px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1); 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
         }
 
         .logo { text-align: center; margin-bottom: 30px; }
@@ -62,24 +62,75 @@
         }
 
         .info-section { margin-top: 40px; border-top: 2px solid #eee; padding-top: 30px; }
-        .stat-card { 
-            background: #f8f9fa; padding: 15px; border-radius: 12px; 
+        .stat-card {
+            background: #f8f9fa; padding: 15px; border-radius: 12px;
             border-right: 5px solid var(--primary-color); margin-bottom: 25px;
         }
         .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--primary-color); }
 
+        /* ===== ORDER BOX ===== */
         .order-box {
             background: white; border: 1px solid #eee; border-radius: 10px;
             margin-bottom: 12px; overflow: hidden;
         }
-        .order-summary { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .order-details { padding: 0 15px; max-height: 0; overflow: hidden; transition: 0.3s ease-out; background: #fafafa; }
-        .order-box.active .order-details { max-height: 500px; padding: 15px; border-top: 1px solid #eee; }
-        
-        .items-list { list-style: none; padding-right: 15px; margin: 10px 0; border-right: 2px solid #ddd; }
+        .order-summary {
+            padding: 15px; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .order-summary:hover { background: #fafafa; }
+
+        .order-details {
+            padding: 0 15px; max-height: 0; overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            background: #fafafa;
+        }
+        .order-box.active .order-details {
+            max-height: 700px; padding: 15px; border-top: 1px solid #eee;
+        }
+
+        /* פירוט פריטים */
+        .items-list { list-style: none; padding: 0; margin: 0 0 14px 0; }
+        .items-list li {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem;
+        }
+        .items-list li:last-child { border-bottom: none; }
+        .item-name-col { flex: 1; }
+        .item-name-col .item-opts { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .item-price-col { font-weight: 700; white-space: nowrap; margin-right: 10px; }
+        .freebie-tag {
+            display: inline-block; background: #eafff2; color: #27ae60;
+            font-size: 0.72rem; font-weight: 700; padding: 1px 7px;
+            border-radius: 5px; margin-left: 5px;
+        }
+
+        /* סיכום מחירים */
+        .order-totals {
+            border-top: 1px solid #eee; padding-top: 10px; margin-top: 4px;
+        }
+        .totals-row {
+            display: flex; justify-content: space-between;
+            font-size: 0.88rem; padding: 4px 0; color: var(--text-muted);
+        }
+        .totals-row.final {
+            font-size: 1rem; font-weight: 800;
+            color: var(--text-main); border-top: 2px solid #ddd;
+            margin-top: 6px; padding-top: 8px;
+        }
+        .totals-row.coupon { color: #27ae60; }
+
         .tag { padding: 3px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; }
         .tag-success { background: #eafff2; color: #27ae60; }
         .tag-pending { background: #fff5e6; color: #d35400; }
+
+        /* כפתור חשבונית */
+        .invoice-btn {
+            display: inline-block; margin-top: 14px;
+            padding: 9px 18px; background: var(--primary-color); color: white;
+            border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+            text-decoration: none; font-family: inherit; border: none; cursor: pointer;
+        }
+        .invoice-btn:hover { opacity: 0.85; }
 
         .message { padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; display: none; font-weight: 600; }
         .error { background: #ffeaea; color: #c0392b; display: block; }
@@ -196,16 +247,14 @@
             }
 
             userData = { id: snap.docs[0].id, ...snap.docs[0].data() };
-            
+
             document.getElementById('user-greeting').textContent = userData.name || '';
             document.getElementById('field-name').value = userData.name || '';
             document.getElementById('field-phone').value = userData.phone || '';
             document.getElementById('stat-points').textContent = userData.points || 0;
 
-            // פירוק כתובת מעודכן
             if (userData.address) {
                 const parts = userData.address.split(',').map(p => p.trim());
-                // רחוב ומספר (חלק ראשון)
                 const streetPart = parts[0] || '';
                 const streetMatch = streetPart.match(/(.*?)\s+(\d+[א-ת]?)$/);
                 if (streetMatch) {
@@ -214,17 +263,13 @@
                 } else {
                     document.getElementById('field-street').value = streetPart;
                 }
-                
-                // עיר (חלק שני)
                 document.getElementById('field-city').value = parts[1] || '';
-                
-                // מיקוד (חלק שלישי)
                 if (parts[2]) {
                     const zipMatch = parts[2].match(/\d+$/);
                     if (zipMatch) document.getElementById('field-zip').value = zipMatch[0];
                 }
             }
-            
+
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('main-content').style.display = 'block';
 
@@ -236,37 +281,65 @@
         }
     }
 
-    async function loadOrders(memberId) {
-        const container = document.getElementById('orders-container');
-        try {
-            const snap = await db.collection('orders').where('clubMemberId', '==', memberId).get();
-            if (snap.empty) {
-                container.innerHTML = '<p style="color:#999; font-size:0.9rem;">אין הזמנות.</p>';
-                return;
-            }
+    function fmt(n) { return '₪' + (parseFloat(n) || 0).toFixed(2); }
 
-            const orders = snap.docs.map(doc => ({id: doc.id, ...doc.data()}))
-                .sort((a,b) => (b.orderDate?.toDate() || 0) - (a.orderDate?.toDate() || 0));
+async function loadOrders(memberId) {
+    const container = document.getElementById('orders-container');
+    try {
+        const snap = await db.collection('orders').where('clubMemberId', '==', memberId).get();
+        if (snap.empty) {
+            container.innerHTML = '<p style="color:#999; font-size:0.9rem;">אין הזמנות.</p>';
+            return;
+        }
 
-            container.innerHTML = orders.map(order => `
+        const orders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+            .sort((a, b) => (b.orderDate?.toDate() || 0) - (a.orderDate?.toDate() || 0));
+
+        container.innerHTML = orders.map(order => {
+            const date = order.orderDate
+                ? order.orderDate.toDate().toLocaleDateString('he-IL')
+                : '---';
+
+            const itemsHTML = (order.items || []).map(item => {
+                const price = item.isFreebie ? null : ((item.price || 0) * (item.quantity || 1));
+                return `
+                    <li>
+                        <div class="item-name-col">
+                            ${item.quantity}x ${item.productName || item.name || ''}
+                        </div>
+                        <div class="item-price-col">
+                            ${item.isFreebie ? '<span style="color:#27ae60;">חינם</span>' : fmt(price)}
+                        </div>
+                    </li>`;
+            }).join('');
+
+            return `
                 <div class="order-box" onclick="this.classList.toggle('active')">
                     <div class="order-summary">
                         <div>
-                            <strong>#${order.id.substring(0,6)}</strong>
-                            <div style="font-size:0.8rem; color:#666;">${order.orderDate ? order.orderDate.toDate().toLocaleDateString('he-IL') : '---'}</div>
+                            <strong>#${order.id.substring(0, 6).toUpperCase()}</strong>
+                            <div style="font-size:0.8rem; color:#666;">${date}</div>
                         </div>
                         <div style="text-align:left">
-                            <div style="font-weight:800">₪${(order.totalAmount || 0).toFixed(2)}</div>
-                            <span class="tag ${order.completed ? 'tag-success' : 'tag-pending'}">${order.completed ? 'הושלם' : 'בטיפול'}</span>
+                            <div style="font-weight:800">${fmt(order.totalAmount || 0)}</div>
+                            <span class="tag ${order.completed ? 'tag-success' : 'tag-pending'}">
+                                ${order.completed ? 'הושלם' : 'בטיפול'}
+                            </span>
                         </div>
                     </div>
                     <div class="order-details">
-                        <ul class="items-list">${(order.items || []).map(i => `<li>${i.quantity}x ${i.productName || i.name}</li>`).join('')}</ul>
+                        <ul class="items-list">${itemsHTML}</ul>
+                        <a href="invoice.html#${order.id}" target="_blank"
+                           class="invoice-btn" onclick="event.stopPropagation()">📄 צפה בחשבונית</a>
                     </div>
-                </div>
-            `).join('');
-        } catch (e) { container.innerHTML = 'שגיאה'; }
+                </div>`;
+        }).join('');
+
+    } catch (e) {
+        container.innerHTML = '<p style="color:red;">שגיאה בטעינת הזמנות</p>';
+        console.error(e);
     }
+}
 
     async function loadLeads(email) {
         const container = document.getElementById('leads-container');
@@ -277,19 +350,24 @@
                 return;
             }
 
-            const leads = snap.docs.map(doc => ({id: doc.id, ...doc.data()}))
-                .sort((a,b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+            const leads = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
 
             container.innerHTML = leads.map(lead => `
                 <div style="background:#fff; border:1px solid #eee; padding:12px; border-radius:10px; margin-bottom:10px;">
                     <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#666; margin-bottom:5px;">
                         <span>פנייה מיום ${lead.createdAt ? lead.createdAt.toDate().toLocaleDateString('he-IL') : 'לא ידוע'}</span>
-                        <span style="color:${lead.status === 'closed' ? 'green' : '#e67e22'}">${lead.status === 'closed' ? 'סגור' : 'בטיפול'}</span>
+                        <span style="color:${lead.status === 'closed' ? 'green' : '#e67e22'}">
+                            ${lead.status === 'closed' ? 'סגור' : 'בטיפול'}
+                        </span>
                     </div>
                     <div style="font-size:0.95rem;">${lead.message || ''}</div>
                 </div>
             `).join('');
-        } catch (e) { container.innerHTML = 'שגיאה'; }
+        } catch (e) {
+            container.innerHTML = '<p style="color:red;">שגיאה בטעינת פניות</p>';
+            console.error(e);
+        }
     }
 
     document.getElementById('update-form').onsubmit = async (e) => {
@@ -303,9 +381,8 @@
             const house = document.getElementById('field-house').value;
             const city = document.getElementById('field-city').value;
             const zip = document.getElementById('field-zip').value;
-            
             const fullAddress = `${street} ${house}, ${city}, ${zip}`;
-            
+
             const upData = {
                 name: document.getElementById('field-name').value,
                 phone: document.getElementById('field-phone').value,
