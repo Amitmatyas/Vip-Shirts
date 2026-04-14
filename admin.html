@@ -2448,7 +2448,7 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
                         <label style="font-weight: bold; display: block; margin-bottom: 8px;">מצב ההזמנה (רק למנהל):</label>
                         <textarea class="order-status-text" data-order-id="${order.id}">${order.adminStatus || ''}</textarea>
 <button class="btn btn-success complete-order-btn" data-order-id="${order.id}">סמן כהושלם</button>
-<button class="btn btn-secondary" onclick="event.stopPropagation(); navigator.clipboard.writeText(window.location.origin + '/invoice.html#${order.id}').then(() => { this.textContent='✓ הועתק'; setTimeout(()=>{ this.textContent='קישור חשבונית'; },2000); })" style="margin-top:8px;">🔗 קישור חשבונית</button>                    </div>
+<button class="btn btn-secondary" onclick="event.stopPropagation(); navigator.clipboard.writeText(window.location.origin + '/invoice.html#${order.id}').then(() => { this.textContent='✓ הועתק'; setTimeout(()=>{ this.textContent='קישור חשבונית'; },2000); })" style="margin-top:8px;">קישור חשבונית</button>                    </div>
                 `;
                 orderCard.addEventListener('click', (e) => {
                     if (!e.target.classList.contains('order-status-text') && !e.target.classList.contains('complete-order-btn')) showOrderDetails(order);
