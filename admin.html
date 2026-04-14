@@ -1817,9 +1817,7 @@ logoutButton.addEventListener('click', () => {
                         </div>`;
                 }
 
-                // יצירת קישור עמוק למוצר (מסיר את admin.html מהנתיב)
-                const baseUrl = window.location.origin + window.location.pathname.replace('admin.html', '');
-                const productLink = `${baseUrl}#${encodeURIComponent(product.name)}`;
+const productLink = `${window.location.origin}/#${encodeURIComponent(product.name)}`;
 
                 productCard.innerHTML = `
                     ${saleBadge}
