@@ -1441,6 +1441,7 @@
             <p><strong>קופון:</strong> <span id="modal-coupon"></span></p>
             <p><strong>סה"כ כולל משלוח:</strong> <span id="modal-total-amount"></span> ₪</p>
             <p><strong>תאריך הזמנה:</strong> <span id="modal-order-date"></span></p>
+            <p><strong>הערות:</strong> <span id="modal-order-notes" style="white-space:pre-wrap; background:#fff8e1; padding:6px 10px; border-radius:6px; display:inline-block; margin-top:4px; border:1px solid #ffd54f;"></span></p>
             <h4>פרטי פריטים:</h4>
             <ul id="modal-order-items"></ul>
         </div>
@@ -2443,6 +2444,7 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
                         <p style="margin-top: 8px;"><strong>לקוח:</strong> ${order.customerName || 'אנונימי'}</p>
                         <p><strong>סה"כ:</strong> ${order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'} ₪</p>
                         <p><strong>תאריך:</strong> ${orderDate}</p>
+                        ${order.orderNotes ? `<p style="margin-top:6px; color:#8d6e63; font-size:0.9em; background:#fff8e1; padding:5px 8px; border-radius:5px; border-right:3px solid #ffd54f;">💬 ${order.orderNotes}</p>` : ''}
                     </div>
                     <div class="order-status-section" onclick="event.stopPropagation();">
                         <label style="font-weight: bold; display: block; margin-bottom: 8px;">מצב ההזמנה (רק למנהל):</label>
@@ -2484,6 +2486,10 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
         document.getElementById('modal-coupon').textContent = order.appliedCoupon || 'אין';
         document.getElementById('modal-total-amount').textContent = order.totalAmount ? order.totalAmount.toFixed(2) : '0.00';
         document.getElementById('modal-order-date').textContent = order.orderDate ? new Date(order.orderDate.toDate()).toLocaleString('he-IL') : 'לא ידוע';
+        const notesEl = document.getElementById('modal-order-notes');
+const notes = order.orderNotes;
+notesEl.textContent = notes || 'אין הערות';
+notesEl.style.color = notes ? '#5d4037' : '#999';
 
         const modalOrderItems = document.getElementById('modal-order-items');
         modalOrderItems.innerHTML = '';
