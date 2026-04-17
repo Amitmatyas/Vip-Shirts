@@ -67,6 +67,13 @@
 
         .logo img { width: 120px; height: auto; }
 
+
+    #inv-notes {
+    font-style: italic;
+    color: #444;
+    white-space: pre-wrap; /* שומר על ירידות שורה אם הלקוח לחץ Enter */
+}
+        
         /* ===== INFO BLOCKS ===== */
         .section-title {
             font-size: 0.78rem;
@@ -288,7 +295,14 @@
                 <tbody id="inv-items"></tbody>
             </table>
         </div>
-
+        
+<div id="notes-section" style="display:none; margin-top: 20px;">
+    <div class="section-title">הערות להזמנה</div>
+    <div style="font-size: 0.92rem; color: var(--text-main); line-height: 1.6; padding: 10px 0; border-top: 1px solid #eee;">
+        <p id="inv-notes"></p>
+    </div>
+</div>
+        
         <div class="totals-section">
             <div class="totals-box">
                 <div class="totals-row">
@@ -363,6 +377,12 @@ const date = o.orderDate ? o.orderDate.toDate().toLocaleString('he-IL', {
                 `${o.customerPhone || ''}<br>${o.customerEmail || ''}`;
             document.getElementById('inv-address').textContent = o.customerAddress || '—';
 
+            // הצגת הערות לקוח אם קיימות
+if (o.orderNotes && o.orderNotes !== "אין הערות" && o.orderNotes !== "ללא הערות") {
+    document.getElementById('notes-section').style.display = 'block';
+    document.getElementById('inv-notes').textContent = o.orderNotes;
+}
+            
             const tbody = document.getElementById('inv-items');
             (o.items || []).forEach(item => {
                 const price = item.isFreebie ? 0 : (item.price || 0);
