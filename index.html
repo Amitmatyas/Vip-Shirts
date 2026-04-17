@@ -3560,10 +3560,10 @@ function renderPayPalButton() {
                         status: 'completed',
                         completed: false,
                         paymentType: 'paypal',
-                        paypalOrderId: details.id
+                        paypalOrderId: details.id,
                         orderNotes: document.getElementById('order-notes').value.trim() || null,
-                    });
-                    
+                                        });
+
                     // Update club member points
                     if (clubMemberId) {
                         try {
