@@ -3167,13 +3167,14 @@ applyCouponBtn.addEventListener('click', async () => {
     couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
 });
 
-        function openProductModal(productId, isCouponFreebie = false) {
+    function openProductModal(productId, isCouponFreebie = false) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
     modalProductImage.src = product.image;
     modalProductImage.alt = product.name;
     modalProductTitle.textContent = product.name;
+    modalProductDescription.innerHTML = (product.description || '').replace(/\n/g, '<br>');
 
     const onSale = isProductOnSale(product);
     const effectivePrice = getEffectivePrice(product);
