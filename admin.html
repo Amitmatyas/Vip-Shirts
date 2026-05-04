@@ -3763,6 +3763,80 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
         });
     });
 
+        // ============================================
+// ADD CATEGORY
+// ============================================
+document.getElementById('add-category-btn').addEventListener('click', async () => {
+    const name = document.getElementById('category-name').value.trim();
+    if (!name) { alert('אנא הזן שם קטגוריה'); return; }
+    if (categories.includes(name)) { alert('קטגוריה זו כבר קיימת'); return; }
+    try {
+        categories.push(name);
+        await db.collection('Settings').doc('main').update({ Categories: categories });
+        document.getElementById('category-name').value = '';
+        await loadCategories();
+        updateCategoryCheckboxes();
+    } catch (error) { console.error('Error adding category:', error); alert('שגיאה בהוספת קטגוריה'); }
+});
+
+// ============================================
+// EDIT CATEGORY NAME
+// ============================================
+async function editCategoryName(oldName) {
+    const newName = prompt('שם קטגוריה חדש:', oldName);
+    if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
+    const trimmed = newName.trim();
+    if (categories.includes(trimmed)) { alert('קטגוריה בשם זה כבר קיימת'); return; }
+
+    try {
+        // Update categories list in Settings
+        const idx = categories.indexOf(oldName);
+        if (idx !== -1) categories[idx] = trimmed;
+        await db.collection('Settings').doc('main').update({ Categories: categories });
+
+        // Update all products that reference the old category name
+        const batch = db.batch();
+        products.forEach(product => {
+            const cats = getProductCategories(product);
+            if (cats.includes(oldName)) {
+                const updated = cats.map(c => c === oldName ? trimmed : c);
+                batch.update(db.collection('soccer_shirts').doc(product.id), { categories: updated });
+            }
+        });
+        await batch.commit();
+
+        alert('קטגוריה עודכנה בהצלחה!');
+        await loadAllProducts();
+        await loadCategories();
+    } catch (error) { console.error('Error editing category:', error); alert('שגיאה בעריכת קטגוריה'); }
+}
+
+// ============================================
+// DELETE CATEGORY
+// ============================================
+async function deleteCategory(name) {
+    if (!confirm(`האם למחוק את הקטגוריה "${name}"?\nהמוצרים לא יימחקו, רק הקטגוריה תוסר מהם.`)) return;
+    try {
+        categories = categories.filter(c => c !== name);
+        await db.collection('Settings').doc('main').update({ Categories: categories });
+
+        // Remove category from all products that have it
+        const batch = db.batch();
+        products.forEach(product => {
+            const cats = getProductCategories(product);
+            if (cats.includes(name)) {
+                const updated = cats.filter(c => c !== name);
+                batch.update(db.collection('soccer_shirts').doc(product.id), { categories: updated });
+            }
+        });
+        await batch.commit();
+
+        alert('קטגוריה נמחקה בהצלחה!');
+        await loadAllProducts();
+        await loadCategories();
+    } catch (error) { console.error('Error deleting category:', error); alert('שגיאה במחיקת קטגוריה'); }
+}
+        
     </script>
 </body>
 </html>
