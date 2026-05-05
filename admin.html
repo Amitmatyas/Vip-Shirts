@@ -2291,10 +2291,16 @@ editFormContainer.innerHTML = `
                 <small>אם תזין עלות, העלות הזו תתווסף לעגלה בנוסף למשלוח הרגיל של שאר המוצרים </small>
             </div>
         </div>
-        <div class="form-group">
+<div class="form-group">
             <label>קטגוריות:</label>
             <div class="category-checkboxes" id="edit-category-checkboxes"></div>
             <small>בחר קטגוריה</small>
+        </div>
+        <div class="form-group">
+            <label>תת-קטגוריה:</label>
+            <select id="edit-product-subcategory" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:6px;font-size:1em;">
+                <option value="">ללא תת-קטגוריה</option>
+            </select>
         </div>
         <div class="form-group">
             <label>תמונה נוכחית:</label>
@@ -2350,10 +2356,19 @@ window.removeExistingChart = function(idx) {
 };
 
         // Setup category checkboxes with current selections
+// Setup category checkboxes with current selections
         updateCategoryCheckboxes('edit-category-checkboxes', currentCats);
 
-        setupImageUpload('edit-product-image-file','edit-product-image-preview','edit-product-upload-status','edit-product-image-url','edit-product-image-upload');
+        // Setup subcategory select
+        setTimeout(() => {
+            updateSubCategorySelect('edit-category-checkboxes', 'edit-product-subcategory', product.subCategory || '');
+            document.querySelectorAll('#edit-category-checkboxes input').forEach(cb => {
+                cb.addEventListener('change', () => updateSubCategorySelect('edit-category-checkboxes', 'edit-product-subcategory'));
+            });
+        }, 0);
 
+        setupImageUpload('edit-product-image-file','edit-product-image-preview','edit-product-upload-status','edit-product-image-url','edit-product-image-upload');
+        
         const editCustomFieldsContainer = document.getElementById('edit-custom-fields-container');
         if (product.customFields && product.customFields.length > 0) {
             product.customFields.forEach(field => createCustomFieldUI(field, editCustomFieldsContainer));
@@ -2368,7 +2383,8 @@ window.removeExistingChart = function(idx) {
             const salePrice = parseFloat(document.getElementById('edit-product-sale-price').value) || null;
             const saleEndDate = document.getElementById('edit-product-sale-end').value || null;
             const customShipping = parseFloat(document.getElementById('edit-product-custom-shipping').value);
-            const selectedCats = getSelectedCategories('edit-category-checkboxes');
+const selectedCats = getSelectedCategories('edit-category-checkboxes');
+            const subCategory = document.getElementById('edit-product-subcategory').value || null;
             const image = document.getElementById('edit-product-image-url').value.trim();
 
 if (!name || !description || isNaN(price) || price < 0 || !image) {
@@ -2378,9 +2394,10 @@ if (!name || !description || isNaN(price) || price < 0 || !image) {
             if (salePrice && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
 
             const customFields = extractCustomFields(editCustomFieldsContainer);
-            const updateData = {
+const updateData = {
                 name, description, price,
                 categories: selectedCats,
+                subCategory: subCategory,
                 image,
                 customFields: customFields.length > 0 ? customFields : null
             };
@@ -2538,39 +2555,162 @@ updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
 
     const orderDetailsModal = document.getElementById('order-details-modal');
         
-    function showOrderDetails(order) {
-        document.getElementById('modal-customer-name').textContent = order.customerName || 'לא ידוע';
-        document.getElementById('modal-customer-email').textContent = order.customerEmail || 'לא ידוע';
-        document.getElementById('modal-customer-phone').textContent = order.customerPhone || 'לא ידוע';
-        document.getElementById('modal-customer-address').textContent = order.customerAddress || 'לא ידוע';
-        document.getElementById('modal-subtotal').textContent = order.subtotal ? order.subtotal.toFixed(2) : '0.00';
-        document.getElementById('modal-shipping').textContent = order.shippingCost ? order.shippingCost.toFixed(2) : '0.00';
-        document.getElementById('modal-coupon').textContent = order.appliedCoupon || 'אין';
-        document.getElementById('modal-total-amount').textContent = order.totalAmount ? order.totalAmount.toFixed(2) : '0.00';
-        document.getElementById('modal-order-date').textContent = order.orderDate ? new Date(order.orderDate.toDate()).toLocaleString('he-IL') : 'לא ידוע';
-        const notesEl = document.getElementById('modal-order-notes');
-const notes = order.orderNotes;
-notesEl.textContent = notes || 'אין הערות';
-notesEl.style.color = notes ? '#5d4037' : '#999';
+    let currentEditingOrderId = null;
 
-        const modalOrderItems = document.getElementById('modal-order-items');
-        modalOrderItems.innerHTML = '';
-        if (order.items && order.items.length > 0) {
-            order.items.forEach(item => {
-                const listItem = document.createElement('li');
-                let optionsInfo = '';
-                if (item.selectedOptions) {
-                    Object.keys(item.selectedOptions).forEach(key => { if (item.selectedOptions[key]) optionsInfo += `<br>${key}: ${item.selectedOptions[key]}`; });
-                }
-                const freebieTag = item.isFreebie ? ' <strong style="color: #27ae60;">(מתנה)</strong>' : '';
-                listItem.innerHTML = `<strong>${item.productName}</strong>${freebieTag} (כמות: ${item.quantity})${optionsInfo}`;
-                modalOrderItems.appendChild(listItem);
-            });
-        } else {
-            modalOrderItems.innerHTML = '<li>אין פרטי פריטים עבור הזמנה זו.</li>';
-        }
-        orderDetailsModal.classList.add('active');
+function showOrderDetails(order) {
+    currentEditingOrderId = order.id;
+    const m = document.getElementById('order-details-modal');
+    m.querySelector('.modal-content').innerHTML = `
+        <span class="close-button">&times;</span>
+        <h3>עריכת הזמנה</h3>
+        <div style="display:grid;gap:12px;">
+            <div class="form-group">
+                <label>שם לקוח:</label>
+                <input type="text" id="edit-order-name" value="${order.customerName || ''}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+            </div>
+            <div class="form-group">
+                <label>אימייל:</label>
+                <input type="email" id="edit-order-email" value="${order.customerEmail || ''}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+            </div>
+            <div class="form-group">
+                <label>טלפון:</label>
+                <input type="tel" id="edit-order-phone" value="${order.customerPhone || ''}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+            </div>
+            <div class="form-group">
+                <label>כתובת:</label>
+                <input type="text" id="edit-order-address" value="${order.customerAddress || ''}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+                <div class="form-group">
+                    <label>סה"כ מוצרים (₪):</label>
+                    <input type="number" id="edit-order-subtotal" value="${order.subtotal || 0}" step="0.01" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                </div>
+                <div class="form-group">
+                    <label>משלוח (₪):</label>
+                    <input type="number" id="edit-order-shipping" value="${order.shippingCost || 0}" step="0.01" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                </div>
+                <div class="form-group">
+                    <label>סה"כ לתשלום (₪):</label>
+                    <input type="number" id="edit-order-total" value="${order.totalAmount || 0}" step="0.01" min="0" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>קופון:</label>
+                <input type="text" id="edit-order-coupon" value="${order.appliedCoupon || ''}" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+            </div>
+            <div class="form-group">
+                <label>הערות:</label>
+                <textarea id="edit-order-notes" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;min-height:60px;resize:vertical;font-family:inherit;">${order.orderNotes || ''}</textarea>
+            </div>
+            <div>
+                <label style="font-weight:bold;display:block;margin-bottom:8px;">פריטים בהזמנה:</label>
+                <div id="edit-order-items-container"></div>
+                <button type="button" id="add-order-item-btn" class="btn btn-success" style="margin-top:10px;">+ הוסף פריט</button>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:10px;">
+                <button class="btn btn-dark" id="save-order-edit-btn" style="flex:1;">💾 שמור שינויים</button>
+                <button class="btn btn-secondary close-button" style="flex:1;">ביטול</button>
+            </div>
+        </div>
+    `;
+
+    // Render items
+    const itemsContainer = document.getElementById('edit-order-items-container');
+    const currentItems = order.items ? JSON.parse(JSON.stringify(order.items)) : [];
+    window._editOrderItems = currentItems;
+
+    function renderEditItems() {
+        itemsContainer.innerHTML = '';
+        window._editOrderItems.forEach((item, idx) => {
+            const optionsStr = item.selectedOptions
+                ? Object.entries(item.selectedOptions).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(', ')
+                : '';
+            const div = document.createElement('div');
+            div.style.cssText = 'border:1px solid #e9ecef;border-radius:8px;padding:12px;margin-bottom:10px;background:#f8f9fa;';
+            div.innerHTML = `
+                <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;align-items:end;">
+                    <div>
+                        <label style="font-size:0.85em;color:#555;">שם מוצר:</label>
+                        <input type="text" value="${item.productName || item.name || ''}" 
+                               onchange="window._editOrderItems[${idx}].productName = this.value; window._editOrderItems[${idx}].name = this.value;"
+                               style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:5px;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85em;color:#555;">כמות:</label>
+                        <input type="number" value="${item.quantity || 1}" min="1"
+                               onchange="window._editOrderItems[${idx}].quantity = parseInt(this.value);"
+                               style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:5px;">
+                    </div>
+                    <div>
+                        <label style="font-size:0.85em;color:#555;">מחיר (₪):</label>
+                        <input type="number" value="${item.price || 0}" step="0.01" min="0"
+                               onchange="window._editOrderItems[${idx}].price = parseFloat(this.value);"
+                               style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:5px;">
+                    </div>
+                    <button onclick="window._editOrderItems.splice(${idx},1); renderEditItems();"
+                            style="background:#e74c3c;color:white;border:none;border-radius:5px;padding:8px 12px;cursor:pointer;height:38px;align-self:end;">✕</button>
+                </div>
+                <div style="margin-top:8px;">
+                    <label style="font-size:0.85em;color:#555;">אפשרויות שנבחרו:</label>
+                    <input type="text" value="${optionsStr}"
+                           onchange="window._editOrderItems[${idx}].selectedOptions = parseOptionsStr(this.value);"
+                           placeholder="מפתח: ערך, מפתח2: ערך2"
+                           style="width:100%;padding:8px;border:1.5px solid #ddd;border-radius:5px;">
+                </div>
+            `;
+            itemsContainer.appendChild(div);
+        });
     }
+
+    window.parseOptionsStr = function(str) {
+        const obj = {};
+        if (!str.trim()) return obj;
+        str.split(',').forEach(part => {
+            const [k, ...rest] = part.split(':');
+            if (k && rest.length) obj[k.trim()] = rest.join(':').trim();
+        });
+        return obj;
+    };
+
+    window.renderEditItems = renderEditItems;
+    renderEditItems();
+
+    document.getElementById('add-order-item-btn').addEventListener('click', () => {
+        window._editOrderItems.push({ productName: '', name: '', quantity: 1, price: 0, selectedOptions: {} });
+        renderEditItems();
+    });
+
+    document.getElementById('save-order-edit-btn').addEventListener('click', async () => {
+        try {
+            const updateData = {
+                customerName:    document.getElementById('edit-order-name').value.trim(),
+                customerEmail:   document.getElementById('edit-order-email').value.trim(),
+                customerPhone:   document.getElementById('edit-order-phone').value.trim(),
+                customerAddress: document.getElementById('edit-order-address').value.trim(),
+                subtotal:        parseFloat(document.getElementById('edit-order-subtotal').value) || 0,
+                shippingCost:    parseFloat(document.getElementById('edit-order-shipping').value) || 0,
+                totalAmount:     parseFloat(document.getElementById('edit-order-total').value) || 0,
+                appliedCoupon:   document.getElementById('edit-order-coupon').value.trim() || null,
+                orderNotes:      document.getElementById('edit-order-notes').value.trim() || null,
+                items:           window._editOrderItems
+            };
+            await db.collection('orders').doc(currentEditingOrderId).update(updateData);
+            alert('✓ הזמנה עודכנה בהצלחה!');
+            orderDetailsModal.classList.remove('active');
+            await fetchOrders(currentSearchTerm);
+        } catch(e) {
+            console.error(e);
+            alert('שגיאה בשמירת ההזמנה');
+        }
+    });
+
+    // Re-attach close buttons
+    m.querySelectorAll('.close-button').forEach(btn => {
+        btn.addEventListener('click', () => orderDetailsModal.classList.remove('active'));
+    });
+
+    orderDetailsModal.classList.add('active');
+}
 
     // ============================================
     // CONTACT LEADS
