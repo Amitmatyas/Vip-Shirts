@@ -1138,10 +1138,17 @@
         <small>אם תזין עלות, העלות הזו תתווסף לעגלה בנוסף למשלוח הרגיל של שאר המוצרים </small>
     </div>
 </div>
-                    <div class="form-group">
+<div class="form-group">
                         <label>קטגוריות: *</label>
                         <div class="category-checkboxes" id="product-category-checkboxes"></div>
                         <small>בחר קטגוריה</small>
+                    </div>
+                    <div class="form-group">
+                        <label>תת-קטגוריה:</label>
+                        <select id="product-subcategory" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:6px;font-size:1em;">
+                            <option value="">ללא תת-קטגוריה</option>
+                        </select>
+                        <small>בחר תחילה קטגוריה ראשית כדי לראות תת-קטגוריות</small>
                     </div>
                     <div class="form-group">
                         <label>תמונה: *</label>
@@ -1710,13 +1717,13 @@ logoutButton.addEventListener('click', () => {
     // ============================================
     // SETTINGS INITIALIZATION
     // ============================================
-    async function initializeSettings() {
+async function initializeSettings() {
         try {
             const settingsDoc = await db.collection('Settings').doc('main').get();
             if (!settingsDoc.exists) {
                 await db.collection('Settings').doc('main').set({
                     Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 },
-                    Coupons: [], Categories: [], Announcements: []
+                    Coupons: [], Categories: [], SubCategories: {}, Announcements: []
                 });
             }
         } catch (error) { console.error('Error initializing settings:', error); }
@@ -1725,19 +1732,22 @@ logoutButton.addEventListener('click', () => {
     // ============================================
     // CATEGORIES
     // ============================================
+let subCategoriesMap = {}; // { "קטגוריה ראשית": ["תת1","תת2"] }
+
     async function loadCategories() {
         try {
             const settingsDoc = await db.collection('Settings').doc('main').get();
             if (settingsDoc.exists) {
                 const data = settingsDoc.data();
                 categories = data.Categories || [];
+                subCategoriesMap = data.SubCategories || {};
                 await displayCategoriesWithProducts();
                 updateCategoryCheckboxes();
             }
         } catch (error) { console.error('Error loading categories:', error); }
     }
 
-    function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', selectedCats = []) {
+function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', selectedCats = []) {
         const container = document.getElementById(containerId);
         if (!container) return;
         container.innerHTML = '';
@@ -1748,9 +1758,31 @@ logoutButton.addEventListener('click', () => {
             cb.value = cat;
             cb.dataset.category = cat;
             if (selectedCats.includes(cat)) cb.checked = true;
+            cb.addEventListener('change', () => updateSubCategorySelect(containerId, 'product-subcategory'));
             label.appendChild(cb);
             label.appendChild(document.createTextNode(cat));
             container.appendChild(label);
+        });
+    }
+
+    function updateSubCategorySelect(checkboxContainerId, selectId, selectedSubCat = '') {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        const checkedCats = Array.from(
+            document.querySelectorAll(`#${checkboxContainerId} input:checked`)
+        ).map(cb => cb.value);
+        
+        const allSubCats = [...new Set(
+            checkedCats.flatMap(cat => subCategoriesMap[cat] || [])
+        )];
+
+        select.innerHTML = '<option value="">ללא תת-קטגוריה</option>';
+        allSubCats.forEach(sc => {
+            const opt = document.createElement('option');
+            opt.value = sc;
+            opt.textContent = sc;
+            if (sc === selectedSubCat) opt.selected = true;
+            select.appendChild(opt);
         });
     }
 
@@ -1759,44 +1791,60 @@ logoutButton.addEventListener('click', () => {
         if (!container) return [];
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
     }
-        async function displayCategoriesWithProducts() {
+async function displayCategoriesWithProducts() {
     const categoriesGrid = document.getElementById('categories-grid');
-    
-    // מציג סקלטון בזמן הטעינה
     showSkeletonCategories();
 
-    // בדיקה אם אין קטגוריות בכלל
     if (categories.length === 0) {
         categoriesGrid.innerHTML = '<p>אין קטגוריות. הוסף קטגוריה חדשה למעלה.</p>';
         return;
     }
 
-    // --- כאן אנחנו מורידים את הסקלטון ---
-    // מנקים את הגריד כדי להכניס את התוכן האמיתי
     categoriesGrid.innerHTML = '';
 
     for (const category of categories) {
-        // סינון מוצרים השייכים לקטגוריה הנוכחית
         const categoryProducts = products.filter(p => getProductCategories(p).includes(category));
+        const subCats = subCategoriesMap[category] || [];
 
         const categoryBox = document.createElement('div');
         categoryBox.className = 'category-box';
+
+        let subCatHTML = `
+            <div style="margin-top:10px;padding:12px;background:#fff;border-radius:8px;border:1px solid #dee2e6;">
+                <strong style="font-size:0.9em;color:#555;">תת-קטגוריות:</strong>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;" id="subcats-${category}">
+                    ${subCats.map((sc,i) => `
+                        <span style="background:#e9ecef;padding:4px 10px;border-radius:20px;font-size:0.88em;display:flex;align-items:center;gap:6px;">
+                            ${sc}
+                            <button onclick="deleteSubCategory('${category}',${i})" 
+                                    style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1em;padding:0;line-height:1;">×</button>
+                        </span>
+                    `).join('')}
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                    <input type="text" id="new-subcat-${category}" placeholder="שם תת-קטגוריה חדשה"
+                           style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:0.9em;">
+                    <button onclick="addSubCategory('${category}')" class="btn btn-success" style="padding:6px 14px;font-size:0.88em;">הוסף</button>
+                </div>
+            </div>
+        `;
+
         categoryBox.innerHTML = `
             <div class="category-box-header">
-                <h3>${category}</h3>
+                <h3>${category} <span style="color:#999;font-size:0.75em;">(${categoryProducts.length} מוצרים)</span></h3>
                 <div class="category-actions">
                     <button class="btn btn-primary btn-edit-category" data-category="${category}">ערוך שם</button>
                     <button class="btn btn-danger btn-delete-category" data-category="${category}">מחק</button>
                 </div>
             </div>
-            <div class="products-in-category" id="products-${category}"></div>
+            ${subCatHTML}
+            <div class="products-in-category" id="products-${category}" style="margin-top:15px;"></div>
         `;
         categoriesGrid.appendChild(categoryBox);
 
         const productsContainer = document.getElementById(`products-${category}`);
-        
         if (categoryProducts.length === 0) {
-            productsContainer.innerHTML = '<p style="color: #666;">אין מוצרים בקטגוריה זו</p>';
+            productsContainer.innerHTML = '<p style="color:#666;">אין מוצרים בקטגוריה זו</p>';
         } else {
             categoryProducts.forEach(product => {
                 const productCard = document.createElement('div');
@@ -1804,30 +1852,31 @@ logoutButton.addEventListener('click', () => {
 
                 const onSale = isProductOnSale(product);
                 const effectivePrice = getEffectivePrice(product);
-                
                 let priceHTML = `<div class="product-price">${effectivePrice.toFixed(2)} ₪</div>`;
                 let saleBadge = '';
-                
                 if (onSale) {
                     const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
                     saleBadge = `<div class="sale-badge-mini">-${discount}%</div>`;
-                    priceHTML = `
-                        <div class="product-price on-sale">
-                            <span class="original-price">${product.price.toFixed(2)} ₪</span>
-                            <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
-                        </div>`;
+                    priceHTML = `<div class="product-price on-sale">
+                        <span class="original-price">${product.price.toFixed(2)} ₪</span>
+                        <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
+                    </div>`;
                 }
 
-const productLink = `${window.location.origin}/#${encodeURIComponent(product.name)}`;
+                const productLink = `${window.location.origin}/#${encodeURIComponent(product.name)}`;
+                const subCatLabel = product.subCategory
+                    ? `<div style="font-size:0.78em;color:#28a745;margin-bottom:4px;">📂 ${product.subCategory}</div>`
+                    : '';
 
                 productCard.innerHTML = `
                     ${saleBadge}
                     <img src="${product.image}" alt="${product.name}">
+                    ${subCatLabel}
                     <h4>${product.name}</h4>
                     ${priceHTML}
                     <div class="product-mini-actions">
                         <button class="btn btn-dark btn-edit-product" data-product-id="${product.id}">ערוך</button>
-                        <button class="btn btn-success btn-copy-link" data-product-link="${productLink}" title="העתק קישור" style="padding: 6px 10px; font-size: 0.85em;">🔗</button>
+                        <button class="btn btn-success btn-copy-link" data-product-link="${productLink}" title="העתק קישור" style="padding:6px 10px;font-size:0.85em;">🔗</button>
                     </div>
                 `;
                 productsContainer.appendChild(productCard);
@@ -1835,42 +1884,53 @@ const productLink = `${window.location.origin}/#${encodeURIComponent(product.nam
         }
     }
 
-    // הצמדת אירועים לכפתורי קטגוריות
+    // Event listeners
     document.querySelectorAll('.btn-edit-category').forEach(btn => {
         btn.addEventListener('click', () => editCategoryName(btn.dataset.category));
     });
-    
     document.querySelectorAll('.btn-delete-category').forEach(btn => {
         btn.addEventListener('click', () => deleteCategory(btn.dataset.category));
     });
-
-    // הצמדת אירועים לכפתורי מוצרים
     document.querySelectorAll('.btn-edit-product').forEach(btn => {
         btn.addEventListener('click', () => {
             const product = products.find(p => p.id === btn.dataset.productId);
             openEditProductModal(btn.dataset.productId, product);
         });
     });
-
-    // הצמדת אירוע העתקת קישור
     document.querySelectorAll('.btn-copy-link').forEach(btn => {
         btn.addEventListener('click', () => {
-            const link = btn.dataset.productLink;
-            navigator.clipboard.writeText(link).then(() => {
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '✓';
-                btn.style.background = '#27ae60';
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.style.background = '';
-                }, 2000);
-            }).catch(err => {
-                alert('שגיאה בהעתקת הקישור');
-                console.error(err);
-            });
+            navigator.clipboard.writeText(btn.dataset.productLink).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '✓'; btn.style.background = '#27ae60';
+                setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+            }).catch(() => alert('שגיאה בהעתקת הקישור'));
         });
     });
 }
+
+// פונקציות תת-קטגוריות
+window.addSubCategory = async function(category) {
+    const input = document.getElementById(`new-subcat-${category}`);
+    const name = input.value.trim();
+    if (!name) { alert('הזן שם תת-קטגוריה'); return; }
+    if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
+    if (subCategoriesMap[category].includes(name)) { alert('תת-קטגוריה זו כבר קיימת'); return; }
+    subCategoriesMap[category].push(name);
+    try {
+        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+        await loadCategories();
+    } catch(e) { console.error(e); alert('שגיאה בהוספת תת-קטגוריה'); }
+};
+
+window.deleteSubCategory = async function(category, index) {
+    if (!confirm('למחוק תת-קטגוריה זו?')) return;
+    subCategoriesMap[category].splice(index, 1);
+    try {
+        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+        await loadCategories();
+    } catch(e) { console.error(e); alert('שגיאה במחיקת תת-קטגוריה'); }
+};
+        
     // ============================================
     // SKELETON LOADERS
     // ============================================
@@ -2145,6 +2205,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
     const saleEndDate = document.getElementById('product-sale-end').value || null;
     const customShipping = parseFloat(document.getElementById('product-custom-shipping').value);
     const selectedCats = getSelectedCategories('product-category-checkboxes');
+    const subCategory = document.getElementById('product-subcategory').value || null;
     const image = document.getElementById('product-image-url').value.trim();
 
     if (!name || !description || isNaN(price) || price < 0 || !image) {
@@ -2157,6 +2218,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
     const productData = {
         name, description, price,
         categories: selectedCats,
+        subCategory: subCategory,
         image,
         customFields: customFields.length > 0 ? customFields : null,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
