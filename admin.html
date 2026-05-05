@@ -2799,71 +2799,81 @@ const orderDetailsModal = document.getElementById('order-details-modal');
             }
 
 function renderItemCustomFields(idx, item) {
-                // מחפש מוצר תואם — קודם לפי _productId, אחר כך לפי שם
-                let product = null;
-                if (item._productId) {
-                    product = products.find(p => p.id === item._productId);
+    // תמיד משתמשים ב-selectedOptions ישירות כשדות טקסט
+    // זה הכי אמין כי זה בדיוק מה שנשמר בהזמנה
+    if (!item.selectedOptions || Object.keys(item.selectedOptions).length === 0) {
+        // אם אין selectedOptions, ננסה לטעון את שדות המוצר ריקים
+        let product = null;
+        if (item._productId) product = products.find(p => p.id === item._productId);
+        if (!product) {
+            const itemName = (item.productName || item.name || '').trim().toLowerCase();
+            product = products.find(p => p.name.trim().toLowerCase() === itemName);
+        }
+        if (!product || !product.customFields || product.customFields.length === 0) return '';
+
+        return `<div style="border-top:1px dashed #ddd;margin-top:8px;padding-top:8px;">
+            <div style="font-size:0.82em;color:#888;margin-bottom:8px;">אפשרויות:</div>
+            ${product.customFields.map(field => {
+                if (field.type === 'select') {
+                    const opts = (field.options || []).map(o =>
+                        `<option value="${o.value}">${o.value}${o.extraPrice > 0 ? ` (+${o.extraPrice}₪)` : ''}</option>`
+                    ).join('');
+                    return `<div class="form-group" style="margin:0 0 8px 0;">
+                        <label style="font-size:0.88em;">${field.name}${field.required ? ' *' : ''}:</label>
+                        <select class="item-option-select" data-idx="${idx}" data-field="${field.name}"
+                                style="width:100%;padding:9px;border:2px solid #ddd;border-radius:6px;">
+                            <option value="">בחר...</option>${opts}
+                        </select>
+                    </div>`;
+                } else {
+                    return `<div class="form-group" style="margin:0 0 8px 0;">
+                        <label style="font-size:0.88em;">${field.name}${field.required ? ' *' : ''}:</label>
+                        <input type="text" class="item-option-text" data-idx="${idx}" data-field="${field.name}"
+                               value="" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:6px;">
+                    </div>`;
                 }
-                if (!product) {
-                    const itemName = (item.productName || item.name || '').trim().toLowerCase();
-                    product = products.find(p => p.name.trim().toLowerCase() === itemName);
-                }
+            }).join('')}
+        </div>`;
+    }
 
-                // קובע אילו שדות להציג:
-                // אם מצאנו מוצר עם customFields — משתמשים בהם (עם הערכים מ-selectedOptions)
-                // אם לא — משתמשים ב-selectedOptions ישירות כשדות טקסט
-                let fieldsToRender = [];
+    // יש selectedOptions - מציג אותם כמו שהם, ישירות מההזמנה
+    // מנסה למצוא מוצר כדי לדעת אם שדה הוא select או text
+    let product = null;
+    if (item._productId) product = products.find(p => p.id === item._productId);
+    if (!product) {
+        const itemName = (item.productName || item.name || '').trim().toLowerCase();
+        product = products.find(p => p.name.trim().toLowerCase() === itemName);
+    }
+    const customFieldsMap = {};
+    if (product && product.customFields) {
+        product.customFields.forEach(f => customFieldsMap[f.name] = f);
+    }
 
-                if (product && product.customFields && product.customFields.length > 0) {
-                    fieldsToRender = product.customFields.map(field => ({
-                        name: field.name,
-                        type: field.type,
-                        required: field.required,
-                        options: field.options || [],
-                        currentVal: item.selectedOptions?.[field.name] || ''
-                    }));
-                } else if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
-                    // אין מוצר תואם — מציג selectedOptions כשדות טקסט חופשיים
-                    fieldsToRender = Object.entries(item.selectedOptions).map(([key, val]) => ({
-                        name: key,
-                        type: 'text',
-                        required: false,
-                        options: [],
-                        currentVal: val
-                    }));
-                }
-
-                if (fieldsToRender.length === 0) return '';
-
-                return `<div style="border-top:1px dashed #ddd;margin-top:8px;padding-top:8px;">
-                    <div style="font-size:0.82em;color:#888;margin-bottom:8px;">אפשרויות:</div>
-                    ${fieldsToRender.map(field => {
-                        if (field.type === 'select') {
-                            const opts = field.options.map(o =>
-                                `<option value="${o.value}" ${field.currentVal === o.value ? 'selected' : ''}>${o.value}${o.extraPrice > 0 ? ` (+${o.extraPrice}₪)` : ''}</option>`
-                            ).join('');
-                            return `
-                                <div class="form-group" style="margin:0 0 8px 0;">
-                                    <label style="font-size:0.88em;">${field.name}${field.required ? ' *' : ''}:</label>
-                                    <select class="item-option-select" data-idx="${idx}" data-field="${field.name}"
-                                            style="width:100%;padding:9px;border:2px solid #ddd;border-radius:6px;">
-                                        <option value="">בחר...</option>
-                                        ${opts}
-                                    </select>
-                                </div>`;
-                        } else {
-                            return `
-                                <div class="form-group" style="margin:0 0 8px 0;">
-                                    <label style="font-size:0.88em;">${field.name}${field.required ? ' *' : ''}:</label>
-                                    <input type="text" class="item-option-text" data-idx="${idx}" data-field="${field.name}"
-                                           value="${field.currentVal}"
-                                           style="width:100%;padding:9px;border:2px solid #ddd;border-radius:6px;">
-                                </div>`;
-                        }
-                    }).join('')}
+    return `<div style="border-top:1px dashed #ddd;margin-top:8px;padding-top:8px;">
+        <div style="font-size:0.82em;color:#888;margin-bottom:8px;">אפשרויות:</div>
+        ${Object.entries(item.selectedOptions).map(([key, val]) => {
+            const fieldDef = customFieldsMap[key];
+            if (fieldDef && fieldDef.type === 'select') {
+                const opts = (fieldDef.options || []).map(o =>
+                    `<option value="${o.value}" ${val === o.value ? 'selected' : ''}>${o.value}${o.extraPrice > 0 ? ` (+${o.extraPrice}₪)` : ''}</option>`
+                ).join('');
+                return `<div class="form-group" style="margin:0 0 8px 0;">
+                    <label style="font-size:0.88em;">${key}:</label>
+                    <select class="item-option-select" data-idx="${idx}" data-field="${key}"
+                            style="width:100%;padding:9px;border:2px solid #ddd;border-radius:6px;">
+                        <option value="">בחר...</option>${opts}
+                    </select>
+                </div>`;
+            } else {
+                return `<div class="form-group" style="margin:0 0 8px 0;">
+                    <label style="font-size:0.88em;">${key}:</label>
+                    <input type="text" class="item-option-text" data-idx="${idx}" data-field="${key}"
+                           value="${val}" style="width:100%;padding:9px;border:2px solid #ddd;border-radius:6px;">
                 </div>`;
             }
-
+        }).join('')}
+    </div>`;
+}
             function attachItemEvents() {
                 // בחירת מוצר מהמסד
                 document.querySelectorAll('.item-product-select').forEach(sel => {
