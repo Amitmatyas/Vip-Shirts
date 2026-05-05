@@ -2196,6 +2196,7 @@ db.enablePersistence({ synchronizeTabs: true })
         let announcements = [];
         let currentAnnouncementIndex = 0;
         let currentCategoryFilter = 'all';
+        let currentSubCategoryFilter = '';
         let couponLockedOptions = null;
         let isCouponProduct = false;
         let cartOpen = false;
@@ -2929,6 +2930,9 @@ if (expiry && expiry >= today) {
             if (currentCategoryFilter !== 'all') {
                 filtered = filtered.filter(p => productInCategory(p, currentCategoryFilter));
             }
+            if (currentSubCategoryFilter) {
+                filtered = filtered.filter(p => p.subCategory === currentSubCategoryFilter);
+            }
 
             const searchValue = searchInput.value.toLowerCase();
             if (searchValue) {
@@ -3012,7 +3016,7 @@ let badgeHTML = '';
         searchInput.addEventListener('input', applyFilters);
         sortSelect.addEventListener('change', applyFilters);
 
-        function updateCategoryFilter() {
+function updateCategoryFilter() {
             const filterDiv = document.getElementById('category-filter');
             filterDiv.innerHTML = '<button class="active" data-category="all">הכל</button>';
 
@@ -3020,21 +3024,102 @@ let badgeHTML = '';
                 const btn = document.createElement('button');
                 btn.textContent = cat;
                 btn.dataset.category = cat;
-                btn.addEventListener('click', () => filterByCategory(cat));
+                btn.addEventListener('click', () => enterCategory(cat));
                 filterDiv.appendChild(btn);
             });
 
-            filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => filterByCategory('all'));
+            filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => {
+                currentCategoryFilter = 'all';
+                currentSubCategoryFilter = '';
+                renderCategoryBar();
+                applyFilters();
+            });
+        }
+
+        function renderCategoryBar() {
+            const filterDiv = document.getElementById('category-filter');
+
+            if (currentCategoryFilter === 'all') {
+                // תצוגת כל הקטגוריות הראשיות
+                filterDiv.innerHTML = '<button class="active" data-category="all">הכל</button>';
+                categories.forEach(cat => {
+                    const btn = document.createElement('button');
+                    btn.textContent = cat;
+                    btn.dataset.category = cat;
+                    if (cat === currentCategoryFilter) btn.classList.add('active');
+                    btn.addEventListener('click', () => enterCategory(cat));
+                    filterDiv.appendChild(btn);
+                });
+                filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => {
+                    currentCategoryFilter = 'all';
+                    currentSubCategoryFilter = '';
+                    renderCategoryBar();
+                    applyFilters();
+                });
+            } else {
+                // תוך קטגוריה — הצג תת-קטגוריות
+                const subCats = subCategoriesMap[currentCategoryFilter] || [];
+                filterDiv.innerHTML = '';
+
+                // כפתור חזרה
+                const backBtn = document.createElement('button');
+                backBtn.textContent = '← הכל';
+                backBtn.style.cssText = 'background:#555;color:white;';
+                backBtn.addEventListener('click', () => {
+                    currentCategoryFilter = 'all';
+                    currentSubCategoryFilter = '';
+                    renderCategoryBar();
+                    applyFilters();
+                });
+                filterDiv.appendChild(backBtn);
+
+                // שם הקטגוריה הנוכחית (כותרת)
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = currentCategoryFilter;
+                titleSpan.style.cssText = 'font-weight:900;padding:10px 16px;color:#dc3545;font-size:1em;';
+                filterDiv.appendChild(titleSpan);
+
+                if (subCats.length > 0) {
+                    // כפתור "הכל" בתוך הקטגוריה
+                    const allSubBtn = document.createElement('button');
+                    allSubBtn.textContent = 'הכל';
+                    if (!currentSubCategoryFilter) allSubBtn.classList.add('active');
+                    allSubBtn.addEventListener('click', () => {
+                        currentSubCategoryFilter = '';
+                        renderCategoryBar();
+                        applyFilters();
+                    });
+                    filterDiv.appendChild(allSubBtn);
+
+                    subCats.forEach(sc => {
+                        const btn = document.createElement('button');
+                        btn.textContent = sc;
+                        if (sc === currentSubCategoryFilter) btn.classList.add('active');
+                        btn.addEventListener('click', () => {
+                            currentSubCategoryFilter = sc;
+                            renderCategoryBar();
+                            applyFilters();
+                        });
+                        filterDiv.appendChild(btn);
+                    });
+                }
+            }
+        }
+
+        function enterCategory(cat) {
+            currentCategoryFilter = cat;
+            currentSubCategoryFilter = '';
+            renderCategoryBar();
+            applyFilters();
         }
 
         function filterByCategory(category) {
             currentCategoryFilter = category;
-            document.querySelectorAll('#category-filter button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.category === category) btn.classList.add('active');
-            });
+            currentSubCategoryFilter = '';
+            renderCategoryBar();
             applyFilters();
         }
+let subCategoriesMap = {};
 
         async function loadSettings() {
             try {
@@ -3042,13 +3127,16 @@ let badgeHTML = '';
                 if (settingsDoc.exists) {
                     settings = settingsDoc.data();
                     categories = settings.Categories || [];
+                    subCategoriesMap = settings.SubCategories || {};
                     updateCategoryFilter();
                 } else {
-                    settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [] };
+                    settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
+                    subCategoriesMap = {};
                 }
             } catch (error) {
                 console.error('Error loading settings:', error);
-                settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [] };
+                settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
+                subCategoriesMap = {};
             }
         }
 
