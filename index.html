@@ -2245,6 +2245,14 @@
         <div id="categories-cards-container"></div>
     </div>
 
+    <!-- ===== כרטיסיות תת-קטגוריות ===== -->
+<div id="subcategories-section" style="display:none;">
+    <div id="subcategories-home-section" style="max-width:1200px;margin:36px auto 0;padding:0 20px;">
+        <h2 class="section-title" id="subcategories-section-title"></h2>
+        <div id="subcategories-cards-container" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:18px;"></div>
+    </div>
+</div>
+    
     <!-- ===== גריד מוצרים (מוצג רק בתוך קטגוריה) ===== -->
     <div id="products-browse-section" style="display:none;">
         <div id="filters">
@@ -3457,13 +3465,14 @@ function updateCategoryFilter() {
             renderCategoriesStrip();
         }
 
-        function showHomePage() {
-            currentCategoryFilter = 'all';
-            currentSubCategoryFilter = '';
-            document.getElementById('products-browse-section').style.display = 'none';
-            document.getElementById('categories-home-section').style.display = 'block';
-            document.getElementById('featured-section').style.display = 'block';
-        }
+function showHomePage() {
+    currentCategoryFilter = 'all';
+    currentSubCategoryFilter = '';
+    document.getElementById('products-browse-section').style.display = 'none';
+    document.getElementById('subcategories-section').style.display = 'none';
+    document.getElementById('categories-home-section').style.display = 'block';
+    document.getElementById('featured-section').style.display = 'block';
+}
 
         function renderCategoriesStrip() {
             const container = document.getElementById('categories-cards-container');
@@ -3570,15 +3579,77 @@ function renderCategoryBar() {
         }
 
 function enterCategory(cat) {
-            currentCategoryFilter = cat;
-            currentSubCategoryFilter = '';
-            document.getElementById('products-browse-section').style.display = 'block';
-            document.getElementById('categories-home-section').style.display = 'none';
-            document.getElementById('featured-section').style.display = 'none';
-            renderCategoryBar();
-            applyFilters();
-        }
+    currentCategoryFilter = cat;
+    currentSubCategoryFilter = '';
 
+    const subCats = subCategoriesMap[cat] || [];
+
+    if (subCats.length > 0) {
+        // יש תת-קטגוריות — הצג אותן כרטיסיות
+        document.getElementById('categories-home-section').style.display = 'none';
+        document.getElementById('featured-section').style.display = 'none';
+        document.getElementById('products-browse-section').style.display = 'none';
+        document.getElementById('subcategories-section').style.display = 'block';
+
+        document.getElementById('subcategories-home-section').innerHTML = `
+    <h2 class="section-title" id="subcategories-section-title">${cat}</h2>
+    <div id="subcategories-cards-container" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:18px;"></div>
+`;
+const container = document.getElementById('subcategories-cards-container');
+        const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
+
+        // כרטיס "הכל" שמציג את כל המוצרים בקטגוריה
+        const allCard = document.createElement('div');
+        allCard.className = 'category-card';
+        allCard.innerHTML = `
+            <img src="${(settings && settings.CategoryImages && settings.CategoryImages[cat]) || LOGO}" alt="${cat}" loading="lazy">
+            <div class="cat-card-name">הכל</div>
+        `;
+        allCard.addEventListener('click', () => enterSubCategory(cat, ''));
+        container.appendChild(allCard);
+
+        // כרטיס לכל תת-קטגוריה
+        subCats.forEach(sc => {
+            const scImg = (settings && settings.SubCategoryImages && settings.SubCategoryImages[`${cat}::${sc}`]) || LOGO;
+            const card = document.createElement('div');
+            card.className = 'category-card';
+            card.innerHTML = `
+                <img src="${scImg}" alt="${sc}" loading="lazy">
+                <div class="cat-card-name">${sc}</div>
+            `;
+            card.addEventListener('click', () => enterSubCategory(cat, sc));
+            container.appendChild(card);
+        });
+
+        // כפתור חזרה
+        const backBtn = document.createElement('button');
+        backBtn.textContent = '← חזור לדף הבית';
+        backBtn.style.cssText = 'display:block;margin:18px auto 0;padding:10px 22px;border:none;background:#555;color:white;border-radius:8px;font-size:1em;cursor:pointer;font-weight:700;';
+        backBtn.addEventListener('click', showHomePage);
+        document.getElementById('subcategories-home-section').appendChild(backBtn);
+
+    } else {
+        // אין תת-קטגוריות — עבור ישירות לרשימת מוצרים
+        document.getElementById('subcategories-section').style.display = 'none';
+        document.getElementById('products-browse-section').style.display = 'block';
+        document.getElementById('categories-home-section').style.display = 'none';
+        document.getElementById('featured-section').style.display = 'none';
+        renderCategoryBar();
+        applyFilters();
+    }
+}
+
+        function enterSubCategory(cat, subCat) {
+    currentCategoryFilter = cat;
+    currentSubCategoryFilter = subCat;
+    document.getElementById('subcategories-section').style.display = 'none';
+    document.getElementById('products-browse-section').style.display = 'block';
+    document.getElementById('categories-home-section').style.display = 'none';
+    document.getElementById('featured-section').style.display = 'none';
+    renderCategoryBar();
+    applyFilters();
+}
+        
         function filterByCategory(category) {
             currentCategoryFilter = category;
             currentSubCategoryFilter = '';
@@ -4513,8 +4584,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+function openSizeChartZoom(src) {
+    const modal = document.getElementById('size-chart-zoom-modal');
+    const img = document.getElementById('size-chart-zoom-img');
+    img.src = src;
+    modal.classList.add('active');
+}
+
+document.getElementById('close-zoom-btn').addEventListener('click', () => {
+    document.getElementById('size-chart-zoom-modal').classList.remove('active');
+});
+
+document.getElementById('size-chart-zoom-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('size-chart-zoom-modal')) {
+        document.getElementById('size-chart-zoom-modal').classList.remove('active');
+    }
+});
+
 function handleDeepLink() {
-            const hash = window.location.hash;
+    const hash = window.location.hash;
             if (!hash || !hash.startsWith('#')) return;
             const productName = decodeURIComponent(hash.substring(1)).trim();
             if (!productName) return;
