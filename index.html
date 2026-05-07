@@ -473,7 +473,7 @@
 .category-filter {
     margin: 30px auto;
     display: flex;
-    gap: 16px;
+    gap: 18px;
     flex-wrap: wrap;
     justify-content: center;
     max-width: 1200px;
@@ -487,14 +487,14 @@
     background: white;
     cursor: pointer;
     transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
-    border-radius: 18px;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.09);
+    border-radius: 22px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.11);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0;
-    min-width: 110px;
-    max-width: 130px;
+    min-width: 155px;
+    max-width: 175px;
     color: #2c3e50;
     overflow: hidden;
     text-align: center;
@@ -502,16 +502,16 @@
 
 .category-filter button img {
     width: 100%;
-    height: 90px;
+    height: 130px;
     object-fit: contain;
     display: block;
     background: #f9f9f9;
-    padding: 8px;
+    padding: 10px;
 }
 
 .category-filter button span:last-child {
-    padding: 8px 6px 10px;
-    font-size: 0.88em;
+    padding: 10px 8px 12px;
+    font-size: 0.95em;
     font-weight: 700;
     width: 100%;
     text-align: center;
@@ -522,14 +522,13 @@
 
 .category-filter button:hover {
     border-color: #dc3545;
-    transform: translateY(-5px);
-    box-shadow: 0 10px 26px rgba(220,53,69,0.18);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 14px 32px rgba(220,53,69,0.22);
 }
 
 .category-filter button.active {
     border-color: #dc3545;
     background: white;
-    color: #dc3545;
 }
 
 .category-filter button.active span:last-child {
@@ -545,13 +544,13 @@
     min-width: auto;
     max-width: none;
     flex-direction: row;
-    padding: 12px 22px;
+    padding: 14px 28px;
     border-radius: 50px;
-    font-size: 0.95em;
+    font-size: 1em;
     font-weight: 700;
     align-self: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
     overflow: visible;
 }
 
@@ -3644,14 +3643,12 @@ function renderCategoryBar() {
         });
         filterDiv.appendChild(backBtn);
 
-        if (subCats.length > 0) {
+ if (subCats.length > 0) {
             const catImg = (settings && settings.CategoryImages && settings.CategoryImages[currentCategoryFilter]) || LOGO;
             const allSubBtn = document.createElement('button');
-            allSubBtn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 12px;height:auto;';
             const allImg = document.createElement('img');
             allImg.src = catImg;
             allImg.alt = 'הכל';
-            allImg.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;';
             const allSpan = document.createElement('span');
             allSpan.textContent = 'הכל';
             allSubBtn.appendChild(allImg);
@@ -3667,11 +3664,9 @@ function renderCategoryBar() {
             subCats.forEach(sc => {
                 const scImg = (settings && settings.SubCategoryImages && settings.SubCategoryImages[currentCategoryFilter + '::' + sc]) || LOGO;
                 const btn = document.createElement('button');
-                btn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 12px;height:auto;';
                 const img = document.createElement('img');
                 img.src = scImg;
                 img.alt = sc;
-                img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;';
                 const span = document.createElement('span');
                 span.textContent = sc;
                 btn.appendChild(img);
@@ -3685,8 +3680,6 @@ function renderCategoryBar() {
                 filterDiv.appendChild(btn);
             });
         }
-    }
-}
 
 function enterCategory(cat) {
     currentCategoryFilter = cat;
