@@ -4372,7 +4372,94 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
         });
     });
 
-        // ============================================
+// ============================================
+    // FEATURED PRODUCTS
+    // ============================================
+    let featuredSelectedIds = new Set();
+
+    async function loadFeaturedProducts() {
+        try {
+            const settingsDoc = await db.collection('Settings').doc('main').get();
+            if (settingsDoc.exists) {
+                const data = settingsDoc.data();
+                featuredSelectedIds = new Set(data.FeaturedProducts || []);
+            }
+        } catch (e) { console.error(e); }
+        renderFeaturedGrid();
+    }
+
+    function renderFeaturedGrid(filterText = '') {
+        const grid = document.getElementById('featured-select-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const filtered = products.filter(p =>
+            !filterText || p.name.toLowerCase().includes(filterText.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">אין מוצרים.</p>';
+            return;
+        }
+
+        filtered.forEach(product => {
+            const item = document.createElement('div');
+            item.className = 'bulk-product-item' + (featuredSelectedIds.has(product.id) ? ' selected' : '');
+            item.dataset.productId = product.id;
+            item.innerHTML = `
+                <input type="checkbox" ${featuredSelectedIds.has(product.id) ? 'checked' : ''}>
+                <img src="${product.image}" alt="${product.name}" loading="lazy">
+                <span title="${product.name}">${product.name}</span>
+            `;
+            const cb = item.querySelector('input[type="checkbox"]');
+            const toggle = () => {
+                if (featuredSelectedIds.has(product.id)) {
+                    featuredSelectedIds.delete(product.id);
+                    item.classList.remove('selected');
+                    cb.checked = false;
+                } else {
+                    if (featuredSelectedIds.size >= 5) {
+                        alert('ניתן לבחור עד 5 מוצרים מומלצים בלבד');
+                        return;
+                    }
+                    featuredSelectedIds.add(product.id);
+                    item.classList.add('selected');
+                    cb.checked = true;
+                }
+                updateFeaturedCount();
+            };
+            item.addEventListener('click', (e) => { if (e.target !== cb) toggle(); });
+            cb.addEventListener('change', toggle);
+            grid.appendChild(item);
+        });
+
+        updateFeaturedCount();
+    }
+
+    function updateFeaturedCount() {
+        const status = document.getElementById('featured-save-status');
+        if (status) {
+            status.textContent = `${featuredSelectedIds.size} / 5 נבחרו`;
+            status.style.color = featuredSelectedIds.size > 0 ? '#27ae60' : '#666';
+        }
+    }
+
+    document.getElementById('save-featured-btn')?.addEventListener('click', async () => {
+        try {
+            await db.collection('Settings').doc('main').update({
+                FeaturedProducts: Array.from(featuredSelectedIds)
+            });
+            const status = document.getElementById('featured-save-status');
+            status.textContent = '✅ נשמר בהצלחה!';
+            status.style.color = '#27ae60';
+            setTimeout(() => { status.textContent = `${featuredSelectedIds.size} / 5 נבחרו`; }, 3000);
+        } catch (e) {
+            console.error(e);
+            alert('שגיאה בשמירה');
+        }
+    });
+
+    // ============================================
 // ADD CATEGORY
 // ============================================
 document.getElementById('add-category-btn').addEventListener('click', async () => {
