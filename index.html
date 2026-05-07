@@ -140,13 +140,324 @@
             line-height: 1;
         }
 
-        #filters {
+#filters {
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin: 30px 20px;
+            margin: 20px 0;
             flex-wrap: wrap;
             align-items: center;
+        }
+
+        /* ===== GLOBAL SEARCH BAR ===== */
+        #global-search-bar {
+            max-width: 680px;
+            margin: 30px auto 0;
+            padding: 0 20px;
+            position: relative;
+            z-index: 500;
+        }
+
+        #global-search-inner {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 50px;
+            box-shadow: 0 4px 24px rgba(220,53,69,0.18), 0 1px 6px rgba(0,0,0,0.08);
+            padding: 6px 18px;
+            gap: 12px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #global-search-inner:focus-within {
+            border-color: #dc3545;
+            box-shadow: 0 6px 30px rgba(220,53,69,0.28);
+        }
+
+        #global-search-icon {
+            font-size: 1.3em;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            flex-shrink: 0;
+        }
+
+        #global-search-inner:focus-within #global-search-icon {
+            opacity: 1;
+        }
+
+        #global-search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 1.1em;
+            font-family: 'Heebo', Arial, sans-serif;
+            background: transparent;
+            color: #222;
+            padding: 10px 0;
+            direction: rtl;
+        }
+
+        #global-search-input::placeholder {
+            color: #bbb;
+            animation: placeholderCycle 8s infinite;
+        }
+
+        @keyframes placeholderCycle {
+            0%, 18%   { opacity: 1; }
+            22%, 48%  { opacity: 0; }
+            52%, 68%  { opacity: 1; }
+            72%, 98%  { opacity: 0; }
+            100%      { opacity: 1; }
+        }
+
+        #global-search-clear {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 50%;
+            transition: color 0.2s, background 0.2s;
+            flex-shrink: 0;
+        }
+
+        #global-search-clear:hover {
+            color: #dc3545;
+            background: #fff0f0;
+        }
+
+        #global-search-results {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 20px;
+            left: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            max-height: 420px;
+            overflow-y: auto;
+            display: none;
+            z-index: 600;
+            border: 1px solid #f0f0f0;
+        }
+
+        #global-search-results.open {
+            display: block;
+            animation: searchDropIn 0.2s ease;
+        }
+
+        @keyframes searchDropIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .search-result-item:last-child { border-bottom: none; }
+
+        .search-result-item:hover {
+            background: #fff5f5;
+        }
+
+        .search-result-item img {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 10px;
+            flex-shrink: 0;
+            border: 1px solid #eee;
+        }
+
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+            text-align: right;
+        }
+
+        .search-result-name {
+            font-weight: 700;
+            color: #222;
+            font-size: 1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-result-name mark {
+            background: #ffe5e5;
+            color: #dc3545;
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+
+        .search-result-cats {
+            font-size: 0.82em;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .search-result-price {
+            font-weight: 700;
+            color: #dc3545;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        .search-result-price .old-price {
+            text-decoration: line-through;
+            color: #bbb;
+            font-size: 0.8em;
+            display: block;
+            text-align: left;
+        }
+
+        .search-no-results {
+            padding: 24px;
+            text-align: center;
+            color: #aaa;
+            font-size: 1em;
+        }
+
+        /* ===== SECTION TITLES ===== */
+        .section-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.7em;
+            margin: 0 0 22px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== FEATURED PRODUCTS ===== */
+        #featured-section {
+            max-width: 1200px;
+            margin: 36px auto 0;
+            padding: 0 20px;
+        }
+
+        #featured-products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 20px;
+        }
+
+        .featured-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 3px 16px rgba(52,52,90,0.11);
+            overflow: hidden;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.22s, box-shadow 0.22s;
+            border: 2px solid #ffe5e5;
+            position: relative;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 28px rgba(220,53,69,0.2);
+            border-color: #dc3545;
+        }
+
+        .featured-card img {
+            width: 100%;
+            height: 170px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .featured-card .featured-name {
+            padding: 10px 10px 4px;
+            font-weight: 700;
+            color: #dc3545;
+            font-size: 1em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .featured-card .featured-price {
+            padding: 0 10px 14px;
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .featured-star-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            color: #333;
+            padding: 4px 9px;
+            border-radius: 8px;
+            font-size: 0.75em;
+            font-weight: 900;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        /* ===== CATEGORY CARDS ===== */
+        #categories-home-section {
+            max-width: 1200px;
+            margin: 42px auto 0;
+            padding: 0 20px;
+        }
+
+        #categories-cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+            gap: 18px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.09);
+            cursor: pointer;
+            transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 26px rgba(220,53,69,0.18);
+            border-color: #dc3545;
+        }
+
+        .category-card img {
+            width: 100%;
+            height: 115px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .category-card .cat-card-name {
+            padding: 10px 8px 12px;
+            font-weight: 700;
+            font-size: 0.95em;
+            color: #2c3e50;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 768px) {
+            #global-search-bar { margin-top: 20px; padding: 0 12px; }
+            #global-search-input { font-size: 1em; }
+            #featured-section, #categories-home-section { padding: 0 12px; margin-top: 28px; }
+            #featured-products-container { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .featured-card img { height: 130px; }
+            #categories-cards-container { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .category-card img { height: 85px; }
+            .section-title { font-size: 1.35em; }
         }
 
         #filters input, #filters select {
@@ -1733,6 +2044,7 @@
     font-size: 4em;
     margin-bottom: 15px;
 }
+        
     </style>
        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -1911,20 +2223,41 @@
         </div>
     </div>
 
-    <div id="filters">
-        <input type="text" id="search-input" placeholder="חפש מוצר..." />
-        <select id="sort-select">
-            <option value="">מיון לפי</option>
-            <option value="price-asc">מחיר: מהזול ליקר</option>
-            <option value="price-desc">מחיר: מהיקר לזול</option>
-        </select>
+<!-- ===== שורת חיפוש גלובלית מונפשת ===== -->
+    <div id="global-search-bar">
+        <div id="global-search-inner">
+            <div id="global-search-icon">🔍</div>
+            <input type="text" id="global-search-input" placeholder="חפש כל מוצר..." autocomplete="off">
+            <button id="global-search-clear" style="display:none;">✕</button>
+        </div>
+        <div id="global-search-results"></div>
     </div>
 
-    <div class="category-filter" id="category-filter">
-        <button class="active" data-category="all">הכל</button>
+    <!-- ===== מוצרים מומלצים ===== -->
+    <div id="featured-section">
+        <h2 class="section-title">⭐ מוצרים מומלצים</h2>
+        <div id="featured-products-container"></div>
     </div>
 
-    <main id="products-container"></main>
+    <!-- ===== פס קטגוריות ===== -->
+    <div id="categories-home-section">
+        <h2 class="section-title">קטגוריות</h2>
+        <div id="categories-cards-container"></div>
+    </div>
+
+    <!-- ===== גריד מוצרים (מוצג רק בתוך קטגוריה) ===== -->
+    <div id="products-browse-section" style="display:none;">
+        <div id="filters">
+            <input type="text" id="search-input" placeholder="חפש בקטגוריה..." />
+            <select id="sort-select">
+                <option value="">מיון לפי</option>
+                <option value="price-asc">מחיר: מהזול ליקר</option>
+                <option value="price-desc">מחיר: מהיקר לזול</option>
+            </select>
+        </div>
+        <div class="category-filter" id="category-filter"></div>
+        <main id="products-container"></main>
+    </div>
 
 <div id="cart-container" class="cart-slide-panel">
     <div class="cart-header">
@@ -2921,7 +3254,7 @@ if (expiry && expiry >= today) {
             currentAnnouncementIndex = (currentAnnouncementIndex + 1) % announcements.length;
         }
 
-        const searchInput = document.getElementById('search-input');
+const searchInput = document.getElementById('search-input');
         const sortSelect = document.getElementById('sort-select');
 
         function applyFilters() {
@@ -2948,6 +3281,112 @@ if (expiry && expiry >= today) {
             renderFilteredProducts(filtered);
         }
 
+        // ===== GLOBAL SEARCH =====
+        (function initGlobalSearch() {
+            const input = document.getElementById('global-search-input');
+            const clearBtn = document.getElementById('global-search-clear');
+            const resultsBox = document.getElementById('global-search-results');
+            if (!input) return;
+
+            const placeholders = [
+                'חפש חולצת ברצלונה...',
+                'חפש חולצת ריאל מדריד...',
+                'חפש חולצת נבחרת ישראל...',
+                'חפש כל מוצר...'
+            ];
+            let phIndex = 0;
+            setInterval(() => {
+                phIndex = (phIndex + 1) % placeholders.length;
+                input.placeholder = placeholders[phIndex];
+            }, 3000);
+
+            let debounceTimer;
+
+            input.addEventListener('input', () => {
+                const val = input.value.trim();
+                clearBtn.style.display = val ? 'block' : 'none';
+                clearTimeout(debounceTimer);
+                if (!val) { resultsBox.classList.remove('open'); return; }
+                debounceTimer = setTimeout(() => runGlobalSearch(val), 180);
+            });
+
+            clearBtn.addEventListener('click', () => {
+                input.value = '';
+                clearBtn.style.display = 'none';
+                resultsBox.classList.remove('open');
+                input.focus();
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!document.getElementById('global-search-bar').contains(e.target)) {
+                    resultsBox.classList.remove('open');
+                }
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') { resultsBox.classList.remove('open'); input.blur(); }
+            });
+        })();
+
+        function highlightMatch(text, query) {
+            if (!query) return text;
+            const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+        }
+
+        function runGlobalSearch(query) {
+            const resultsBox = document.getElementById('global-search-results');
+            if (!products.length) return;
+
+            const q = query.toLowerCase();
+            const matched = products.filter(p =>
+                p.name.toLowerCase().includes(q) ||
+                (p.description || '').toLowerCase().includes(q) ||
+                getProductCategories(p).some(c => c.toLowerCase().includes(q))
+            ).slice(0, 8);
+
+            resultsBox.innerHTML = '';
+
+            if (matched.length === 0) {
+                resultsBox.innerHTML = `<div class="search-no-results">😕 לא נמצאו תוצאות עבור "<strong>${query}</strong>"</div>`;
+                resultsBox.classList.add('open');
+                return;
+            }
+
+            matched.forEach(product => {
+                const onSale = isProductOnSale(product);
+                const effectivePrice = getEffectivePrice(product);
+                const cats = getProductCategories(product).join(' · ');
+
+                let priceHTML = '';
+                if (onSale) {
+                    priceHTML = `<span class="old-price">${product.price.toFixed(2)} ₪</span>${effectivePrice.toFixed(2)} ₪`;
+                } else {
+                    priceHTML = `${effectivePrice.toFixed(2)} ₪`;
+                }
+
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" loading="lazy">
+                    <div class="search-result-info">
+                        <div class="search-result-name">${highlightMatch(product.name, query)}</div>
+                        ${cats ? `<div class="search-result-cats">${cats}</div>` : ''}
+                    </div>
+                    <div class="search-result-price">${priceHTML}</div>
+                `;
+                item.addEventListener('click', () => {
+                    resultsBox.classList.remove('open');
+                    document.getElementById('global-search-input').value = '';
+                    document.getElementById('global-search-clear').style.display = 'none';
+                    openProductModal(product.id);
+                });
+                resultsBox.appendChild(item);
+            });
+
+            resultsBox.classList.add('open');
+        }
+
         function getEffectivePrice(product) {
             if (product.salePrice && product.salePrice > 0) {
                 if (product.saleEndDate) {
@@ -2969,14 +3408,12 @@ if (expiry && expiry >= today) {
             return true;
         }
 
-        function renderFilteredProducts(list) {
+function renderFilteredProducts(list) {
             productsContainer.innerHTML = '';
             if (list.length === 0) {
                 productsContainer.innerHTML = '<p style="text-align: center; width: 100%; padding: 40px;">לא נמצאו מוצרים.</p>';
                 return;
             }
-
-            const showBadges = (currentCategoryFilter === 'all');
 
             list.forEach(product => {
                 const card = document.createElement('div');
@@ -3017,45 +3454,71 @@ let badgeHTML = '';
         sortSelect.addEventListener('change', applyFilters);
 
 function updateCategoryFilter() {
-            const filterDiv = document.getElementById('category-filter');
-            filterDiv.innerHTML = '<button class="active" data-category="all">הכל</button>';
+            renderCategoriesStrip();
+        }
 
+        function showHomePage() {
+            currentCategoryFilter = 'all';
+            currentSubCategoryFilter = '';
+            document.getElementById('products-browse-section').style.display = 'none';
+            document.getElementById('categories-home-section').style.display = 'block';
+            document.getElementById('featured-section').style.display = 'block';
+        }
+
+        function renderCategoriesStrip() {
+            const container = document.getElementById('categories-cards-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
             categories.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.textContent = cat;
-                btn.dataset.category = cat;
-                btn.addEventListener('click', () => enterCategory(cat));
-                filterDiv.appendChild(btn);
-            });
-
-            filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => {
-                currentCategoryFilter = 'all';
-                currentSubCategoryFilter = '';
-                renderCategoryBar();
-                applyFilters();
+                const catImg = (settings && settings.CategoryImages && settings.CategoryImages[cat]) || LOGO;
+                const card = document.createElement('div');
+                card.className = 'category-card';
+                card.innerHTML = `
+                    <img src="${catImg}" alt="${cat}" loading="lazy">
+                    <div class="cat-card-name">${cat}</div>
+                `;
+                card.addEventListener('click', () => enterCategory(cat));
+                container.appendChild(card);
             });
         }
 
-        function renderCategoryBar() {
+        async function renderFeaturedProducts() {
+            const container = document.getElementById('featured-products-container');
+            const section = document.getElementById('featured-section');
+            if (!container || !settings) return;
+            const featuredIds = settings.FeaturedProducts || [];
+            if (featuredIds.length === 0) { section.style.display = 'none'; return; }
+            const featuredProducts = featuredIds.map(id => products.find(p => p.id === id)).filter(Boolean);
+            if (featuredProducts.length === 0) { section.style.display = 'none'; return; }
+            section.style.display = 'block';
+            container.innerHTML = '';
+            featuredProducts.forEach(product => {
+                const onSale = isProductOnSale(product);
+                const effectivePrice = getEffectivePrice(product);
+                let priceHTML = `${effectivePrice.toFixed(2)} ₪`;
+                if (onSale) {
+                    priceHTML = `<span style="text-decoration:line-through;color:#bbb;font-size:0.82em;">${product.price.toFixed(2)} ₪</span><br><span style="color:#e74c3c;font-weight:900;">${product.salePrice.toFixed(2)} ₪</span>`;
+                }
+                const card = document.createElement('div');
+                card.className = 'featured-card';
+                card.innerHTML = `
+                    <div class="featured-star-badge">⭐ מומלץ</div>
+                    <img src="${product.image}" alt="${product.name}" loading="lazy">
+                    <div class="featured-name">${product.name}</div>
+                    <div class="featured-price">${priceHTML}</div>
+                `;
+                card.addEventListener('click', () => openProductModal(product.id));
+                container.appendChild(card);
+            });
+        }
+
+function renderCategoryBar() {
             const filterDiv = document.getElementById('category-filter');
 
             if (currentCategoryFilter === 'all') {
-                // תצוגת כל הקטגוריות הראשיות
-                filterDiv.innerHTML = '<button class="active" data-category="all">הכל</button>';
-                categories.forEach(cat => {
-                    const btn = document.createElement('button');
-                    btn.textContent = cat;
-                    btn.dataset.category = cat;
-                    if (cat === currentCategoryFilter) btn.classList.add('active');
-                    btn.addEventListener('click', () => enterCategory(cat));
-                    filterDiv.appendChild(btn);
-                });
-                filterDiv.querySelector('[data-category="all"]').addEventListener('click', () => {
-                    currentCategoryFilter = 'all';
-                    currentSubCategoryFilter = '';
-                    renderCategoryBar();
-                    applyFilters();
-                });
+                filterDiv.innerHTML = '<button class="active" data-category="all">← דף הבית</button>';
+                filterDiv.querySelector('[data-category="all"]').addEventListener('click', showHomePage);
             } else {
                 // תוך קטגוריה — הצג תת-קטגוריות
                 const subCats = subCategoriesMap[currentCategoryFilter] || [];
@@ -3106,9 +3569,12 @@ function updateCategoryFilter() {
             }
         }
 
-        function enterCategory(cat) {
+function enterCategory(cat) {
             currentCategoryFilter = cat;
             currentSubCategoryFilter = '';
+            document.getElementById('products-browse-section').style.display = 'block';
+            document.getElementById('categories-home-section').style.display = 'none';
+            document.getElementById('featured-section').style.display = 'none';
             renderCategoryBar();
             applyFilters();
         }
@@ -3147,7 +3613,8 @@ async function fetchProducts() {
             10000
         );
         products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        applyFilters();
+        renderFeaturedProducts();
+        renderCategoriesStrip();
         handleDeepLink();
     } catch (error) {
         console.error('שגיאת טעינת מוצרים:', error);
@@ -4030,47 +4497,38 @@ closeCart();
         }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // הצג סקלטון מיד
-    productsContainer.innerHTML = `
-        <div style="text-align:center;padding:80px 20px;width:100%;grid-column:1/-1;">
-            <div style="font-size:3em;margin-bottom:15px;">⏳</div>
-            <p style="font-size:1.1em;color:#666;">טוען מוצרים...</p>
-        </div>`;
+    document.getElementById('products-browse-section').style.display = 'none';
 
     try {
-        // settings חייב להיות ראשון כי fetchProducts תלוי בו
         await loadSettings();
-
-        // כל השאר במקביל
         loadCartFromStorage();
         await Promise.all([
             loadAnnouncements(),
             fetchProducts(),
             loadClubMember()
         ]);
-
         updateCartDisplay();
     } catch (error) {
         console.error('שגיאת אתחול:', error);
     }
 });
 
-        function handleDeepLink() {
-    const hash = window.location.hash;
-    if (!hash || !hash.startsWith('#')) return;
-    
-    const productName = decodeURIComponent(hash.substring(1)).trim();
-    if (!productName) return;
-    
-    const product = products.find(p => 
-        p.name.trim() === productName || 
-        p.name.trim().toLowerCase() === productName.toLowerCase()
-    );
-    
-    if (product) {
-        openProductModal(product.id);
-    }
-}
+function handleDeepLink() {
+            const hash = window.location.hash;
+            if (!hash || !hash.startsWith('#')) return;
+            const productName = decodeURIComponent(hash.substring(1)).trim();
+            if (!productName) return;
+            const product = products.find(p =>
+                p.name.trim() === productName ||
+                p.name.trim().toLowerCase() === productName.toLowerCase()
+            );
+            if (product) {
+                document.getElementById('products-browse-section').style.display = 'block';
+                document.getElementById('categories-home-section').style.display = 'none';
+                document.getElementById('featured-section').style.display = 'none';
+                openProductModal(product.id);
+            }
+        }
         
     </script>
 </body>
