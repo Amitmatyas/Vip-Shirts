@@ -470,14 +470,14 @@
             width: 200px;
         }
 
-        .category-filter {
-    margin: 36px auto;
+.category-filter {
+    margin: 30px auto;
     display: flex;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
     justify-content: center;
     max-width: 1200px;
-    padding: 0 24px;
+    padding: 0 20px;
     align-items: flex-start;
 }
 
@@ -486,45 +486,44 @@
     border: 3px solid transparent;
     background: white;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 24px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+    transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+    border-radius: 18px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.09);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0;
-    min-width: 160px;
+    min-width: 110px;
+    max-width: 130px;
     color: #2c3e50;
     overflow: hidden;
+    text-align: center;
 }
 
 .category-filter button img {
-    width: 160px;
-    height: 140px;
-    object-fit: cover;
-    border-radius: 0;
+    width: 100%;
+    height: 90px;
+    object-fit: contain;
     display: block;
-    transition: transform 0.3s ease;
+    background: #f9f9f9;
+    padding: 8px;
 }
 
 .category-filter button span:last-child {
-    padding: 12px 10px 14px;
-    font-size: 1.05em;
+    padding: 8px 6px 10px;
+    font-size: 0.88em;
     font-weight: 700;
     width: 100%;
     text-align: center;
     background: white;
     border-top: 1px solid #f0f0f0;
+    color: #2c3e50;
 }
 
 .category-filter button:hover {
     border-color: #dc3545;
-    transform: translateY(-6px);
-    box-shadow: 0 12px 28px rgba(220,53,69,0.22);
-}
-
-.category-filter button:hover img {
-    transform: scale(1.06);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 26px rgba(220,53,69,0.18);
 }
 
 .category-filter button.active {
@@ -538,20 +537,17 @@
     background: #fff5f5;
 }
 
-.category-filter button.active img {
-    box-shadow: none;
-}
-
 /* כפתור חזרה */
 .category-filter .back-btn {
     background: linear-gradient(135deg, #555, #333);
     color: white;
     border-color: transparent;
     min-width: auto;
+    max-width: none;
     flex-direction: row;
-    padding: 14px 24px;
+    padding: 12px 22px;
     border-radius: 50px;
-    font-size: 1em;
+    font-size: 0.95em;
     font-weight: 700;
     align-self: center;
     gap: 8px;
@@ -3545,13 +3541,34 @@ function showHomePage() {
             container.innerHTML = '';
             const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
 
-            // כפתור "הכל" קבוע
+            // כפתור "הכל" בסגנון back-btn
             const allCard = document.createElement('div');
-            allCard.className = 'category-card';
-            allCard.innerHTML = `
-                <img src="${LOGO}" alt="הכל" loading="lazy">
-                <div class="cat-card-name">הכל</div>
+            allCard.style.cssText = `
+                background: linear-gradient(135deg, #555, #333);
+                color: white;
+                border-radius: 22px;
+                overflow: hidden;
+                box-shadow: 0 4px 18px rgba(0,0,0,0.2);
+                cursor: pointer;
+                transition: transform 0.22s, box-shadow 0.22s;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             `;
+            allCard.innerHTML = `
+                <img src="${LOGO}" alt="הכל" loading="lazy" style="width:100%;height:150px;object-fit:contain;padding:8px;background:rgba(255,255,255,0.1);">
+                <div style="padding:12px 10px 14px;font-weight:700;font-size:1.05em;color:white;">כל המוצרים</div>
+            `;
+            allCard.addEventListener('mouseenter', () => {
+                allCard.style.transform = 'translateY(-6px) scale(1.03)';
+                allCard.style.boxShadow = '0 14px 32px rgba(0,0,0,0.3)';
+            });
+            allCard.addEventListener('mouseleave', () => {
+                allCard.style.transform = '';
+                allCard.style.boxShadow = '0 4px 18px rgba(0,0,0,0.2)';
+            });
             allCard.addEventListener('click', () => {
                 currentCategoryFilter = 'all';
                 currentSubCategoryFilter = '';
