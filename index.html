@@ -3660,7 +3660,6 @@ function renderCategoryBar() {
                 applyFilters();
             });
             filterDiv.appendChild(allSubBtn);
-
             subCats.forEach(sc => {
                 const scImg = (settings && settings.SubCategoryImages && settings.SubCategoryImages[currentCategoryFilter + '::' + sc]) || LOGO;
                 const btn = document.createElement('button');
@@ -3680,6 +3679,8 @@ function renderCategoryBar() {
                 filterDiv.appendChild(btn);
             });
         }
+    }
+}
 
 function enterCategory(cat) {
     currentCategoryFilter = cat;
