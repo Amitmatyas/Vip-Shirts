@@ -428,6 +428,12 @@
     text-align: center;
 }
 
+.category-card:hover {
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 14px 32px rgba(220,53,69,0.22);
+    border-color: #dc3545;
+}
+
 .category-card img {
     width: 100%;
     height: 150px;
@@ -465,69 +471,99 @@
         }
 
         .category-filter {
-            margin: 30px auto;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 1200px;
-            padding: 0 20px;
-        }
+    margin: 36px auto;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1200px;
+    padding: 0 24px;
+    align-items: flex-start;
+}
 
-        .category-filter button {
-    padding: 14px 16px;
-    border: 2px solid transparent;
+.category-filter button {
+    padding: 0;
+    border: 3px solid transparent;
     background: white;
     cursor: pointer;
-    transition: all 0.2s;
-    font-size: 1em;
-    font-weight: 700;
-    border-radius: 20px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 24px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    min-width: 130px;
+    gap: 0;
+    min-width: 160px;
     color: #2c3e50;
-}
-.category-filter button img {
-    width: 110px;
-    height: 110px;
-    object-fit: cover;
-    border-radius: 14px;
-    display: block;
-}
-.category-filter button:hover {
-    border-color: #dc3545;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(220,53,69,0.18);
-}
-.category-filter button.active {
-    border-color: #dc3545;
-    background: #fff5f5;
-    color: #dc3545;
-}
-.category-filter button.active img {
-    box-shadow: 0 0 0 2px #dc3545;
+    overflow: hidden;
 }
 
-/* כפתור חזרה — ללא תמונה, עיצוב שונה */
+.category-filter button img {
+    width: 160px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 0;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.category-filter button span:last-child {
+    padding: 12px 10px 14px;
+    font-size: 1.05em;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    background: white;
+    border-top: 1px solid #f0f0f0;
+}
+
+.category-filter button:hover {
+    border-color: #dc3545;
+    transform: translateY(-6px);
+    box-shadow: 0 12px 28px rgba(220,53,69,0.22);
+}
+
+.category-filter button:hover img {
+    transform: scale(1.06);
+}
+
+.category-filter button.active {
+    border-color: #dc3545;
+    background: white;
+    color: #dc3545;
+}
+
+.category-filter button.active span:last-child {
+    color: #dc3545;
+    background: #fff5f5;
+}
+
+.category-filter button.active img {
+    box-shadow: none;
+}
+
+/* כפתור חזרה */
 .category-filter .back-btn {
-    background: #555;
+    background: linear-gradient(135deg, #555, #333);
     color: white;
     border-color: transparent;
     min-width: auto;
     flex-direction: row;
-    padding: 10px 18px;
-    border-radius: 20px;
-    font-size: 0.95em;
+    padding: 14px 24px;
+    border-radius: 50px;
+    font-size: 1em;
+    font-weight: 700;
     align-self: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+    overflow: visible;
 }
+
 .category-filter .back-btn:hover {
-    background: #333;
+    background: linear-gradient(135deg, #333, #111);
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
 
         main#products-container {
