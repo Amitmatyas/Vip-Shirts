@@ -3625,62 +3625,12 @@ function renderCategoryBar() {
 function enterCategory(cat) {
     currentCategoryFilter = cat;
     currentSubCategoryFilter = '';
-
-    const subCats = subCategoriesMap[cat] || [];
-
-    if (subCats.length > 0) {
-        // יש תת-קטגוריות — הצג אותן כרטיסיות
-        document.getElementById('categories-home-section').style.display = 'none';
-        document.getElementById('featured-section').style.display = 'none';
-        document.getElementById('products-browse-section').style.display = 'none';
-        document.getElementById('subcategories-section').style.display = 'block';
-
-        document.getElementById('subcategories-home-section').innerHTML = `
-    <h2 class="section-title" id="subcategories-section-title">${cat}</h2>
-    <div id="subcategories-cards-container" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:18px;"></div>
-`;
-const container = document.getElementById('subcategories-cards-container');
-        const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
-
-        // כרטיס "הכל" שמציג את כל המוצרים בקטגוריה
-        const allCard = document.createElement('div');
-        allCard.className = 'category-card';
-        allCard.innerHTML = `
-            <img src="${(settings && settings.CategoryImages && settings.CategoryImages[cat]) || LOGO}" alt="${cat}" loading="lazy">
-            <div class="cat-card-name">הכל</div>
-        `;
-        allCard.addEventListener('click', () => enterSubCategory(cat, ''));
-        container.appendChild(allCard);
-
-        // כרטיס לכל תת-קטגוריה
-        subCats.forEach(sc => {
-            const scImg = (settings && settings.SubCategoryImages && settings.SubCategoryImages[`${cat}::${sc}`]) || LOGO;
-            const card = document.createElement('div');
-            card.className = 'category-card';
-            card.innerHTML = `
-                <img src="${scImg}" alt="${sc}" loading="lazy">
-                <div class="cat-card-name">${sc}</div>
-            `;
-            card.addEventListener('click', () => enterSubCategory(cat, sc));
-            container.appendChild(card);
-        });
-
-        // כפתור חזרה
-        const backBtn = document.createElement('button');
-        backBtn.textContent = '← חזור לדף הבית';
-        backBtn.style.cssText = 'display:block;margin:18px auto 0;padding:10px 22px;border:none;background:#555;color:white;border-radius:8px;font-size:1em;cursor:pointer;font-weight:700;';
-        backBtn.addEventListener('click', showHomePage);
-        document.getElementById('subcategories-home-section').appendChild(backBtn);
-
-    } else {
-        // אין תת-קטגוריות — עבור ישירות לרשימת מוצרים
-        document.getElementById('subcategories-section').style.display = 'none';
-        document.getElementById('products-browse-section').style.display = 'block';
-        document.getElementById('categories-home-section').style.display = 'none';
-        document.getElementById('featured-section').style.display = 'none';
-        renderCategoryBar();
-        applyFilters();
-    }
+    document.getElementById('subcategories-section').style.display = 'none';
+    document.getElementById('products-browse-section').style.display = 'block';
+    document.getElementById('categories-home-section').style.display = 'none';
+    document.getElementById('featured-section').style.display = 'none';
+    renderCategoryBar();
+    applyFilters();
 }
 
         function enterSubCategory(cat, subCat) {
