@@ -3523,69 +3523,75 @@ function showHomePage() {
         }
 
 function renderCategoryBar() {
-            const filterDiv = document.getElementById('category-filter');
+    const filterDiv = document.getElementById('category-filter');
+    const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
 
-            if (currentCategoryFilter === 'all') {
-                filterDiv.innerHTML = '<button class="active" data-category="all">← דף הבית</button>';
-                filterDiv.querySelector('[data-category="all"]').addEventListener('click', showHomePage);
-            } else {
-                // תוך קטגוריה — הצג תת-קטגוריות
-                const subCats = subCategoriesMap[currentCategoryFilter] || [];
-                filterDiv.innerHTML = '';
+    if (currentCategoryFilter === 'all') {
+        filterDiv.innerHTML = '<button class="active" data-category="all">← דף הבית</button>';
+        filterDiv.querySelector('[data-category="all"]').addEventListener('click', showHomePage);
+    } else {
+        const subCats = subCategoriesMap[currentCategoryFilter] || [];
+        filterDiv.innerHTML = '';
 
-                // כפתור חזרה
-                const backBtn = document.createElement('button');
-                backBtn.textContent = '← הכל';
-                backBtn.style.cssText = 'background:#555;color:white;';
-                backBtn.addEventListener('click', () => {
-                    currentCategoryFilter = 'all';
-                    currentSubCategoryFilter = '';
+        const backBtn = document.createElement('button');
+        backBtn.textContent = '← הכל';
+        backBtn.style.cssText = 'background:#555;color:white;';
+        backBtn.addEventListener('click', () => {
+            currentCategoryFilter = 'all';
+            currentSubCategoryFilter = '';
+            renderCategoryBar();
+            applyFilters();
+        });
+        filterDiv.appendChild(backBtn);
+
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = currentCategoryFilter;
+        titleSpan.style.cssText = 'font-weight:900;padding:10px 16px;color:#dc3545;font-size:1em;';
+        filterDiv.appendChild(titleSpan);
+
+        if (subCats.length > 0) {
+            const catImg = (settings && settings.CategoryImages && settings.CategoryImages[currentCategoryFilter]) || LOGO;
+            const allSubBtn = document.createElement('button');
+            allSubBtn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 12px;height:auto;';
+            const allImg = document.createElement('img');
+            allImg.src = catImg;
+            allImg.alt = 'הכל';
+            allImg.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;';
+            const allSpan = document.createElement('span');
+            allSpan.textContent = 'הכל';
+            allSubBtn.appendChild(allImg);
+            allSubBtn.appendChild(allSpan);
+            if (!currentSubCategoryFilter) allSubBtn.classList.add('active');
+            allSubBtn.addEventListener('click', () => {
+                currentSubCategoryFilter = '';
+                renderCategoryBar();
+                applyFilters();
+            });
+            filterDiv.appendChild(allSubBtn);
+
+            subCats.forEach(sc => {
+                const scImg = (settings && settings.SubCategoryImages && settings.SubCategoryImages[currentCategoryFilter + '::' + sc]) || LOGO;
+                const btn = document.createElement('button');
+                btn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 12px;height:auto;';
+                const img = document.createElement('img');
+                img.src = scImg;
+                img.alt = sc;
+                img.style.cssText = 'width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;';
+                const span = document.createElement('span');
+                span.textContent = sc;
+                btn.appendChild(img);
+                btn.appendChild(span);
+                if (sc === currentSubCategoryFilter) btn.classList.add('active');
+                btn.addEventListener('click', () => {
+                    currentSubCategoryFilter = sc;
                     renderCategoryBar();
                     applyFilters();
                 });
-                filterDiv.appendChild(backBtn);
-
-                // שם הקטגוריה הנוכחית (כותרת)
-                const titleSpan = document.createElement('span');
-                titleSpan.textContent = currentCategoryFilter;
-                titleSpan.style.cssText = 'font-weight:900;padding:10px 16px;color:#dc3545;font-size:1em;';
-                filterDiv.appendChild(titleSpan);
-
-                if (subCats.length > 0) {
-                    // כפתור "הכל" בתוך הקטגוריה
-                    const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
-const catImg = (settings && settings.CategoryImages && settings.CategoryImages[currentCategoryFilter]) || LOGO;
-const allSubBtn = document.createElement('button');
-allSubBtn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 12px;height:auto;';
-allSubBtn.innerHTML = `
-    <img src="${catImg}" alt="הכל" style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;">
-    <span>הכל</span>
-`;
-if (!currentSubCategoryFilter) allSubBtn.classList.add('active');
-allSubBtn.addEventListener('click', () => {
-    currentSubCategoryFilter = '';
-    renderCategoryBar();
-    applyFilters();
-});
-filterDiv.appendChild(allSubBtn);
-
-subCats.forEach(sc => {
-    const LOGO = 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png';
-    const scImg = (settings && settings.SubCategoryImages && settings.SubCategoryImages[`${currentCategoryFilter}::${sc}`]) || LOGO;
-    const btn = document.createElement('button');
-    btn.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 12px;height:auto;';
-    btn.innerHTML = `
-        <img src="${scImg}" alt="${sc}" style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block;">
-        <span>${sc}</span>
-    `;
-    if (sc === currentSubCategoryFilter) btn.classList.add('active');
-    btn.addEventListener('click', () => {
-        currentSubCategoryFilter = sc;
-        renderCategoryBar();
-        applyFilters();
-    });
-    filterDiv.appendChild(btn);
-});
+                filterDiv.appendChild(btn);
+            });
+        }
+    }
+}
 
 function enterCategory(cat) {
     currentCategoryFilter = cat;
