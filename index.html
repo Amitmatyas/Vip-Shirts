@@ -3334,8 +3334,13 @@ const searchInput = document.getElementById('search-input');
                 filtered = filtered.filter(p => productInCategory(p, currentCategoryFilter));
             }
             if (currentSubCategoryFilter) {
-                filtered = filtered.filter(p => p.subCategory === currentSubCategoryFilter);
-            }
+    filtered = filtered.filter(p => {
+        const subCats = Array.isArray(p.subCategories) && p.subCategories.length > 0
+            ? p.subCategories
+            : (p.subCategory ? [p.subCategory] : []);
+        return subCats.includes(currentSubCategoryFilter);
+    });
+}
 
             const searchValue = searchInput.value.toLowerCase();
             if (searchValue) {
