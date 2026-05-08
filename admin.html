@@ -1802,11 +1802,6 @@ function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', s
         if (!container) return [];
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
     }
-// ============================================
-// CATEGORY & SUBCATEGORY IMAGES MAPS - חייב להיות לפני loadCategories
-// ============================================
-let categoryImagesMap = {};
-let subCategoryImagesMap = {};
 
 // פונקציית עזר: sanitize שמות לשימוש ב-ID של DOM
 function sanitizeId(str) {
