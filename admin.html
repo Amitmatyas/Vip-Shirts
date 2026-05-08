@@ -1143,13 +1143,13 @@
                         <div class="category-checkboxes" id="product-category-checkboxes"></div>
                         <small>בחר קטגוריה</small>
                     </div>
-                    <div class="form-group">
-                        <label>תת-קטגוריה:</label>
-                        <select id="product-subcategory" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:6px;font-size:1em;">
-                            <option value="">ללא תת-קטגוריה</option>
-                        </select>
-                        <small>בחר תחילה קטגוריה ראשית כדי לראות תת-קטגוריות</small>
-                    </div>
+<div class="form-group">
+    <label>תת-קטגוריות:</label>
+    <div class="category-checkboxes" id="product-subcategory-checkboxes">
+        <span style="color:#999;font-size:0.9em;">בחר קטגוריה ראשית תחילה</span>
+    </div>
+    <small>ניתן לבחור מספר תת-קטגוריות</small>
+</div>
                     <div class="form-group">
                         <label>תמונה: *</label>
                         <div class="image-upload-container" id="product-image-upload">
@@ -1769,7 +1769,7 @@ function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', s
             cb.value = cat;
             cb.dataset.category = cat;
             if (selectedCats.includes(cat)) cb.checked = true;
-            cb.addEventListener('change', () => updateSubCategorySelect(containerId, 'product-subcategory'));
+            cb.addEventListener('change', () => updateSubCategoryCheckboxes(containerId, 'product-subcategory-checkboxes'));
             label.appendChild(cb);
             label.appendChild(document.createTextNode(cat));
             container.appendChild(label);
@@ -1958,9 +1958,12 @@ async function displayCategoriesWithProducts() {
                 }
 
                 const productLink = `${window.location.origin}/#${encodeURIComponent(product.name)}`;
-                const subCatLabel = product.subCategory
-                    ? `<div style="font-size:0.78em;color:#28a745;margin-bottom:4px;">📂 ${product.subCategory}</div>`
-                    : '';
+                const subCats = Array.isArray(product.subCategories) && product.subCategories.length > 0
+    ? product.subCategories
+    : (product.subCategory ? [product.subCategory] : []);
+const subCatLabel = subCats.length > 0
+    ? `<div style="font-size:0.78em;color:#28a745;margin-bottom:4px;">📂 ${subCats.join(' · ')}</div>`
+    : '';
 
                 productCard.innerHTML = `
                     ${saleBadge}
@@ -2376,7 +2379,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
     const saleEndDate = document.getElementById('product-sale-end').value || null;
     const customShipping = parseFloat(document.getElementById('product-custom-shipping').value);
     const selectedCats = getSelectedCategories('product-category-checkboxes');
-    const subCategory = document.getElementById('product-subcategory').value || null;
+    const subCategories = getSelectedSubCategories('product-subcategory-checkboxes');
     const image = document.getElementById('product-image-url').value.trim();
 
     if (!name || !description || isNaN(price) || price < 0 || !image) {
@@ -2389,7 +2392,7 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
     const productData = {
         name, description, price,
         categories: selectedCats,
-        subCategory: subCategory,
+        subCategories: subCategories,
         image,
         customFields: customFields.length > 0 ? customFields : null,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -2467,12 +2470,13 @@ editFormContainer.innerHTML = `
             <div class="category-checkboxes" id="edit-category-checkboxes"></div>
             <small>בחר קטגוריה</small>
         </div>
-        <div class="form-group">
-            <label>תת-קטגוריה:</label>
-            <select id="edit-product-subcategory" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:6px;font-size:1em;">
-                <option value="">ללא תת-קטגוריה</option>
-            </select>
-        </div>
+<div class="form-group">
+    <label>תת-קטגוריות:</label>
+    <div class="category-checkboxes" id="edit-product-subcategory-checkboxes">
+        <span style="color:#999;font-size:0.9em;">בחר קטגוריה ראשית תחילה</span>
+    </div>
+    <small>ניתן לבחור מספר תת-קטגוריות</small>
+</div>
         <div class="form-group">
             <label>תמונה נוכחית:</label>
             <img src="${product.image}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px;">
@@ -2531,12 +2535,15 @@ window.removeExistingChart = function(idx) {
         updateCategoryCheckboxes('edit-category-checkboxes', currentCats);
 
         // Setup subcategory select
-        setTimeout(() => {
-            updateSubCategorySelect('edit-category-checkboxes', 'edit-product-subcategory', product.subCategory || '');
-            document.querySelectorAll('#edit-category-checkboxes input').forEach(cb => {
-                cb.addEventListener('change', () => updateSubCategorySelect('edit-category-checkboxes', 'edit-product-subcategory'));
-            });
-        }, 0);
+setTimeout(() => {
+    const currentSubCats = Array.isArray(product.subCategories)
+        ? product.subCategories
+        : (product.subCategory ? [product.subCategory] : []);
+    updateSubCategoryCheckboxes('edit-category-checkboxes', 'edit-product-subcategory-checkboxes', currentSubCats);
+    document.querySelectorAll('#edit-category-checkboxes input').forEach(cb => {
+        cb.addEventListener('change', () => updateSubCategoryCheckboxes('edit-category-checkboxes', 'edit-product-subcategory-checkboxes', getSelectedSubCategories('edit-product-subcategory-checkboxes')));
+    });
+}, 0);
 
         setupImageUpload('edit-product-image-file','edit-product-image-preview','edit-product-upload-status','edit-product-image-url','edit-product-image-upload');
         
@@ -2555,7 +2562,7 @@ window.removeExistingChart = function(idx) {
             const saleEndDate = document.getElementById('edit-product-sale-end').value || null;
             const customShipping = parseFloat(document.getElementById('edit-product-custom-shipping').value);
 const selectedCats = getSelectedCategories('edit-category-checkboxes');
-            const subCategory = document.getElementById('edit-product-subcategory').value || null;
+            const subCategories = getSelectedSubCategories('edit-product-subcategory-checkboxes');
             const image = document.getElementById('edit-product-image-url').value.trim();
 
 if (!name || !description || isNaN(price) || price < 0 || !image) {
@@ -2568,7 +2575,8 @@ if (!name || !description || isNaN(price) || price < 0 || !image) {
 const updateData = {
                 name, description, price,
                 categories: selectedCats,
-                subCategory: subCategory,
+                subCategories: subCategories,
+                subCategory: firebase.firestore.FieldValue.delete(),
                 image,
                 customFields: customFields.length > 0 ? customFields : null
             };
