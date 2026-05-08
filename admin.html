@@ -1776,26 +1776,41 @@ function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', s
         });
     }
 
-    function updateSubCategorySelect(checkboxContainerId, selectId, selectedSubCat = '') {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-        const checkedCats = Array.from(
-            document.querySelectorAll(`#${checkboxContainerId} input:checked`)
-        ).map(cb => cb.value);
-        
-        const allSubCats = [...new Set(
-            checkedCats.flatMap(cat => subCategoriesMap[cat] || [])
-        )];
+function updateSubCategoryCheckboxes(checkboxContainerId, containerIdSub, selectedSubCats = []) {
+    const container = document.getElementById(containerIdSub);
+    if (!container) return;
+    const checkedCats = Array.from(
+        document.querySelectorAll(`#${checkboxContainerId} input:checked`)
+    ).map(cb => cb.value);
 
-        select.innerHTML = '<option value="">ללא תת-קטגוריה</option>';
-        allSubCats.forEach(sc => {
-            const opt = document.createElement('option');
-            opt.value = sc;
-            opt.textContent = sc;
-            if (sc === selectedSubCat) opt.selected = true;
-            select.appendChild(opt);
-        });
+    const allSubCats = [...new Set(
+        checkedCats.flatMap(cat => subCategoriesMap[cat] || [])
+    )];
+
+    container.innerHTML = '';
+    if (allSubCats.length === 0) {
+        container.innerHTML = '<span style="color:#999;font-size:0.9em;">בחר קטגוריה ראשית תחילה</span>';
+        return;
     }
+    allSubCats.forEach(sc => {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px 8px;border-radius:4px;';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = sc;
+        cb.style.cssText = 'width:16px;height:16px;cursor:pointer;';
+        if (selectedSubCats.includes(sc)) cb.checked = true;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(sc));
+        container.appendChild(label);
+    });
+}
+
+function getSelectedSubCategories(containerIdSub) {
+    const container = document.getElementById(containerIdSub);
+    if (!container) return [];
+    return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+}
 
     function getSelectedCategories(containerId = 'product-category-checkboxes') {
         const container = document.getElementById(containerId);
