@@ -1740,21 +1740,23 @@ async function initializeSettings() {
     // CATEGORIES
     // ============================================
 let subCategoriesMap = {}; // { "קטגוריה ראשית": ["תת1","תת2"] }
+let categoryImagesMap = {};
+let subCategoryImagesMap = {};
 
 async function loadCategories() {
-        try {
-            const settingsDoc = await db.collection('Settings').doc('main').get();
-            if (settingsDoc.exists) {
-                const data = settingsDoc.data();
-                categories = data.Categories || [];
-                subCategoriesMap = data.SubCategories || {};
-                categoryImagesMap = data.CategoryImages || {};
-                subCategoryImagesMap = data.SubCategoryImages || {};
-                await displayCategoriesWithProducts();
-                updateCategoryCheckboxes();
-            }
-        } catch (error) { console.error('Error loading categories:', error); }
-    }
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (settingsDoc.exists) {
+            const data = settingsDoc.data();
+            categories = data.Categories || [];
+            subCategoriesMap = data.SubCategories || {};
+            categoryImagesMap = data.CategoryImages || {};
+            subCategoryImagesMap = data.SubCategoryImages || {};
+            await displayCategoriesWithProducts();
+            updateCategoryCheckboxes();
+        }
+    } catch (error) { console.error('Error loading categories:', error); }
+}
 
 function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', selectedCats = []) {
         const container = document.getElementById(containerId);
@@ -1800,6 +1802,17 @@ function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', s
         if (!container) return [];
         return Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
     }
+// ============================================
+// CATEGORY & SUBCATEGORY IMAGES MAPS - חייב להיות לפני loadCategories
+// ============================================
+let categoryImagesMap = {};
+let subCategoryImagesMap = {};
+
+// פונקציית עזר: sanitize שמות לשימוש ב-ID של DOM
+function sanitizeId(str) {
+    return str.replace(/[^a-zA-Z0-9א-ת]/g, '_');
+}
+
 async function displayCategoriesWithProducts() {
     const categoriesGrid = document.getElementById('categories-grid');
     showSkeletonCategories();
@@ -1818,11 +1831,12 @@ async function displayCategoriesWithProducts() {
         const categoryBox = document.createElement('div');
         categoryBox.className = 'category-box';
 
-    const catImageUrl = categoryImagesMap[category] || '';
-        const catImagePreviewId = `cat-img-preview-${category.replace(/\s/g,'_')}`;
-        const catImageStatusId = `cat-img-status-${category.replace(/\s/g,'_')}`;
-        const catImageInputId = `cat-img-input-${category.replace(/\s/g,'_')}`;
-        const catImageUrlId = `cat-img-url-${category.replace(/\s/g,'_')}`;
+        const catSafe = sanitizeId(category);
+        const catImageUrl = categoryImagesMap[category] || '';
+        const catImagePreviewId = `cat-img-preview-${catSafe}`;
+        const catImageStatusId  = `cat-img-status-${catSafe}`;
+        const catImageInputId   = `cat-img-input-${catSafe}`;
+        const catImageUrlId     = `cat-img-url-${catSafe}`;
 
         let subCatHTML = `
             <!-- תמונת קטגוריה -->
@@ -1842,32 +1856,36 @@ async function displayCategoriesWithProducts() {
             <!-- תת-קטגוריות -->
             <div style="margin-top:10px;padding:12px;background:#fff;border-radius:8px;border:1px solid #dee2e6;">
                 <strong style="font-size:0.9em;color:#555;">תת-קטגוריות:</strong>
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;" id="subcats-${category}">
-                    ${subCats.map((sc,i) => {
-                        const scImg = subCategoryImagesMap[`${category}::${sc}`] || '';
-                        const scImgInputId = `sc-img-input-${category.replace(/\s/g,'_')}_${sc.replace(/\s/g,'_')}`;
-                        const scImgPreviewId = `sc-img-preview-${category.replace(/\s/g,'_')}_${sc.replace(/\s/g,'_')}`;
-                        const scImgStatusId = `sc-img-status-${category.replace(/\s/g,'_')}_${sc.replace(/\s/g,'_')}`;
-                        const scImgUrlId = `sc-img-url-${category.replace(/\s/g,'_')}_${sc.replace(/\s/g,'_')}`;
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;" id="subcats-${catSafe}">
+                    ${subCats.map((sc, i) => {
+                        const scSafe = sanitizeId(sc);
+                        const scImg        = subCategoryImagesMap[`${category}::${sc}`] || '';
+                        const scImgInputId  = `sc-img-input-${catSafe}_${scSafe}`;
+                        const scImgPreviewId = `sc-img-preview-${catSafe}_${scSafe}`;
+                        const scImgStatusId  = `sc-img-status-${catSafe}_${scSafe}`;
+                        const scImgUrlId     = `sc-img-url-${catSafe}_${scSafe}`;
+                        // JSON.stringify מבטיח escape תקין של גרשיים בשמות
+                        const catJ = JSON.stringify(category);
+                        const scJ  = JSON.stringify(sc);
                         return `
                         <div style="background:#e9ecef;padding:8px 10px;border-radius:8px;font-size:0.88em;display:flex;align-items:center;gap:8px;">
-                            <img id="${scImgPreviewId}" src="${scImg || 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png'}" 
+                            <img id="${scImgPreviewId}"
+                                 src="${scImg || 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png'}" 
                                  style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #ccc;cursor:pointer;"
                                  onclick="document.getElementById('${scImgInputId}').click()" title="שנה תמונה">
-                            <input type="file" id="${scImgInputId}" accept="image/*" style="display:none;"
-                                   onchange="uploadSubCatImage('${category}','${sc}','${scImgInputId}','${scImgPreviewId}','${scImgStatusId}','${scImgUrlId}')">
+                            <input type="file" id="${scImgInputId}" accept="image/*" style="display:none;">
                             <input type="hidden" id="${scImgUrlId}" value="${scImg}">
                             ${sc}
                             <span id="${scImgStatusId}" style="font-size:0.78em;color:#888;"></span>
-                            <button onclick="deleteSubCategory('${category}',${i})" 
+                            <button onclick="deleteSubCategory(${catJ},${i})" 
                                     style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1em;padding:0;line-height:1;">×</button>
                         </div>`;
                     }).join('')}
                 </div>
                 <div style="display:flex;gap:8px;margin-top:10px;">
-                    <input type="text" id="new-subcat-${category}" placeholder="שם תת-קטגוריה חדשה"
+                    <input type="text" id="new-subcat-${catSafe}" placeholder="שם תת-קטגוריה חדשה"
                            style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:0.9em;">
-                    <button onclick="addSubCategory('${category}')" class="btn btn-success" style="padding:6px 14px;font-size:0.88em;">הוסף</button>
+                    <button onclick="addSubCategory(${JSON.stringify(category)})" class="btn btn-success" style="padding:6px 14px;font-size:0.88em;">הוסף</button>
                 </div>
             </div>
         `;
@@ -1881,11 +1899,34 @@ async function displayCategoriesWithProducts() {
                 </div>
             </div>
             ${subCatHTML}
-            <div class="products-in-category" id="products-${category}" style="margin-top:15px;"></div>
+            <div class="products-in-category" id="products-${catSafe}" style="margin-top:15px;"></div>
         `;
         categoriesGrid.appendChild(categoryBox);
 
-        const productsContainer = document.getElementById(`products-${category}`);
+        // ===== רישום event listeners לתמונות תת-קטגוריות =====
+        subCats.forEach((sc, i) => {
+            const scSafe = sanitizeId(sc);
+            const scImgInputId   = `sc-img-input-${catSafe}_${scSafe}`;
+            const scImgPreviewId = `sc-img-preview-${catSafe}_${scSafe}`;
+            const scImgStatusId  = `sc-img-status-${catSafe}_${scSafe}`;
+            const scImgUrlId     = `sc-img-url-${catSafe}_${scSafe}`;
+            const inputEl = document.getElementById(scImgInputId);
+            if (inputEl) {
+                inputEl.addEventListener('change', () =>
+                    uploadSubCatImage(category, sc, scImgInputId, scImgPreviewId, scImgStatusId, scImgUrlId)
+                );
+            }
+        });
+
+        // ===== רישום event listener לתמונת קטגוריה ראשית =====
+        const catInput = document.getElementById(catImageInputId);
+        if (catInput) {
+            catInput.addEventListener('change', () =>
+                uploadCategoryImage(category, catImageInputId, catImagePreviewId, catImageStatusId, catImageUrlId)
+            );
+        }
+
+        const productsContainer = document.getElementById(`products-${catSafe}`);
         if (categoryProducts.length === 0) {
             productsContainer.innerHTML = '<p style="color:#666;">אין מוצרים בקטגוריה זו</p>';
         } else {
@@ -1927,24 +1968,12 @@ async function displayCategoriesWithProducts() {
         }
     }
 
-// Event listeners
+    // ===== Event listeners לעריכה/מחיקת קטגוריות ומוצרים =====
     document.querySelectorAll('.btn-edit-category').forEach(btn => {
         btn.addEventListener('click', () => editCategoryName(btn.dataset.category));
     });
     document.querySelectorAll('.btn-delete-category').forEach(btn => {
         btn.addEventListener('click', () => deleteCategory(btn.dataset.category));
-    });
-
-    // Category image upload listeners
-    categories.forEach(cat => {
-        const inputId = `cat-img-input-${cat.replace(/\s/g,'_')}`;
-        const previewId = `cat-img-preview-${cat.replace(/\s/g,'_')}`;
-        const statusId = `cat-img-status-${cat.replace(/\s/g,'_')}`;
-        const urlId = `cat-img-url-${cat.replace(/\s/g,'_')}`;
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.addEventListener('change', () => uploadCategoryImage(cat, inputId, previewId, statusId, urlId));
-        }
     });
     document.querySelectorAll('.btn-edit-product').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1964,11 +1993,8 @@ async function displayCategoriesWithProducts() {
 }
 
 // ============================================
-// CATEGORY & SUBCATEGORY IMAGES
+// CATEGORY & SUBCATEGORY IMAGES - פונקציות העלאה
 // ============================================
-let categoryImagesMap = {};
-let subCategoryImagesMap = {};
-
 window.uploadCategoryImage = async function(category, inputId, previewId, statusId, urlId) {
     const input = document.getElementById(inputId);
     const file = input.files[0];
@@ -2001,16 +2027,45 @@ window.uploadSubCatImage = async function(category, subCat, inputId, previewId, 
     status.style.color = '#e67e22';
     try {
         const url = await uploadImageToImgBB(file);
-        document.getElementById(urlId).value = url;
-        preview.src = url;
+        // עדכון ישיר של ה-DOM ללא צורך ברינדור מחדש
+        const previewEl = document.getElementById(previewId);
+        const urlEl = document.getElementById(urlId);
+        if (previewEl) previewEl.src = url;
+        if (urlEl) urlEl.value = url;
         subCategoryImagesMap[`${category}::${subCat}`] = url;
         await db.collection('Settings').doc('main').update({ SubCategoryImages: subCategoryImagesMap });
         status.textContent = '✓ נשמר';
         status.style.color = '#27ae60';
+        // איפוס ה-input כדי שניתן יהיה להעלות שוב
+        input.value = '';
     } catch (e) {
         status.textContent = 'שגיאה';
         status.style.color = 'red';
     }
+};
+
+// פונקציות תת-קטגוריות
+window.addSubCategory = async function(category) {
+    const safe = sanitizeId(category);
+    const input = document.getElementById(`new-subcat-${safe}`);
+    const name = input.value.trim();
+    if (!name) { alert('הזן שם תת-קטגוריה'); return; }
+    if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
+    if (subCategoriesMap[category].includes(name)) { alert('תת-קטגוריה זו כבר קיימת'); return; }
+    subCategoriesMap[category].push(name);
+    try {
+        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+        await loadCategories();
+    } catch(e) { console.error(e); alert('שגיאה בהוספת תת-קטגוריה'); }
+};
+
+window.deleteSubCategory = async function(category, index) {
+    if (!confirm('למחוק תת-קטגוריה זו?')) return;
+    subCategoriesMap[category].splice(index, 1);
+    try {
+        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+        await loadCategories();
+    } catch(e) { console.error(e); alert('שגיאה במחיקת תת-קטגוריה'); }
 };
 
 // פונקציות תת-קטגוריות
