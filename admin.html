@@ -2061,6 +2061,7 @@ window.uploadSubCatImage = async function(category, subCat, inputId, previewId, 
 window.addSubCategory = async function(category) {
     const safe = sanitizeId(category);
     const input = document.getElementById(`new-subcat-${safe}`);
+    if (!input) { alert('שגיאה: לא נמצא שדה קלט'); return; }
     const name = input.value.trim();
     if (!name) { alert('הזן שם תת-קטגוריה'); return; }
     if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
@@ -2074,32 +2075,16 @@ window.addSubCategory = async function(category) {
 
 window.deleteSubCategory = async function(category, index) {
     if (!confirm('למחוק תת-קטגוריה זו?')) return;
+    if (!subCategoriesMap[category]) return;
     subCategoriesMap[category].splice(index, 1);
+    // נקה גם תמונות תת-קטגוריה שנמחקו
+    const key = `${category}::${subCategoriesMap[category][index] || ''}`;
+    delete subCategoryImagesMap[key];
     try {
-        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
-        await loadCategories();
-    } catch(e) { console.error(e); alert('שגיאה במחיקת תת-קטגוריה'); }
-};
-
-// פונקציות תת-קטגוריות
-window.addSubCategory = async function(category) {
-    const input = document.getElementById(`new-subcat-${category}`);
-    const name = input.value.trim();
-    if (!name) { alert('הזן שם תת-קטגוריה'); return; }
-    if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
-    if (subCategoriesMap[category].includes(name)) { alert('תת-קטגוריה זו כבר קיימת'); return; }
-    subCategoriesMap[category].push(name);
-    try {
-        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
-        await loadCategories();
-    } catch(e) { console.error(e); alert('שגיאה בהוספת תת-קטגוריה'); }
-};
-
-window.deleteSubCategory = async function(category, index) {
-    if (!confirm('למחוק תת-קטגוריה זו?')) return;
-    subCategoriesMap[category].splice(index, 1);
-    try {
-        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+        await db.collection('Settings').doc('main').update({
+            SubCategories: subCategoriesMap,
+            SubCategoryImages: subCategoryImagesMap
+        });
         await loadCategories();
     } catch(e) { console.error(e); alert('שגיאה במחיקת תת-קטגוריה'); }
 };
