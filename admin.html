@@ -1659,6 +1659,7 @@ async function onSuccessfulLogin() {
         await loadShippingSettings();
         await loadCoupons();
         await loadAnnouncements();
+        await loadFeaturedProducts();
         setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
     } catch (err) {
         console.error('שגיאה בטעינה:', err);
