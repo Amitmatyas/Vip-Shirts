@@ -2077,9 +2077,6 @@ window.deleteSubCategory = async function(category, index) {
     if (!confirm('למחוק תת-קטגוריה זו?')) return;
     if (!subCategoriesMap[category]) return;
     subCategoriesMap[category].splice(index, 1);
-    // נקה גם תמונות תת-קטגוריה שנמחקו
-    const key = `${category}::${subCategoriesMap[category][index] || ''}`;
-    delete subCategoryImagesMap[key];
     try {
         await db.collection('Settings').doc('main').update({
             SubCategories: subCategoriesMap,
