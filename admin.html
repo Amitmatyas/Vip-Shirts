@@ -4584,11 +4584,9 @@ async function deleteCategory(name) {
 
         alert('קטגוריה נמחקה בהצלחה!');
         await loadAllProducts();
-        await loadCategories();
+await loadCategories();
     } catch (error) { console.error('Error deleting category:', error); alert('שגיאה במחיקת קטגוריה'); }
 }
-
-        
     </script>
 </body>
 </html>
