@@ -2118,10 +2118,14 @@
         <div class="announcement-text"></div>
     </div>
 
-    <header>
-        <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" alt="VIP Shirts">
-        <h1>VIP Shirts</h1>
-    </header>
+<header>
+    <img src="https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png" 
+         alt="VIP Shirts" 
+         onclick="showHomePage()" 
+         style="cursor:pointer;" 
+         title="חזרה לדף הבית">
+    <h1 onclick="showHomePage()" style="cursor:pointer;" title="חזרה לדף הבית">VIP Shirts</h1>
+</header>
 
     <!-- ENHANCED TOGGLE BUTTON -->
     <button id="cart-toggle-button">
@@ -4610,15 +4614,20 @@ closeCart();
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('products-browse-section').style.display = 'none';
 
+    // טעינה מיידית של עגלה (סנכרוני — אין צורך להמתין)
+    loadCartFromStorage();
+    updateCartDisplay();
+
     try {
+        // טעינת הגדרות קודם (נדרש לפני מוצרים)
         await loadSettings();
-        loadCartFromStorage();
+
+        // הכל במקביל
         await Promise.all([
             loadAnnouncements(),
             fetchProducts(),
             loadClubMember()
         ]);
-        updateCartDisplay();
     } catch (error) {
         console.error('שגיאת אתחול:', error);
     }
