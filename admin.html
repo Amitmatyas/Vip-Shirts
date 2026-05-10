@@ -1754,34 +1754,33 @@ async function loadCategories() {
             categoryImagesMap = data.CategoryImages || {};
             subCategoryImagesMap = data.SubCategoryImages || {};
             await displayCategoriesWithProducts();
-            updateCategoryCheckboxes();
+            updateCategoryCheckboxes('product-category-checkboxes', []);
         }
     } catch (error) { console.error('Error loading categories:', error); }
 }
 
-function updateCategoryCheckboxes(containerId = 'product-category-checkboxes', selectedCats = []) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        container.innerHTML = '';
-        categories.forEach(cat => {
-            const label = document.createElement('label');
-            const cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.value = cat;
-            cb.dataset.category = cat;
-            if (selectedCats.includes(cat)) cb.checked = true;
-            cb.addEventListener('change', () => updateSubCategoryCheckboxes(containerId, 'product-subcategory-checkboxes'));
-            label.appendChild(cb);
-            label.appendChild(document.createTextNode(cat));
-            container.appendChild(label);
-        });
-    }
-
-function updateSubCategoryCheckboxes(checkboxContainerId, containerIdSub, selectedSubCats = []) {
-    const container = document.getElementById(containerIdSub);
+function updateCategoryCheckboxes(containerId, selectedCats = []) {
+    const container = document.getElementById(containerId);
     if (!container) return;
+    container.innerHTML = '';
+    categories.forEach(cat => {
+        const label = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.value = cat;
+        if (selectedCats.includes(cat)) cb.checked = true;
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(' ' + cat));
+        container.appendChild(label);
+    });
+}
+
+function updateSubCategoryCheckboxes(catCheckboxContainerId, subCatContainerId, selectedSubCats = []) {
+    const container = document.getElementById(subCatContainerId);
+    if (!container) return;
+
     const checkedCats = Array.from(
-        document.querySelectorAll(`#${checkboxContainerId} input:checked`)
+        document.querySelectorAll('#' + catCheckboxContainerId + ' input[type="checkbox"]:checked')
     ).map(cb => cb.value);
 
     const allSubCats = [...new Set(
@@ -1802,7 +1801,7 @@ function updateSubCategoryCheckboxes(checkboxContainerId, containerIdSub, select
         cb.style.cssText = 'width:16px;height:16px;cursor:pointer;';
         if (selectedSubCats.includes(sc)) cb.checked = true;
         label.appendChild(cb);
-        label.appendChild(document.createTextNode(sc));
+        label.appendChild(document.createTextNode(' ' + sc));
         container.appendChild(label);
     });
 }
@@ -1838,69 +1837,13 @@ async function displayCategoriesWithProducts() {
     for (const category of categories) {
         const categoryProducts = products.filter(p => getProductCategories(p).includes(category));
         const subCats = subCategoriesMap[category] || [];
+        const catSafe = sanitizeId(category);
+        const catImageUrl = categoryImagesMap[category] || '';
 
         const categoryBox = document.createElement('div');
         categoryBox.className = 'category-box';
 
-        const catSafe = sanitizeId(category);
-        const catImageUrl = categoryImagesMap[category] || '';
-        const catImagePreviewId = `cat-img-preview-${catSafe}`;
-        const catImageStatusId  = `cat-img-status-${catSafe}`;
-        const catImageInputId   = `cat-img-input-${catSafe}`;
-        const catImageUrlId     = `cat-img-url-${catSafe}`;
-
-        let subCatHTML = `
-            <!-- תמונת קטגוריה -->
-            <div style="margin-top:10px;padding:12px;background:#fff3cd;border-radius:8px;border:1px solid #ffc107;margin-bottom:8px;">
-                <strong style="font-size:0.9em;color:#555;display:block;margin-bottom:8px;">🖼️ תמונת קטגוריה:</strong>
-                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <img id="${catImagePreviewId}" src="${catImageUrl || 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png'}" 
-                         style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid #ddd;">
-                    <div>
-                        <input type="file" id="${catImageInputId}" accept="image/*" style="display:none;">
-                        <input type="hidden" id="${catImageUrlId}" value="${catImageUrl}">
-                        <button onclick="document.getElementById('${catImageInputId}').click()" class="btn btn-secondary" style="padding:6px 14px;font-size:0.85em;">בחר תמונה</button>
-                        <div id="${catImageStatusId}" style="font-size:0.82em;margin-top:4px;color:#666;"></div>
-                    </div>
-                </div>
-            </div>
-            <!-- תת-קטגוריות -->
-            <div style="margin-top:10px;padding:12px;background:#fff;border-radius:8px;border:1px solid #dee2e6;">
-                <strong style="font-size:0.9em;color:#555;">תת-קטגוריות:</strong>
-                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;" id="subcats-${catSafe}">
-                    ${subCats.map((sc, i) => {
-                        const scSafe = sanitizeId(sc);
-                        const scImg        = subCategoryImagesMap[`${category}::${sc}`] || '';
-                        const scImgInputId  = `sc-img-input-${catSafe}_${scSafe}`;
-                        const scImgPreviewId = `sc-img-preview-${catSafe}_${scSafe}`;
-                        const scImgStatusId  = `sc-img-status-${catSafe}_${scSafe}`;
-                        const scImgUrlId     = `sc-img-url-${catSafe}_${scSafe}`;
-                        // JSON.stringify מבטיח escape תקין של גרשיים בשמות
-                        const catJ = JSON.stringify(category);
-                        const scJ  = JSON.stringify(sc);
-                        return `
-                        <div style="background:#e9ecef;padding:8px 10px;border-radius:8px;font-size:0.88em;display:flex;align-items:center;gap:8px;">
-                            <img id="${scImgPreviewId}"
-                                 src="${scImg || 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png'}" 
-                                 style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #ccc;cursor:pointer;"
-                                 onclick="document.getElementById('${scImgInputId}').click()" title="שנה תמונה">
-                            <input type="file" id="${scImgInputId}" accept="image/*" style="display:none;">
-                            <input type="hidden" id="${scImgUrlId}" value="${scImg}">
-                            ${sc}
-                            <span id="${scImgStatusId}" style="font-size:0.78em;color:#888;"></span>
-                            <button onclick="deleteSubCategory(${catJ},${i})" 
-                                    style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1em;padding:0;line-height:1;">×</button>
-                        </div>`;
-                    }).join('')}
-                </div>
-                <div style="display:flex;gap:8px;margin-top:10px;">
-                    <input type="text" id="new-subcat-${catSafe}" placeholder="שם תת-קטגוריה חדשה"
-                           style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:0.9em;">
-                    <button onclick="addSubCategory(${JSON.stringify(category)})" class="btn btn-success" style="padding:6px 14px;font-size:0.88em;">הוסף</button>
-                </div>
-            </div>
-        `;
-
+        // ---- בנה HTML ראשי ----
         categoryBox.innerHTML = `
             <div class="category-box-header">
                 <h3>${category} <span style="color:#999;font-size:0.75em;">(${categoryProducts.length} מוצרים)</span></h3>
@@ -1909,219 +1852,217 @@ async function displayCategoriesWithProducts() {
                     <button class="btn btn-danger btn-delete-category" data-category="${category}">מחק</button>
                 </div>
             </div>
-            ${subCatHTML}
-            <div class="products-in-category" id="products-${catSafe}" style="margin-top:15px;"></div>
+            <div class="cat-image-section" style="margin-top:10px;padding:12px;background:#fff3cd;border-radius:8px;border:1px solid #ffc107;margin-bottom:8px;">
+                <strong style="font-size:0.9em;color:#555;display:block;margin-bottom:8px;">🖼️ תמונת קטגוריה:</strong>
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <img class="cat-img-preview" src="${catImageUrl || 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png'}" 
+                         style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:2px solid #ddd;">
+                    <div>
+                        <input type="file" class="cat-img-input" accept="image/*" style="display:none;">
+                        <button class="btn btn-secondary cat-img-btn" style="padding:6px 14px;font-size:0.85em;">בחר תמונה</button>
+                        <div class="cat-img-status" style="font-size:0.82em;margin-top:4px;color:#666;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="subcat-section" style="margin-top:10px;padding:12px;background:#fff;border-radius:8px;border:1px solid #dee2e6;">
+                <strong style="font-size:0.9em;color:#555;">תת-קטגוריות:</strong>
+                <div class="subcat-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;"></div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                    <input type="text" class="new-subcat-input" placeholder="שם תת-קטגוריה חדשה"
+                           style="flex:1;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:0.9em;">
+                    <button class="btn btn-success add-subcat-btn" style="padding:6px 14px;font-size:0.88em;">הוסף</button>
+                </div>
+            </div>
+            <div class="products-in-category" style="margin-top:15px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:15px;"></div>
         `;
+
         categoriesGrid.appendChild(categoryBox);
 
-        // ===== רישום event listeners לתמונות תת-קטגוריות =====
-        subCats.forEach((sc, i) => {
-            const scSafe = sanitizeId(sc);
-            const scImgInputId   = `sc-img-input-${catSafe}_${scSafe}`;
-            const scImgPreviewId = `sc-img-preview-${catSafe}_${scSafe}`;
-            const scImgStatusId  = `sc-img-status-${catSafe}_${scSafe}`;
-            const scImgUrlId     = `sc-img-url-${catSafe}_${scSafe}`;
-            const inputEl = document.getElementById(scImgInputId);
-            if (inputEl) {
-                inputEl.addEventListener('change', () =>
-                    uploadSubCatImage(category, sc, scImgInputId, scImgPreviewId, scImgStatusId, scImgUrlId)
-                );
+        // ---- תמונת קטגוריה ראשית ----
+        const catImgInput = categoryBox.querySelector('.cat-img-input');
+        const catImgPreview = categoryBox.querySelector('.cat-img-preview');
+        const catImgStatus = categoryBox.querySelector('.cat-img-status');
+        const catImgBtn = categoryBox.querySelector('.cat-img-btn');
+
+        catImgBtn.addEventListener('click', () => catImgInput.click());
+        catImgInput.addEventListener('change', async () => {
+            const file = catImgInput.files[0];
+            if (!file) return;
+            catImgStatus.textContent = 'מעלה...';
+            catImgStatus.style.color = '#e67e22';
+            try {
+                const url = await uploadImageToImgBB(file);
+                catImgPreview.src = url;
+                categoryImagesMap[category] = url;
+                await db.collection('Settings').doc('main').update({ CategoryImages: categoryImagesMap });
+                catImgStatus.textContent = '✓ נשמר';
+                catImgStatus.style.color = '#27ae60';
+                catImgInput.value = '';
+            } catch (e) {
+                catImgStatus.textContent = 'שגיאה';
+                catImgStatus.style.color = 'red';
             }
         });
 
-        // ===== רישום event listener לתמונת קטגוריה ראשית =====
-        const catInput = document.getElementById(catImageInputId);
-        if (catInput) {
-            catInput.addEventListener('change', () =>
-                uploadCategoryImage(category, catImageInputId, catImagePreviewId, catImageStatusId, catImageUrlId)
-            );
-        }
+        // ---- רינדור תת-קטגוריות ----
+        const subcatList = categoryBox.querySelector('.subcat-list');
+        renderSubcatList(subcatList, category, subCats);
 
-        const productsContainer = document.getElementById(`products-${catSafe}`);
+        // ---- הוספת תת-קטגוריה ----
+        const newSubcatInput = categoryBox.querySelector('.new-subcat-input');
+        const addSubcatBtn = categoryBox.querySelector('.add-subcat-btn');
+        addSubcatBtn.addEventListener('click', async () => {
+            const name = newSubcatInput.value.trim();
+            if (!name) { alert('הזן שם תת-קטגוריה'); return; }
+            if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
+            if (subCategoriesMap[category].includes(name)) { alert('תת-קטגוריה זו כבר קיימת'); return; }
+            subCategoriesMap[category].push(name);
+            try {
+                await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+                newSubcatInput.value = '';
+                renderSubcatList(subcatList, category, subCategoriesMap[category]);
+                updateCategoryCheckboxes('product-category-checkboxes', []);
+            } catch (e) {
+                subCategoriesMap[category].pop();
+                alert('שגיאה בהוספת תת-קטגוריה');
+            }
+        });
+        newSubcatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') addSubcatBtn.click(); });
+
+        // ---- מוצרים ----
+        const productsContainer = categoryBox.querySelector('.products-in-category');
         if (categoryProducts.length === 0) {
             productsContainer.innerHTML = '<p style="color:#666;">אין מוצרים בקטגוריה זו</p>';
         } else {
             categoryProducts.forEach(product => {
-                const productCard = document.createElement('div');
-                productCard.className = 'product-mini-card';
-
-                const onSale = isProductOnSale(product);
-                const effectivePrice = getEffectivePrice(product);
-                let priceHTML = `<div class="product-price">${effectivePrice.toFixed(2)} ₪</div>`;
-                let saleBadge = '';
-                if (onSale) {
-                    const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
-                    saleBadge = `<div class="sale-badge-mini">-${discount}%</div>`;
-                    priceHTML = `<div class="product-price on-sale">
-                        <span class="original-price">${product.price.toFixed(2)} ₪</span>
-                        <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
-                    </div>`;
-                }
-
-                const productLink = `${window.location.origin}/#${encodeURIComponent(product.name)}`;
-                const subCats = Array.isArray(product.subCategories) && product.subCategories.length > 0
-    ? product.subCategories
-    : (product.subCategory ? [product.subCategory] : []);
-const subCatLabel = subCats.length > 0
-    ? `<div style="font-size:0.78em;color:#28a745;margin-bottom:4px;">📂 ${subCats.join(' · ')}</div>`
-    : '';
-
-                productCard.innerHTML = `
-                    ${saleBadge}
-                    <img src="${product.image}" alt="${product.name}">
-                    ${subCatLabel}
-                    <h4>${product.name}</h4>
-                    ${priceHTML}
-                    <div class="product-mini-actions">
-                        <button class="btn btn-dark btn-edit-product" data-product-id="${product.id}">ערוך</button>
-                        <button class="btn btn-success btn-copy-link" data-product-link="${productLink}" title="העתק קישור" style="padding:6px 10px;font-size:0.85em;">🔗</button>
-                    </div>
-                `;
+                const productCard = createProductMiniCard(product);
                 productsContainer.appendChild(productCard);
             });
         }
-    }
 
-    // ===== Event listeners לעריכה/מחיקת קטגוריות ומוצרים =====
-    document.querySelectorAll('.btn-edit-category').forEach(btn => {
-        btn.addEventListener('click', () => editCategoryName(btn.dataset.category));
-    });
-    document.querySelectorAll('.btn-delete-category').forEach(btn => {
-        btn.addEventListener('click', () => deleteCategory(btn.dataset.category));
-    });
-    document.querySelectorAll('.btn-edit-product').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const product = products.find(p => p.id === btn.dataset.productId);
-            openEditProductModal(btn.dataset.productId, product);
+        // ---- edit/delete category buttons ----
+        categoryBox.querySelector('.btn-edit-category').addEventListener('click', () => editCategoryName(category));
+        categoryBox.querySelector('.btn-delete-category').addEventListener('click', () => deleteCategory(category));
+    }
+}
+
+// ---- פונקציית עזר: רינדור רשימת תת-קטגוריות ----
+function renderSubcatList(container, category, subCats) {
+    container.innerHTML = '';
+    if (!subCats || subCats.length === 0) {
+        container.innerHTML = '<span style="color:#999;font-size:0.85em;">אין תת-קטגוריות</span>';
+        return;
+    }
+    subCats.forEach((sc, i) => {
+        const scImg = subCategoryImagesMap[`${category}::${sc}`] || '';
+        const chip = document.createElement('div');
+        chip.style.cssText = 'background:#e9ecef;padding:8px 10px;border-radius:8px;font-size:0.88em;display:flex;align-items:center;gap:8px;';
+
+        chip.innerHTML = `
+            <img class="sc-img-preview" src="${scImg || 'https://i.postimg.cc/XYRrh5bT/3554E7D6-78B2-43C1-947D-CD4B1D37A560.png'}" 
+                 style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #ccc;cursor:pointer;" title="שנה תמונה">
+            <input type="file" class="sc-img-input" accept="image/*" style="display:none;">
+            <span>${sc}</span>
+            <span class="sc-img-status" style="font-size:0.78em;color:#888;"></span>
+            <button class="sc-delete-btn" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1em;padding:0;line-height:1;">×</button>
+        `;
+
+        const scImgPreview = chip.querySelector('.sc-img-preview');
+        const scImgInput = chip.querySelector('.sc-img-input');
+        const scImgStatus = chip.querySelector('.sc-img-status');
+        const scDeleteBtn = chip.querySelector('.sc-delete-btn');
+
+        // העלאת תמונה לתת-קטגוריה
+        scImgPreview.addEventListener('click', () => scImgInput.click());
+        scImgInput.addEventListener('change', async () => {
+            const file = scImgInput.files[0];
+            if (!file) return;
+            scImgStatus.textContent = 'מעלה...';
+            scImgStatus.style.color = '#e67e22';
+            try {
+                const url = await uploadImageToImgBB(file);
+                scImgPreview.src = url;
+                subCategoryImagesMap[`${category}::${sc}`] = url;
+                await db.collection('Settings').doc('main').update({ SubCategoryImages: subCategoryImagesMap });
+                scImgStatus.textContent = '✓';
+                scImgStatus.style.color = '#27ae60';
+                scImgInput.value = '';
+            } catch (e) {
+                scImgStatus.textContent = 'שגיאה';
+                scImgStatus.style.color = 'red';
+            }
         });
-    });
-    document.querySelectorAll('.btn-copy-link').forEach(btn => {
-        btn.addEventListener('click', () => {
-            navigator.clipboard.writeText(btn.dataset.productLink).then(() => {
-                const orig = btn.innerHTML;
-                btn.innerHTML = '✓'; btn.style.background = '#27ae60';
-                setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
-            }).catch(() => alert('שגיאה בהעתקת הקישור'));
+
+        // מחיקת תת-קטגוריה
+        scDeleteBtn.addEventListener('click', async () => {
+            if (!confirm(`למחוק תת-קטגוריה "${sc}"?`)) return;
+            subCategoriesMap[category].splice(i, 1);
+            try {
+                await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
+                renderSubcatList(container, category, subCategoriesMap[category]);
+                updateCategoryCheckboxes('product-category-checkboxes', []);
+            } catch (e) {
+                subCategoriesMap[category].splice(i, 0, sc); // rollback
+                alert('שגיאה במחיקת תת-קטגוריה');
+            }
         });
+
+        container.appendChild(chip);
     });
 }
 
-// ============================================
-// CATEGORY & SUBCATEGORY IMAGES - פונקציות העלאה
-// ============================================
-window.uploadCategoryImage = async function(category, inputId, previewId, statusId, urlId) {
-    const input = document.getElementById(inputId);
-    const file = input.files[0];
-    if (!file) return;
-    const status = document.getElementById(statusId);
-    const preview = document.getElementById(previewId);
-    status.textContent = 'מעלה...';
-    status.style.color = '#e67e22';
-    try {
-        const url = await uploadImageToImgBB(file);
-        document.getElementById(urlId).value = url;
-        preview.src = url;
-        categoryImagesMap[category] = url;
-        await db.collection('Settings').doc('main').update({ CategoryImages: categoryImagesMap });
-        status.textContent = '✓ נשמר';
-        status.style.color = '#27ae60';
-    } catch (e) {
-        status.textContent = 'שגיאה';
-        status.style.color = 'red';
-    }
-};
+// ---- פונקציית עזר: כרטיס מוצר מיני ----
+function createProductMiniCard(product) {
+    const productCard = document.createElement('div');
+    productCard.className = 'product-mini-card';
 
-// ============================================
-// העלאת תמונה לתת-קטגוריה
-// ============================================
-window.uploadSubCatImage = async function (category, subCat, inputId, previewId, statusId, urlId) {
-    const input  = document.getElementById(inputId);
-    const file   = input.files[0];
-    if (!file) return;
-
-    const status  = document.getElementById(statusId);
-    const preview = document.getElementById(previewId);
-    const urlEl   = document.getElementById(urlId);
-
-    status.textContent = 'מעלה...';
-    status.style.color = '#e67e22';
-
-    try {
-        const url = await uploadImageToImgBB(file);
-
-        // עדכון ישיר של ה-DOM ללא רינדור מחדש
-        if (preview) preview.src   = url;
-        if (urlEl)   urlEl.value   = url;
-
-        subCategoryImagesMap[`${category}::${subCat}`] = url;
-
-        await db.collection('Settings').doc('main').update({
-            SubCategoryImages: subCategoryImagesMap,
-        });
-
-        status.textContent = '✓ נשמר';
-        status.style.color = '#27ae60';
-
-        // איפוס ה-input כדי שניתן יהיה להעלות שוב
-        input.value = '';
-    } catch (e) {
-        console.error(e);
-        status.textContent = 'שגיאה';
-        status.style.color  = 'red';
-    }
-};
-
-
-// ============================================
-// פונקציות תת-קטגוריות
-// ============================================
-
-window.addSubCategory = async function (category) {
-    const safe  = sanitizeId(category);
-    const input = document.getElementById(`new-subcat-${safe}`);
-
-    if (!input) { alert('שגיאה: לא נמצא שדה קלט'); return; }
-
-    const name = input.value.trim();
-    if (!name) { alert('הזן שם תת-קטגוריה'); return; }
-
-    if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
-
-    if (subCategoriesMap[category].includes(name)) {
-        alert('תת-קטגוריה זו כבר קיימת');
-        return;
+    const onSale = isProductOnSale(product);
+    let priceHTML = `<div class="product-price">${getEffectivePrice(product).toFixed(2)} ₪</div>`;
+    let saleBadge = '';
+    if (onSale) {
+        const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
+        saleBadge = `<div class="sale-badge-mini">-${discount}%</div>`;
+        priceHTML = `<div class="product-price on-sale">
+            <span class="original-price">${product.price.toFixed(2)} ₪</span>
+            <span class="sale-price">${product.salePrice.toFixed(2)} ₪</span>
+        </div>`;
     }
 
-    subCategoriesMap[category].push(name);
+    const productLink = `${window.location.origin}/#${encodeURIComponent(product.name)}`;
+    const subCats = Array.isArray(product.subCategories) && product.subCategories.length > 0
+        ? product.subCategories
+        : (product.subCategory ? [product.subCategory] : []);
+    const subCatLabel = subCats.length > 0
+        ? `<div style="font-size:0.78em;color:#28a745;margin-bottom:4px;">📂 ${subCats.join(' · ')}</div>`
+        : '';
 
-    try {
-        await db.collection('Settings').doc('main').update({
-            SubCategories: subCategoriesMap,
-        });
-        await loadCategories();
-    } catch (e) {
-        console.error(e);
-        alert('שגיאה בהוספת תת-קטגוריה');
-    }
-};
+    productCard.innerHTML = `
+        ${saleBadge}
+        <img src="${product.image}" alt="${product.name}">
+        ${subCatLabel}
+        <h4>${product.name}</h4>
+        ${priceHTML}
+        <div class="product-mini-actions">
+            <button class="btn btn-dark btn-edit-mini" data-product-id="${product.id}">ערוך</button>
+            <button class="btn btn-success btn-copy-mini" data-product-link="${productLink}" title="העתק קישור" style="padding:6px 10px;font-size:0.85em;">🔗</button>
+        </div>
+    `;
 
-window.deleteSubCategory = async function (category, index) {
-    if (!confirm('למחוק תת-קטגוריה זו?')) return;
-    if (!subCategoriesMap[category]) return;
+    productCard.querySelector('.btn-edit-mini').addEventListener('click', () => {
+        const p = products.find(x => x.id === product.id);
+        openEditProductModal(product.id, p);
+    });
+    productCard.querySelector('.btn-copy-mini').addEventListener('click', () => {
+        navigator.clipboard.writeText(productLink).then(() => {
+            const btn = productCard.querySelector('.btn-copy-mini');
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✓'; btn.style.background = '#27ae60';
+            setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+        }).catch(() => alert('שגיאה בהעתקת הקישור'));
+    });
 
-    subCategoriesMap[category].splice(index, 1);
-
-    try {
-        await db.collection('Settings').doc('main').update({
-            SubCategories:       subCategoriesMap,
-            SubCategoryImages:   subCategoryImagesMap,
-        });
-        await loadCategories();
-    } catch (e) {
-        console.error(e);
-        alert('שגיאה במחיקת תת-קטגוריה');
-    }
-};
+    return productCard;
+}
 
 
 // ============================================
@@ -2556,18 +2497,20 @@ window.removeExistingChart = function(idx) {
         updateCategoryCheckboxes('edit-category-checkboxes', currentCats);
 
         // Setup subcategory select
-setTimeout(() => {
-    const currentSubCats = Array.isArray(product.subCategories)
-        ? product.subCategories
-        : (product.subCategory ? [product.subCategory] : []);
-    updateSubCategoryCheckboxes('edit-category-checkboxes', 'edit-product-subcategory-checkboxes', currentSubCats);
-    document.querySelectorAll('#edit-category-checkboxes input').forEach(cb => {
-        cb.addEventListener('change', () => updateSubCategoryCheckboxes('edit-category-checkboxes', 'edit-product-subcategory-checkboxes', getSelectedSubCategories('edit-product-subcategory-checkboxes')));
-    });
-}, 0);
+// Setup subcategory checkboxes
+        const currentSubCats = Array.isArray(product.subCategories)
+            ? product.subCategories
+            : (product.subCategory ? [product.subCategory] : []);
+
+        updateSubCategoryCheckboxes('edit-category-checkboxes', 'edit-product-subcategory-checkboxes', currentSubCats);
+
+        document.getElementById('edit-category-checkboxes').addEventListener('change', () => {
+            const currentSub = getSelectedSubCategories('edit-product-subcategory-checkboxes');
+            updateSubCategoryCheckboxes('edit-category-checkboxes', 'edit-product-subcategory-checkboxes', currentSub);
+        });
 
         setupImageUpload('edit-product-image-file','edit-product-image-preview','edit-product-upload-status','edit-product-image-url','edit-product-image-upload');
-        
+
         const editCustomFieldsContainer = document.getElementById('edit-custom-fields-container');
         if (product.customFields && product.customFields.length > 0) {
             product.customFields.forEach(field => createCustomFieldUI(field, editCustomFieldsContainer));
@@ -2582,18 +2525,18 @@ setTimeout(() => {
             const salePrice = parseFloat(document.getElementById('edit-product-sale-price').value) || null;
             const saleEndDate = document.getElementById('edit-product-sale-end').value || null;
             const customShipping = parseFloat(document.getElementById('edit-product-custom-shipping').value);
-const selectedCats = getSelectedCategories('edit-category-checkboxes');
+            const selectedCats = getSelectedCategories('edit-category-checkboxes');
             const subCategories = getSelectedSubCategories('edit-product-subcategory-checkboxes');
             const image = document.getElementById('edit-product-image-url').value.trim();
 
-if (!name || !description || isNaN(price) || price < 0 || !image) {
-    alert('אנא מלא את כל השדות החובה.');
-    return;
-}
+            if (!name || !description || isNaN(price) || price < 0 || !image) {
+                alert('אנא מלא את כל השדות החובה.');
+                return;
+            }
             if (salePrice && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
 
             const customFields = extractCustomFields(editCustomFieldsContainer);
-const updateData = {
+            const updateData = {
                 name, description, price,
                 categories: selectedCats,
                 subCategories: subCategories,
@@ -2601,7 +2544,6 @@ const updateData = {
                 image,
                 customFields: customFields.length > 0 ? customFields : null
             };
-            // Remove legacy .category field
             updateData.category = firebase.firestore.FieldValue.delete();
 
             if (salePrice && salePrice > 0) updateData.salePrice = salePrice;
@@ -2610,19 +2552,16 @@ const updateData = {
             if (saleEndDate) updateData.saleEndDate = saleEndDate;
             else updateData.saleEndDate = firebase.firestore.FieldValue.delete();
 
-            // קבלת טבלאות מידות קיימות
-const existingCharts = product.sizeCharts || [];
-
-// הוספת חדשות
-const newCharts = await processSizeChartFiles('edit-size-charts-input', 'edit-size-charts-preview', 'edit-size-charts-status');
-updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
+            const existingCharts = product.sizeCharts || [];
+            const newCharts = await processSizeChartFiles('edit-size-charts-input', 'edit-size-charts-preview', 'edit-size-charts-status');
+            updateData.sizeCharts = [...existingCharts, ...newCharts].slice(0, 10);
 
             if (!isNaN(customShipping) && customShipping >= 0) {
-    updateData.customShipping = customShipping;
-} else {
-    updateData.customShipping = firebase.firestore.FieldValue.delete();
-}
-            
+                updateData.customShipping = customShipping;
+            } else {
+                updateData.customShipping = firebase.firestore.FieldValue.delete();
+            }
+
             try {
                 await db.collection('soccer_shirts').doc(productId).update(updateData);
                 alert('המוצר עודכן בהצלחה!');
@@ -4629,6 +4568,12 @@ await loadCategories();
         alert('שגיאה במחיקת קטגוריה'); 
     }
 }
+
+        // Event delegation לעדכון תת-קטגוריות בטופס הוספת מוצר
+document.getElementById('product-category-checkboxes').addEventListener('change', () => {
+    updateSubCategoryCheckboxes('product-category-checkboxes', 'product-subcategory-checkboxes', []);
+});
+        
     </script>
 </body>
 </html>
