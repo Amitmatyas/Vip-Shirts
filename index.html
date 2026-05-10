@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Shirts</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
-    <link href="https://fonts.googleapis.com/css?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
-    <style>
+<title>VIP Shirts</title>
+<meta name="description" content="VIP Shirts - חולצות כדורגל איכותיות של המועדונים המובילים בעולם. ברצלונה, ריאל מדריד, נבחרת ישראל ועוד. משלוח לכל הארץ.">    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap"></noscript>    <style>
         * {
             box-sizing: border-box;
         }
@@ -2123,7 +2125,6 @@
     </style>
        <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.paypal.com/sdk/js?client-id=AcvNAO7_IAc9jQw98w56c_oLCYgNofTqSzLQiFSy1JcC77TRkbQdoxIjlgixjyo5NYKPFdkqV9ZXNn4I&currency=ILS"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
@@ -2133,10 +2134,13 @@
 
 <header>
     <img src="https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" 
-         alt="VIP Shirts" 
-         onclick="showHomePage()" 
-         style="cursor:pointer;" 
-         title="חזרה לדף הבית">
+     alt="VIP Shirts" 
+     onclick="showHomePage()" 
+     style="cursor:pointer;"
+     title="חזרה לדף הבית"
+     width="150"
+     height="150"
+     fetchpriority="high">
     <h1 style="cursor:default;">VIP Shirts</h1>
 </header>
 
@@ -2504,30 +2508,34 @@
 
     <!-- ===== תמונה קידומית ===== -->
     <div id="promo-image-section" style="display: flex; justify-content: center; margin: 40px auto; padding: 0 20px;">
-        <img 
-            src="https://i.ibb.co/V0chXBvZ/Whats-App-Image-2026-05-09-at-21-43-35.jpg"
-            alt="הסבר על הפאצים"
-            id="promo-main-img"
-            style="width: 400px; height: 300px; object-fit: cover; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,0.13); transition: transform 0.3s ease, box-shadow 0.3s ease;"
-            onmouseover="this.style.transform='translateY(-10px) scale(1.03)'; this.style.boxShadow='0 18px 40px rgba(0,0,0,0.22)'"
-            onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 18px rgba(0,0,0,0.13)'"
-            onclick="document.getElementById('promo-modal').style.display='flex'"
-        >
+<img 
+    src="https://i.ibb.co/V0chXBvZ/Whats-App-Image-2026-05-09-at-21-43-35.jpg"
+    alt="הסבר על הפאצים"
+    id="promo-main-img"
+    fetchpriority="high"
+    width="400"
+    height="300"
+    style="width: 400px; height: 300px; object-fit: cover; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,0.13); transition: transform 0.3s ease, box-shadow 0.3s ease;"
+    onmouseover="this.style.transform='translateY(-10px) scale(1.03)'; this.style.boxShadow='0 18px 40px rgba(0,0,0,0.22)'"
+    onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 18px rgba(0,0,0,0.13)'"
+    onclick="document.getElementById('promo-modal').style.display='flex'"
+>
     </div>
 
     <!-- ===== מודאל תמונה מוגדלת ===== -->
     <div id="promo-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.88); z-index:3000; justify-content:center; align-items:center; padding:20px;" onclick="if(event.target===this)this.style.display='none'">
         <button onclick="document.getElementById('promo-modal').style.display='none'" style="position:absolute; top:18px; left:18px; background:white; border:none; border-radius:50%; width:42px; height:42px; font-size:1.6em; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;">&times;</button>
-        <img 
-            src="https://i.ibb.co/KcvB8PR7/image.png"
-            alt="הסבר על הפאצים"
-            style="width:auto; max-width:95vw; max-height:85vh; object-fit:contain; border-radius:10px;"
-        >
+ <img 
+    src="https://i.ibb.co/KcvB8PR7/image.png"
+    alt="הסבר על הפאצים"
+    loading="lazy"
+    style="width:auto; max-width:95vw; max-height:85vh; object-fit:contain; border-radius:10px;"
+>
     </div>
 
     <!-- About Section -->
     <div class="my-about-card">
-        <img src="https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" alt="VIP Shirts Logo" class="my-about-logo">
+        <img src="https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" alt="VIP Shirts Logo" class="my-about-logo" width="110" height="110" loading="lazy">
         <div class="my-about-content">
             <h3 class="my-about-title">על VIP Shirts</h3>
             <p class="my-about-text">האתר שלנו נולד מאהבה אמיתית לכדורגל
@@ -2767,17 +2775,34 @@ function withTimeout(promise, ms = 10000) {
             updateMobileCartBadge();
         }
 
-        function openCart() {
-            const container = document.getElementById('cart-container');
-            if (!container) return;
-            cartOpen = true;
-            container.classList.add('open');
-            document.body.classList.add('cart-open');
-            const backdrop = document.getElementById('cart-backdrop');
-            if (backdrop) backdrop.classList.add('visible');
-            updateCartButton();
-            if (typeof renderPayPalButton === 'function') renderPayPalButton();
-        }
+        let paypalLoaded = false;
+
+function loadPayPalSDK() {
+    if (paypalLoaded || window.paypal) {
+        paypalLoaded = true;
+        return Promise.resolve();
+    }
+    return new Promise(resolve => {
+        const s = document.createElement('script');
+        s.src = 'https://www.paypal.com/sdk/js?client-id=AcvNAO7_IAc9jQw98w56c_oLCYgNofTqSzLQiFSy1JcC77TRkbQdoxIjlgixjyo5NYKPFdkqV9ZXNn4I&currency=ILS';
+        s.onload = () => { paypalLoaded = true; resolve(); };
+        document.head.appendChild(s);
+    });
+}
+
+function openCart() {
+    const container = document.getElementById('cart-container');
+    if (!container) return;
+    cartOpen = true;
+    container.classList.add('open');
+    document.body.classList.add('cart-open');
+    const backdrop = document.getElementById('cart-backdrop');
+    if (backdrop) backdrop.classList.add('visible');
+    updateCartButton();
+    loadPayPalSDK().then(() => {
+        if (typeof renderPayPalButton === 'function') renderPayPalButton();
+    });
+}
 
         function closeCart() {
             const container = document.getElementById('cart-container');
@@ -3971,8 +3996,8 @@ async function loadSettings() {
             saveCartToStorage();
             
             if (cartOpen) {
-                renderPayPalButton();
-            }
+    loadPayPalSDK().then(() => renderPayPalButton());
+}
         }
 
         function removeFromCart(cartIndex) {
