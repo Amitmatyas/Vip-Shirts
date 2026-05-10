@@ -2138,14 +2138,15 @@
     </div>
 
 <header>
-    <img src="https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" 
+    <img src="https://i.ibb.co/MkgM6wwD/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" 
      alt="VIP Shirts" 
      onclick="showHomePage()" 
      style="cursor:pointer;"
      title="חזרה לדף הבית"
      width="150"
      height="150"
-     fetchpriority="high">
+     fetchpriority="high"
+     loading="eager">
     <h1 style="cursor:default;">VIP Shirts</h1>
 </header>
 
@@ -2540,7 +2541,7 @@
 
     <!-- About Section -->
     <div class="my-about-card">
-        <img src="https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" alt="VIP Shirts Logo" class="my-about-logo" width="110" height="110" loading="lazy">
+    <img src="https://i.ibb.co/MkgM6wwD/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" alt="VIP Shirts Logo" class="my-about-logo" width="110" height="110" loading="lazy">
         <div class="my-about-content">
             <h3 class="my-about-title">על VIP Shirts</h3>
             <p class="my-about-text">האתר שלנו נולד מאהבה אמיתית לכדורגל
@@ -3617,8 +3618,8 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
             const container = document.getElementById('categories-cards-container');
             if (!container) return;
             container.innerHTML = '';
-            const LOGO = 'https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png';
-
+            const LOGO = 'https://i.ibb.co/MkgM6wwD/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png';
+            
             const allCard = document.createElement('div');
             allCard.className = 'category-card';
             allCard.innerHTML = `
@@ -3682,8 +3683,8 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
 
         function renderCategoryBar() {
             const filterDiv = document.getElementById('category-filter');
-            const LOGO = 'https://i.ibb.co/Gv4Lzp2Y/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png';
-
+            const LOGO = 'https://i.ibb.co/MkgM6wwD/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png';
+            
             if (currentCategoryFilter === 'all') {
                 filterDiv.innerHTML = '<button class="active" data-category="all">← דף הבית</button>';
                 filterDiv.querySelector('[data-category="all"]').addEventListener('click', showHomePage);
