@@ -3713,48 +3713,48 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
 
         let subCategoriesMap = {};
 
-        async function loadSettings() {
-            try {
-                const settingsDoc = await db.collection('Settings').doc('main').get();
-                if (settingsDoc.exists) {
-                    settings = settingsDoc.data();
-                    categories = settings.Categories || [];
-                    subCategoriesMap = settings.SubCategories || {};
-                    updateCategoryFilter();
-                } else {
-                    settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
-                    subCategoriesMap = {};
-                }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-                settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
-                subCategoriesMap = {};
-            }
+async function loadSettings() {
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (settingsDoc.exists) {
+            settings = settingsDoc.data();
+            categories = settings.Categories || [];
+            subCategoriesMap = settings.SubCategories || {};
+            updateCategoryFilter();
+            renderCategoriesStrip();
+        } else {
+            settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
+            subCategoriesMap = {};
         }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
+        subCategoriesMap = {};
+    }
+}
 
         async function fetchProducts() {
-            try {
-                const productsSnapshot = await withTimeout(
-                    db.collection('soccer_shirts').get(),
-                    10000
-                );
-                products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFeaturedProducts();
-                renderCategoriesStrip();
-                handleDeepLink();
-            } catch (error) {
-                console.error('שגיאת טעינת מוצרים:', error);
-                productsContainer.innerHTML = `
-                    <div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
-                        <div style="font-size:3em;margin-bottom:15px;">⚠️</div>
-                        <p style="font-size:1.1em;color:#dc3545;font-weight:bold;">שגיאה בטעינת המוצרים</p>
-                        <p style="color:#666;margin-bottom:20px;">בדוק את חיבור האינטרנט ונסה שוב</p>
-                        <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">
-                            רענן דף
-                        </button>
-                    </div>`;
-            }
-        }
+    try {
+        const productsSnapshot = await withTimeout(
+            db.collection('soccer_shirts').get(),
+            10000
+        );
+        products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderFeaturedProducts();
+        handleDeepLink();
+    } catch (error) {
+        console.error('שגיאת טעינת מוצרים:', error);
+        productsContainer.innerHTML = `
+            <div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
+                <div style="font-size:3em;margin-bottom:15px;">⚠️</div>
+                <p style="font-size:1.1em;color:#dc3545;font-weight:bold;">שגיאה בטעינת המוצרים</p>
+                <p style="color:#666;margin-bottom:20px;">בדוק את חיבור האינטרנט ונסה שוב</p>
+                <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">
+                    רענן דף
+                </button>
+            </div>`;
+    }
+}
 
         function calculateShipping() {
             if (!settings || !settings.Shipping) { shippingCost = 0; return; }
