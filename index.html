@@ -2632,10 +2632,34 @@ db.enablePersistence({ synchronizeTabs: true })
         const announcementBar = document.querySelector('.announcement-text');
         const cartCountBadge = document.querySelector('.cart-count');
 
-        let cart = [];
+let cart = [];
         let products = [];
         let categories = [];
         let settings = null;
+        const imageCache = new Map();
+
+        function preloadImage(url) {
+            if (!url || imageCache.has(url)) return;
+            const img = new Image();
+            img.onload = () => imageCache.set(url, url);
+            img.onerror = () => {};
+            img.src = url;
+        }
+
+        function preloadAllProductImages(productList) {
+            productList.forEach(product => {
+                preloadImage(product.image);
+                if (product.sizeCharts) product.sizeCharts.forEach(preloadImage);
+                if (product.customFields) {
+                    product.customFields.forEach(field => {
+                        if (field.options) field.options.forEach(opt => preloadImage(opt.image));
+                    });
+                }
+            });
+            if (settings && settings.CategoryImages) {
+                Object.values(settings.CategoryImages).forEach(preloadImage);
+            }
+        }
         let appliedCoupon = null;
         let currentModalProductId = null;
         let currentProductOptions = {};
@@ -3617,7 +3641,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
                 card.className = 'featured-card';
                 card.innerHTML = `
                     <div class="featured-star-badge">⭐ מומלץ</div>
-                    <img src="${product.image}" alt="${product.name}" loading="lazy">
+                    <img src="${product.image}" alt="${product.name}" loading="eager" fetchpriority="high">
                     <div class="featured-name">${product.name}</div>
                     <div class="featured-price">${priceHTML}</div>
                 `;
@@ -3740,6 +3764,7 @@ async function loadSettings() {
             10000
         );
         products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        preloadAllProductImages(products);
         renderFeaturedProducts();
         handleDeepLink();
     } catch (error) {
