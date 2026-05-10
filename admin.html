@@ -2031,83 +2031,121 @@ window.uploadCategoryImage = async function(category, inputId, previewId, status
     }
 };
 
-window.uploadSubCatImage = async function(category, subCat, inputId, previewId, statusId, urlId) {
-    const input = document.getElementById(inputId);
-    const file = input.files[0];
+// ============================================
+// העלאת תמונה לתת-קטגוריה
+// ============================================
+window.uploadSubCatImage = async function (category, subCat, inputId, previewId, statusId, urlId) {
+    const input  = document.getElementById(inputId);
+    const file   = input.files[0];
     if (!file) return;
-    const status = document.getElementById(statusId);
+
+    const status  = document.getElementById(statusId);
     const preview = document.getElementById(previewId);
+    const urlEl   = document.getElementById(urlId);
+
     status.textContent = 'מעלה...';
     status.style.color = '#e67e22';
+
     try {
         const url = await uploadImageToImgBB(file);
-        // עדכון ישיר של ה-DOM ללא צורך ברינדור מחדש
-        const previewEl = document.getElementById(previewId);
-        const urlEl = document.getElementById(urlId);
-        if (previewEl) previewEl.src = url;
-        if (urlEl) urlEl.value = url;
+
+        // עדכון ישיר של ה-DOM ללא רינדור מחדש
+        if (preview) preview.src   = url;
+        if (urlEl)   urlEl.value   = url;
+
         subCategoryImagesMap[`${category}::${subCat}`] = url;
-        await db.collection('Settings').doc('main').update({ SubCategoryImages: subCategoryImagesMap });
+
+        await db.collection('Settings').doc('main').update({
+            SubCategoryImages: subCategoryImagesMap,
+        });
+
         status.textContent = '✓ נשמר';
         status.style.color = '#27ae60';
+
         // איפוס ה-input כדי שניתן יהיה להעלות שוב
         input.value = '';
     } catch (e) {
+        console.error(e);
         status.textContent = 'שגיאה';
-        status.style.color = 'red';
+        status.style.color  = 'red';
     }
 };
 
+
+// ============================================
 // פונקציות תת-קטגוריות
-window.addSubCategory = async function(category) {
-    const safe = sanitizeId(category);
+// ============================================
+
+window.addSubCategory = async function (category) {
+    const safe  = sanitizeId(category);
     const input = document.getElementById(`new-subcat-${safe}`);
+
     if (!input) { alert('שגיאה: לא נמצא שדה קלט'); return; }
+
     const name = input.value.trim();
     if (!name) { alert('הזן שם תת-קטגוריה'); return; }
-    if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
-    if (subCategoriesMap[category].includes(name)) { alert('תת-קטגוריה זו כבר קיימת'); return; }
-    subCategoriesMap[category].push(name);
-    try {
-        await db.collection('Settings').doc('main').update({ SubCategories: subCategoriesMap });
-        await loadCategories();
-    } catch(e) { console.error(e); alert('שגיאה בהוספת תת-קטגוריה'); }
-};
 
-window.deleteSubCategory = async function(category, index) {
-    if (!confirm('למחוק תת-קטגוריה זו?')) return;
-    if (!subCategoriesMap[category]) return;
-    subCategoriesMap[category].splice(index, 1);
+    if (!subCategoriesMap[category]) subCategoriesMap[category] = [];
+
+    if (subCategoriesMap[category].includes(name)) {
+        alert('תת-קטגוריה זו כבר קיימת');
+        return;
+    }
+
+    subCategoriesMap[category].push(name);
+
     try {
         await db.collection('Settings').doc('main').update({
             SubCategories: subCategoriesMap,
-            SubCategoryImages: subCategoryImagesMap
         });
         await loadCategories();
-    } catch(e) { console.error(e); alert('שגיאה במחיקת תת-קטגוריה'); }
-};
-        
-    // ============================================
-    // SKELETON LOADERS
-    // ============================================
-    function showSkeletonProducts(containerId, count = 6) {
-        const grid = document.getElementById(containerId);
-        if (!grid) return;
-        grid.innerHTML = '';
-        for (let i = 0; i < count; i++) {
-            grid.innerHTML += `
-                <div class="skeleton-card">
-                    <div class="skeleton skeleton-img"></div>
-                    <div class="skeleton skeleton-badge"></div>
-                    <div class="skeleton skeleton-line medium"></div>
-                    <div class="skeleton skeleton-line short"></div>
-                    <div style="display:flex;gap:8px;margin-top:10px;">
-                        <div class="skeleton skeleton-btn" style="flex:1;"></div>
-                        <div class="skeleton skeleton-btn" style="flex:1;"></div>
-                    </div>
-                </div>`;
-        }
+    } catch (e) {
+        console.error(e);
+        alert('שגיאה בהוספת תת-קטגוריה');
     }
+};
+
+window.deleteSubCategory = async function (category, index) {
+    if (!confirm('למחוק תת-קטגוריה זו?')) return;
+    if (!subCategoriesMap[category]) return;
+
+    subCategoriesMap[category].splice(index, 1);
+
+    try {
+        await db.collection('Settings').doc('main').update({
+            SubCategories:       subCategoriesMap,
+            SubCategoryImages:   subCategoryImagesMap,
+        });
+        await loadCategories();
+    } catch (e) {
+        console.error(e);
+        alert('שגיאה במחיקת תת-קטגוריה');
+    }
+};
+
+
+// ============================================
+// SKELETON LOADERS
+// ============================================
+
+function showSkeletonProducts(containerId, count = 6) {
+    const grid = document.getElementById(containerId);
+    if (!grid) return;
+
+    const skeletonCard = `
+        <div class="skeleton-card">
+            <div class="skeleton skeleton-img"></div>
+            <div class="skeleton skeleton-badge"></div>
+            <div class="skeleton skeleton-line medium"></div>
+            <div class="skeleton skeleton-line short"></div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <div class="skeleton skeleton-btn" style="flex:1;"></div>
+                <div class="skeleton skeleton-btn" style="flex:1;"></div>
+            </div>
+        </div>`;
+
+    grid.innerHTML = skeletonCard.repeat(count);
+}
 
     function showSkeletonCategories() {
         const grid = document.getElementById('categories-grid');
