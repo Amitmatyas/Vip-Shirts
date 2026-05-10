@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://www.gstatic.com">
-<link rel="preconnect" href="https://firestore.googleapis.com">
-<link rel="preconnect" href="https://i.ibb.co">
-<link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://www.gstatic.com">
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://i.ibb.co">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://i.ibb.co">
 <title>VIP Shirts</title>
 <meta name="description" content="VIP Shirts - חולצות כדורגל איכותיות של המועדונים המובילים בעולם. ברצלונה, ריאל מדריד, נבחרת ישראל ועוד. משלוח לכל הארץ.">    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" as="style" onload="this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap"></noscript>    
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js" defer></script>
-    
-    <style>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap"></noscript>    <style>
         * {
             box-sizing: border-box;
         }
@@ -2610,42 +2607,7 @@
     <!-- Cart Backdrop (mobile) -->
     <div class="cart-backdrop" id="cart-backdrop" onclick="closeCart()"></div>
 
-<script>
-    // 1. הגדרת משתנים גלובליים
-    let cart = [];
-    let products = [];
-    let categories = [];
-    let settings = null;
-    const imageCache = new Map();
-    let appliedCoupon = null;
-    let currentModalProductId = null;
-    let currentProductOptions = {};
-    let currentProductPrice = 0;
-    let subtotal = 0;
-    let shippingCost = 0;
-    let total = 0;
-    let announcements = [];
-    let currentAnnouncementIndex = 0;
-    let currentCategoryFilter = 'all';
-    let currentSubCategoryFilter = '';
-    let couponLockedOptions = null;
-    let isCouponProduct = false;
-    let cartOpen = false;
-    let currentClubMember = null;
-    let clubModalOpen = false;
-    let pointsToUse = 0;
-    let pointsDiscount = 0;
-
-    // הגדרת משתני אלמנטים (יוגדרו סופית בתוך האתחול)
-    let productsContainer, cartItemsList, cartSubtotalElement, shippingCostElement, 
-        cartTotalElement, shippingInfoElement, checkoutForm, cartToggleButton, 
-        cartContainer, productModal, modalProductImage, modalProductTitle, 
-        modalProductPrice, modalProductDescription, closeProductModalBtn, 
-        modalAddToCartBtn, customOptionsContainer, couponInput, applyCouponBtn, 
-        couponMessage, contactForm, announcementBar, cartCountBadge;
-
-    // 2. אתחול האפליקציה לאחר טעינת ה-DOM והסקריפטים
-    document.addEventListener('DOMContentLoaded', () => {
+    <script>
         const firebaseConfig = {
             apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
             authDomain: "timetable-titus.firebaseapp.com",
@@ -2655,124 +2617,135 @@
             appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
             measurementId: "G-JQ02VEC325"
         };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.enablePersistence({ synchronizeTabs: true })
+  .catch(err => console.log('Persistence unavailable:', err.code));
 
-        // אתחול Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        const productsContainer = document.getElementById('products-container');
+        const cartItemsList = document.getElementById('cart-items');
+        const cartSubtotalElement = document.getElementById('cart-subtotal');
+        const shippingCostElement = document.getElementById('shipping-cost');
+        const cartTotalElement = document.getElementById('cart-total');
+        const shippingInfoElement = document.getElementById('shipping-info');
+        const checkoutForm = document.getElementById('checkout-form');
+        const cartToggleButton = document.getElementById('cart-toggle-button');
+        const cartContainer = document.getElementById('cart-container');
+        const productModal = document.getElementById('product-modal');
+        const modalProductImage = document.getElementById('modal-product-image');
+        const modalProductTitle = document.getElementById('modal-product-title');
+        const modalProductPrice = document.getElementById('modal-product-price');
+        const modalProductDescription = document.getElementById('modal-product-description');
+        const closeProductModalBtn = document.querySelector('.close-product-modal');
+        const modalAddToCartBtn = document.getElementById('modal-add-to-cart');
+        const customOptionsContainer = document.getElementById('custom-options-container');
+        const couponInput = document.getElementById('coupon-input');
+        const applyCouponBtn = document.getElementById('apply-coupon-btn');
+        const couponMessage = document.getElementById('coupon-message');
+        const contactForm = document.getElementById('contact-form');
+        const announcementBar = document.querySelector('.announcement-text');
+        const cartCountBadge = document.querySelector('.cart-count');
+
+let cart = [];
+        let products = [];
+        let categories = [];
+        let settings = null;
+        const imageCache = new Map();
+
+        function preloadImage(url) {
+            if (!url || imageCache.has(url)) return;
+            const img = new Image();
+            img.onload = () => imageCache.set(url, url);
+            img.onerror = () => {};
+            img.src = url;
         }
-        window.db = firebase.firestore();
-        window.db.enablePersistence({ synchronizeTabs: true })
-            .catch(err => console.log('Persistence unavailable:', err.code));
 
-        // חיבור אלמנטים ל-DOM
-        productsContainer = document.getElementById('products-container');
-        cartItemsList = document.getElementById('cart-items');
-        cartSubtotalElement = document.getElementById('cart-subtotal');
-        shippingCostElement = document.getElementById('shipping-cost');
-        cartTotalElement = document.getElementById('cart-total');
-        shippingInfoElement = document.getElementById('shipping-info');
-        checkoutForm = document.getElementById('checkout-form');
-        cartToggleButton = document.getElementById('cart-toggle-button');
-        cartContainer = document.getElementById('cart-container');
-        productModal = document.getElementById('product-modal');
-        modalProductImage = document.getElementById('modal-product-image');
-        modalProductTitle = document.getElementById('modal-product-title');
-        modalProductPrice = document.getElementById('modal-product-price');
-        modalProductDescription = document.getElementById('modal-product-description');
-        closeProductModalBtn = document.querySelector('.close-product-modal');
-        modalAddToCartBtn = document.getElementById('modal-add-to-cart');
-        customOptionsContainer = document.getElementById('custom-options-container');
-        couponInput = document.getElementById('coupon-input');
-        applyCouponBtn = document.getElementById('apply-coupon-btn');
-        couponMessage = document.getElementById('coupon-message');
-        contactForm = document.getElementById('contact-form');
-        announcementBar = document.querySelector('.announcement-text');
-        cartCountBadge = document.querySelector('.cart-count');
-
-        // כאן אתה יכול להפעיל את פונקציות הטעינה הראשוניות שלך (לדוגמה: fetchProducts())
-    });
-
-    // 3. פונקציות עזר וניהול
-    function preloadImage(url) {
-        if (!url || imageCache.has(url)) return;
-        const img = new Image();
-        img.onload = () => imageCache.set(url, url);
-        img.onerror = () => {};
-        img.src = url;
-    }
-
-    function preloadAllProductImages(productList) {
-        productList.forEach(product => {
-            preloadImage(product.image);
-            if (product.sizeCharts) product.sizeCharts.forEach(preloadImage);
-            if (product.customFields) {
-                product.customFields.forEach(field => {
-                    if (field.options) field.options.forEach(opt => preloadImage(opt.image));
-                });
+        function preloadAllProductImages(productList) {
+            productList.forEach(product => {
+                preloadImage(product.image);
+                if (product.sizeCharts) product.sizeCharts.forEach(preloadImage);
+                if (product.customFields) {
+                    product.customFields.forEach(field => {
+                        if (field.options) field.options.forEach(opt => preloadImage(opt.image));
+                    });
+                }
+            });
+            if (settings && settings.CategoryImages) {
+                Object.values(settings.CategoryImages).forEach(preloadImage);
             }
-        });
-        if (settings && settings.CategoryImages) {
-            Object.values(settings.CategoryImages).forEach(preloadImage);
         }
-    }
+        let appliedCoupon = null;
+        let currentModalProductId = null;
+        let currentProductOptions = {};
+        let currentProductPrice = 0;
+        let subtotal = 0;
+        let shippingCost = 0;
+        let total = 0;
+        let announcements = [];
+        let currentAnnouncementIndex = 0;
+        let currentCategoryFilter = 'all';
+        let currentSubCategoryFilter = '';
+        let couponLockedOptions = null;
+        let isCouponProduct = false;
+        let cartOpen = false;
+        let currentClubMember = null;
+        let clubModalOpen = false;
+        let pointsToUse = 0;
+        let pointsDiscount = 0;
 
-    // ===== MOBILE NAV HELPERS =====
-    function setMobileActive(btnId) {
-        document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
-        const btn = document.getElementById(btnId);
-        if (btn) btn.classList.add('active');
-    }
-
-    function focusMobileSearch() {
-        const input = document.getElementById('global-search-input');
-        if (input) {
-            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => input.focus(), 300);
+        // ===== MOBILE NAV HELPERS =====
+        function setMobileActive(btnId) {
+            document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById(btnId);
+            if (btn) btn.classList.add('active');
         }
-    }
 
-    function updateMobileCartBadge() {
-        const badge = document.getElementById('mob-cart-badge');
-        if (!badge) return;
-        const count = cart.reduce((s, i) => s + i.quantity, 0);
-        badge.textContent = count;
-        badge.classList.toggle('visible', count > 0);
-    }
-
-    function withTimeout(promise, ms = 10000) {
-        return Promise.race([
-            promise,
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('timeout')), ms)
-            )
-        ]);
-    }
-
-    function clearCart() {
-        if (!confirm('האם לנקות את העגלה?')) return;
-        
-        cart = [];
-        appliedCoupon = null;
-        pointsToUse = 0;
-        pointsDiscount = 0;
-        
-        if (couponInput) {
-            couponInput.value = '';
-            couponInput.disabled = false;
+        function focusMobileSearch() {
+            const input = document.getElementById('global-search-input');
+            if (input) {
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => input.focus(), 300);
+            }
         }
-        if (applyCouponBtn) applyCouponBtn.disabled = false;
-        if (couponMessage) couponMessage.innerHTML = '';
-        
-        const pointsSlider = document.getElementById('points-slider');
-        if (pointsSlider) pointsSlider.value = pointsSlider.min || 10;
-        
-        localStorage.removeItem('vipshirts_cart');
-        localStorage.removeItem('vipshirts_coupon');
-        
-        if (typeof updateCartDisplay === "function") {
-            updateCartDisplay();
+
+        function updateMobileCartBadge() {
+            const badge = document.getElementById('mob-cart-badge');
+            if (!badge) return;
+            const count = cart.reduce((s, i) => s + i.quantity, 0);
+            badge.textContent = count;
+            badge.classList.toggle('visible', count > 0);
         }
-    }
+
+function withTimeout(promise, ms = 10000) {
+    return Promise.race([
+        promise,
+        new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), ms)
+        )
+    ]);
+}
+
+        function clearCart() {
+    if (!confirm('האם לנקות את העגלה?')) return;
+    
+    cart = [];
+    appliedCoupon = null;
+    pointsToUse = 0;
+    pointsDiscount = 0;
+    
+    couponInput.value = '';
+    couponInput.disabled = false;
+    applyCouponBtn.disabled = false;
+    couponMessage.innerHTML = '';
+    
+    const pointsSlider = document.getElementById('points-slider');
+    if (pointsSlider) pointsSlider.value = pointsSlider.min || 10;
+    
+    localStorage.removeItem('vipshirts_cart');
+    localStorage.removeItem('vipshirts_coupon');
+    
+    updateCartDisplay();
+}
         
         function getProductCategories(product) {
             if (Array.isArray(product.categories) && product.categories.length > 0) {
