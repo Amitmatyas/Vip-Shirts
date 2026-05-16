@@ -4246,7 +4246,7 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
         renderBulkProductGrid(e.target.value);
     });
 
-   document.getElementById('bulk-apply-btn').addEventListener('click', async () => {
+document.getElementById('bulk-apply-btn').addEventListener('click', async () => {
     if (bulkSelectedIds.size === 0) { alert('אנא בחר לפחות מוצר אחד.'); return; }
 
     const enablePrice       = document.getElementById('bulk-enable-price').checked;
@@ -4263,9 +4263,9 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
     }
 
     // Collect values
-    const newPrice    = enablePrice ? parseFloat(document.getElementById('bulk-price').value) : null;
-    const newSalePrice = enableSale ? (parseFloat(document.getElementById('bulk-sale-price').value) || null) : undefined;
-    const newSaleEnd  = enableSale ? (document.getElementById('bulk-sale-end').value || null) : undefined;
+    const newPrice     = enablePrice ? parseFloat(document.getElementById('bulk-price').value) : null;
+    const newSalePrice = enableSale  ? (parseFloat(document.getElementById('bulk-sale-price').value) || null) : null;
+    const newSaleEnd   = enableSale  ? (document.getElementById('bulk-sale-end').value || null) : null;
 
     const catMode = document.querySelector('input[name="bulk-categories-mode"]:checked')?.value || 'replace';
     const newCats = enableCats
@@ -4282,17 +4282,20 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
     // Validation
     if (enablePrice && (isNaN(newPrice) || newPrice < 0)) { alert('מחיר לא תקין'); return; }
 
-    // עיבוד טבלאות מידות לפני הלולאה הראשית
+    // ניקוי תצוגה מקדימה לפני עיבוד חדש
+    document.getElementById('bulk-sizecharts-preview').innerHTML = '';
+    document.getElementById('bulk-sizecharts-status').textContent = '';
+
+    // עיבוד טבלאות מידות לפני הלולאה הראשית — כולל שמירת scMode מחוץ ל-window
     let newSizeCharts = [];
+    let scMode = 'replace';
     if (enableSizeCharts) {
+        scMode = document.querySelector('input[name="bulk-sizecharts-mode"]:checked')?.value || 'replace';
         newSizeCharts = await processSizeChartFiles(
             'bulk-sizecharts-input',
             'bulk-sizecharts-preview',
             'bulk-sizecharts-status'
         );
-        const scMode = document.querySelector('input[name="bulk-sizecharts-mode"]:checked')?.value || 'replace';
-        // שמור את המצב לשימוש בלולאה
-        window._bulkSizeChartsMode = scMode;
     }
 
     const ids = Array.from(bulkSelectedIds);
@@ -4306,93 +4309,119 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
     progressText.textContent = `0 / ${total}`;
     document.getElementById('bulk-apply-btn').disabled = true;
 
-    let done = 0;
-    const BATCH_SIZE = 400;
-    let batch = db.batch();
-    let batchCount = 0;
+    try {
+        let done = 0;
+        const BATCH_SIZE = 400;
+        let batch = db.batch();
+        let batchCount = 0;
 
-    for (const productId of ids) {
-        const product = products.find(p => p.id === productId);
-        if (!product) continue;
+        for (const productId of ids) {
+            const product = products.find(p => p.id === productId);
+            if (!product) continue;
 
-        const updateData = {};
+            const updateData = {};
 
-        if (enablePrice && !isNaN(newPrice) && newPrice >= 0) updateData.price = newPrice;
+            if (enablePrice && !isNaN(newPrice) && newPrice >= 0) updateData.price = newPrice;
 
-        if (enableSale) {
-            if (newSalePrice && newSalePrice > 0) {
-                updateData.salePrice = newSalePrice;
-            } else {
-                updateData.salePrice = firebase.firestore.FieldValue.delete();
+            if (enableSale) {
+                if (newSalePrice && newSalePrice > 0) {
+                    updateData.salePrice = newSalePrice;
+                } else {
+                    // מחיקה רק אם השדה קיים במסמך
+                    if (product.salePrice !== undefined) {
+                        updateData.salePrice = firebase.firestore.FieldValue.delete();
+                    }
+                }
+                if (newSaleEnd) {
+                    updateData.saleEndDate = newSaleEnd;
+                } else {
+                    if (product.saleEndDate !== undefined) {
+                        updateData.saleEndDate = firebase.firestore.FieldValue.delete();
+                    }
+                }
             }
-            if (newSaleEnd) updateData.saleEndDate = newSaleEnd;
-            else updateData.saleEndDate = firebase.firestore.FieldValue.delete();
-        }
 
-        if (enableCats && newCats !== null) {
-            if (catMode === 'replace') {
-                updateData.categories = newCats;
-            } else {
-                const existing = getProductCategories(product);
-                const merged = [...new Set([...existing, ...newCats])];
-                updateData.categories = merged;
+            if (enableCats && newCats !== null) {
+                if (catMode === 'replace') {
+                    updateData.categories = newCats;
+                } else {
+                    const existing = getProductCategories(product);
+                    const merged = [...new Set([...existing, ...newCats])];
+                    updateData.categories = merged;
+                }
+                // מחיקת שדה ישן רק אם קיים
+                if (product.category !== undefined) {
+                    updateData.category = firebase.firestore.FieldValue.delete();
+                }
             }
-            updateData.category = firebase.firestore.FieldValue.delete();
-        }
 
-        if (enableShipping) {
-            const sv = parseFloat(document.getElementById('bulk-shipping').value);
-            if (!isNaN(sv) && sv >= 0) updateData.customShipping = sv;
-            else updateData.customShipping = firebase.firestore.FieldValue.delete();
-        }
-
-        if (enableCF && newCF !== null) {
-            if (cfMode === 'replace') {
-                updateData.customFields = newCF.length > 0 ? newCF : null;
-            } else {
-                const existing = product.customFields || [];
-                updateData.customFields = [...existing, ...newCF];
+            if (enableShipping) {
+                const sv = parseFloat(document.getElementById('bulk-shipping').value);
+                if (!isNaN(sv) && sv >= 0) {
+                    updateData.customShipping = sv;
+                } else {
+                    if (product.customShipping !== undefined) {
+                        updateData.customShipping = firebase.firestore.FieldValue.delete();
+                    }
+                }
             }
-        }
 
-        if (enableDesc && newDesc) updateData.description = newDesc;
-
-        if (enableSizeCharts) {
-            const scMode = window._bulkSizeChartsMode || 'replace';
-            if (scMode === 'replace') {
-                updateData.sizeCharts = newSizeCharts;
-            } else {
-                const existing = product.sizeCharts || [];
-                updateData.sizeCharts = [...existing, ...newSizeCharts].slice(0, 10);
+            if (enableCF && newCF !== null) {
+                if (cfMode === 'replace') {
+                    updateData.customFields = newCF.length > 0 ? newCF : null;
+                } else {
+                    const existing = product.customFields || [];
+                    updateData.customFields = [...existing, ...newCF];
+                }
             }
+
+            if (enableDesc && newDesc) updateData.description = newDesc;
+
+            if (enableSizeCharts) {
+                if (scMode === 'replace') {
+                    updateData.sizeCharts = newSizeCharts;
+                } else {
+                    const existing = product.sizeCharts || [];
+                    updateData.sizeCharts = [...existing, ...newSizeCharts].slice(0, 10);
+                }
+            }
+
+            // אם אין שום שינוי — דלג
+            if (Object.keys(updateData).length === 0) continue;
+
+            const ref = db.collection('soccer_shirts').doc(productId);
+            batch.update(ref, updateData);
+            batchCount++;
+
+            if (batchCount >= BATCH_SIZE) {
+                await batch.commit();
+                batch = db.batch();
+                batchCount = 0;
+            }
+
+            done++;
+            const pct = Math.round((done / total) * 100);
+            progressBar.style.width = pct + '%';
+            progressText.textContent = `${done} / ${total} מוצרים עודכנו...`;
         }
 
-        const ref = db.collection('soccer_shirts').doc(productId);
-        batch.update(ref, updateData);
-        batchCount++;
+        if (batchCount > 0) await batch.commit();
 
-        if (batchCount >= BATCH_SIZE) {
-            await batch.commit();
-            batch = db.batch();
-            batchCount = 0;
-        }
+        progressText.textContent = `✅ הושלם! ${total} מוצרים עודכנו בהצלחה.`;
+        document.getElementById('bulk-apply-btn').disabled = false;
 
-        done++;
-        const pct = Math.round((done / total) * 100);
-        progressBar.style.width = pct + '%';
-        progressText.textContent = `${done} / ${total} מוצרים עודכנו...`;
+        await loadCategories();
+        await loadAllProducts();
+        await loadCoupons();
+
+        alert(`✅ ${total} מוצרים עודכנו בהצלחה!`);
+
+    } catch (err) {
+        console.error('Bulk edit error:', err);
+        progressText.textContent = `❌ שגיאה: ${err.message}`;
+        document.getElementById('bulk-apply-btn').disabled = false;
+        alert(`שגיאה בעדכון מוצרים:\n${err.message}`);
     }
-
-    if (batchCount > 0) await batch.commit();
-
-    progressText.textContent = `✅ הושלם! ${total} מוצרים עודכנו בהצלחה.`;
-    document.getElementById('bulk-apply-btn').disabled = false;
-
-    await loadCategories();
-    await loadAllProducts();
-    await loadCoupons();
-
-    alert(`✅ ${total} מוצרים עודכנו בהצלחה!`);
 });
 
     // Trigger bulk grid render when navigating to bulk-edit section
