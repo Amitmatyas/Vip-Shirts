@@ -4677,7 +4677,7 @@ productModal.style.display = 'flex';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('products-browse-section').style.display = 'none';
 
             loadCartFromStorage();
@@ -4688,9 +4688,10 @@ productModal.style.display = 'flex';
 
                 await Promise.all([
                     loadAnnouncements(),
-                    fetchProducts(),
                     loadClubMember()
                 ]);
+
+                await fetchProducts();
             } catch (error) {
                 console.error('שגיאת אתחול:', error);
             }
