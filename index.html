@@ -4715,9 +4715,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         function handleDeepLink() {
-    const hash = window.location.hash;
-    if (!hash || !hash.startsWith('#')) return;
-    const productName = decodeURIComponent(hash.substring(1)).trim();
+    const fullUrl = window.location.href;
+    const hashIndex = fullUrl.indexOf('#');
+    if (hashIndex === -1) return;
+
+    const raw = decodeURIComponent(fullUrl.substring(hashIndex + 1)).trim();
     if (!productName) return;
     const product = products.find(p =>
         p.name.trim() === productName ||
