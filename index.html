@@ -4829,8 +4829,21 @@ async function loadCountdown() {
         const btn = document.getElementById('countdown-btn');
         if (cfg.btnText) {
             btn.textContent = cfg.btnText;
-            btn.href = cfg.btnUrl || '#';
-            btn.style.display = 'inline-block';
+const btnUrl = cfg.btnUrl || '#';
+btn.href = btnUrl;
+btn.removeAttribute('target');
+
+btn.onclick = function(e) {
+    e.preventDefault();
+    if (btnUrl.startsWith('#')) {
+        window.location.hash = btnUrl.substring(1);
+        handleDeepLink();
+    } else {
+        window.location.href = btnUrl;
+    }
+};
+
+btn.style.display = 'inline-block';
         }
 
         if (cfg.targetDate) {
