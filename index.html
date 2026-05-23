@@ -4250,7 +4250,7 @@ if (product.customFields && product.customFields.length > 0) {
                         select.appendChild(opt);
                     });
 
-                    if (isLocked) {
+                        if (isLocked) {
                         select.disabled = true;
                         select.classList.add('locked-option');
                         currentProductOptions[field.name] = couponLockedOptions[field.name];
@@ -4284,6 +4284,12 @@ if (product.customFields && product.customFields.length > 0) {
                         updateModalPrice();
                     }
 
+                        if (preselectedValue) {
+                        input.value = preselectedValue;
+                        currentProductOptions[field.name] = preselectedValue;
+                        updateModalPrice();
+                    }
+
                     input.addEventListener('input', (e) => {
                         currentProductOptions[field.name] = e.target.value;
                         if (!isCouponFreebie) updateModalPrice();
@@ -4297,7 +4303,10 @@ if (product.customFields && product.customFields.length > 0) {
 productModal.style.display = 'flex';
         currentModalProductId = product.id;
         const hashOptions = Object.keys(preselectedOptions).length > 0
-            ? '?' + Object.entries(preselectedOptions).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&')
+            ? '?' + Object.entries(preselectedOptions).map(([k, v]) =>
+                encodeURIComponent(k).replace(/%2F/gi, '%252F') + '=' +
+                encodeURIComponent(v).replace(/%2F/gi, '%252F')
+              ).join('&')
             : '';
         window.history.replaceState(null, '', '#product:' + encodeURIComponent(product.name) + hashOptions);
     }
@@ -4692,6 +4701,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ]);
 
                 await fetchProducts();
+
+                await fetchProducts();
             } catch (error) {
                 console.error('שגיאת אתחול:', error);
             }
@@ -4719,11 +4730,70 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hashIndex = fullUrl.indexOf('#');
     if (hashIndex === -1) return;
 
-    const raw = decodeURIComponent(fullUrl.substring(hashIndex + 1)).trim();
-    if (!productName) return;
+    const rawEncoded = fullUrl.substring(hashIndex + 1);
+    const raw = decodeURIComponent(rawEncoded.replace(/%252F/gi, '%2F')).trim();
+    if (!raw) return;
+
+    if (raw.startsWith('category:')) {
+        const catName = raw.substring('category:'.length).trim();
+        const matched = categories.find(c => c.toLowerCase() === catName.toLowerCase());
+        if (matched) enterCategory(matched);
+        return;
+    }
+
+    if (raw.startsWith('subcategory:')) {
+        const parts = raw.substring('subcategory:'.length).split(':');
+        if (parts.length >= 2) {
+            const catName = parts[0].trim();
+            const subCatName = parts[1].trim();
+            const matchedCat = categories.find(c => c.toLowerCase() === catName.toLowerCase());
+            if (matchedCat) {
+                const subCats = subCategoriesMap[matchedCat] || [];
+                const matchedSub = subCats.find(s => s.toLowerCase() === subCatName.toLowerCase());
+                if (matchedSub) enterSubCategory(matchedCat, matchedSub);
+                else enterCategory(matchedCat);
+            }
+        }
+        return;
+    }
+
+    if (raw.startsWith('product:')) {
+        const withoutPrefix = raw.substring('product:'.length);
+        const qIndex = withoutPrefix.indexOf('?');
+        const productName = (qIndex !== -1 ? withoutPrefix.substring(0, qIndex) : withoutPrefix).trim();
+        const queryString = qIndex !== -1 ? withoutPrefix.substring(qIndex + 1) : '';
+
+        const product = products.find(p =>
+            p.name.trim() === productName ||
+            p.name.trim().toLowerCase() === productName.toLowerCase()
+        );
+
+        if (product) {
+            document.getElementById('products-browse-section').style.display = 'block';
+            document.getElementById('categories-home-section').style.display = 'none';
+            document.getElementById('featured-section').style.display = 'none';
+
+            const preselectedOptions = {};
+            if (queryString) {
+                queryString.split('&').forEach(pair => {
+                    const eqIndex = pair.indexOf('=');
+                    if (eqIndex !== -1) {
+                        const key = decodeURIComponent(pair.substring(0, eqIndex));
+                        const value = decodeURIComponent(pair.substring(eqIndex + 1));
+                        preselectedOptions[key] = value;
+                    }
+                });
+            }
+
+            openProductModal(product.id, false, preselectedOptions);
+        }
+        return;
+    }
+
+    // תמיכה לאחור — hash ישן
     const product = products.find(p =>
-        p.name.trim() === productName ||
-        p.name.trim().toLowerCase() === productName.toLowerCase()
+        p.name.trim() === raw ||
+        p.name.trim().toLowerCase() === raw.toLowerCase()
     );
     if (product) {
         document.getElementById('products-browse-section').style.display = 'block';
