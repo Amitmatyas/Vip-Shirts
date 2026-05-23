@@ -4836,6 +4836,33 @@ btn.removeAttribute('target');
 btn.onclick = function(e) {
     e.preventDefault();
     if (btnUrl.startsWith('#')) {
+        const raw = decodeURIComponent(btnUrl.substring(1));
+
+        if (raw.startsWith('category:')) {
+            const catName = raw.substring('category:'.length).trim();
+            const matched = categories.find(c => c.toLowerCase() === catName.toLowerCase());
+            if (matched) { enterCategory(matched); return; }
+        }
+
+        if (raw.startsWith('subcategory:')) {
+            const parts = raw.substring('subcategory:'.length).split(':');
+            if (parts.length >= 2) {
+                const matchedCat = categories.find(c => c.toLowerCase() === parts[0].trim().toLowerCase());
+                if (matchedCat) {
+                    const subCats = subCategoriesMap[matchedCat] || [];
+                    const matchedSub = subCats.find(s => s.toLowerCase() === parts[1].trim().toLowerCase());
+                    if (matchedSub) { enterSubCategory(matchedCat, matchedSub); return; }
+                    enterCategory(matchedCat); return;
+                }
+            }
+        }
+
+        if (raw.startsWith('product:')) {
+            const productName = raw.substring('product:'.length).split('?')[0].trim();
+            const product = products.find(p => p.name.trim().toLowerCase() === productName.toLowerCase());
+            if (product) { openProductModal(product.id); return; }
+        }
+
         window.location.hash = btnUrl.substring(1);
         handleDeepLink();
     } else {
