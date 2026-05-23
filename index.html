@@ -4106,7 +4106,7 @@ async function loadSettings() {
             couponMessage.innerHTML = '<span class="coupon-applied">✓ קופון הוחל בהצלחה!</span>';
         });
 
-    function openProductModal(productId, isCouponFreebie = false) {
+    function openProductModal(productId, isCouponFreebie = false, preselectedOptions = {}) {
         const product = products.find(p => p.id === productId);
         if (!product) return;
 
@@ -4210,12 +4210,13 @@ async function loadSettings() {
         currentProductOptions = {};
         customOptionsContainer.innerHTML = '';
 
-        if (product.customFields && product.customFields.length > 0) {
+if (product.customFields && product.customFields.length > 0) {
             product.customFields.forEach((field, index) => {
                 const optionGroup = document.createElement('div');
                 optionGroup.className = 'option-group';
 
                 const isLocked = isCouponFreebie && couponLockedOptions && couponLockedOptions[field.name];
+                const preselectedValue = preselectedOptions[field.name] || '';
 
                 const label = document.createElement('label');
                 label.textContent = field.name + (field.required ? ' *' : '') + ':';
@@ -4240,7 +4241,12 @@ async function loadSettings() {
                         opt.textContent = option.value + (optionPrice > 0 ? ` (+${optionPrice.toFixed(2)}₪)` : '');
                         opt.dataset.image = option.image || '';
                         opt.dataset.extraPrice = optionPrice;
-                        if (isLocked && option.value === couponLockedOptions[field.name]) opt.selected = true;
+
+                        const shouldSelect =
+                            (isLocked && option.value === couponLockedOptions[field.name]) ||
+                            (!isLocked && preselectedValue && option.value === preselectedValue);
+                        if (shouldSelect) opt.selected = true;
+
                         select.appendChild(opt);
                     });
 
@@ -4250,6 +4256,11 @@ async function loadSettings() {
                         currentProductOptions[field.name] = couponLockedOptions[field.name];
                         const lockedOption = field.options.find(o => o.value === couponLockedOptions[field.name]);
                         if (lockedOption && lockedOption.image) modalProductImage.src = lockedOption.image;
+                    } else if (preselectedValue) {
+                        currentProductOptions[field.name] = preselectedValue;
+                        const preOpt = field.options.find(o => o.value === preselectedValue);
+                        if (preOpt && preOpt.image) modalProductImage.src = preOpt.image;
+                        updateModalPrice();
                     }
 
                     select.addEventListener('change', (e) => {
@@ -4266,6 +4277,13 @@ async function loadSettings() {
                     input.id = `custom-field-${index}`;
                     input.placeholder = 'הזן ' + field.name;
                     input.dataset.fieldExtraPrice = (!isCouponFreebie && field.extraPrice) ? field.extraPrice : 0;
+
+                    if (preselectedValue) {
+                        input.value = preselectedValue;
+                        currentProductOptions[field.name] = preselectedValue;
+                        updateModalPrice();
+                    }
+
                     input.addEventListener('input', (e) => {
                         currentProductOptions[field.name] = e.target.value;
                         if (!isCouponFreebie) updateModalPrice();
@@ -4276,9 +4294,12 @@ async function loadSettings() {
             });
         }
 
-        productModal.style.display = 'flex';
+productModal.style.display = 'flex';
         currentModalProductId = product.id;
-        window.history.replaceState(null, '', '#' + encodeURIComponent(product.name));
+        const hashOptions = Object.keys(preselectedOptions).length > 0
+            ? '?' + Object.entries(preselectedOptions).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&')
+            : '';
+        window.history.replaceState(null, '', '#product:' + encodeURIComponent(product.name) + hashOptions);
     }
 
         function updateModalPrice() {
@@ -4693,21 +4714,21 @@ async function loadSettings() {
         });
 
         function handleDeepLink() {
-            const hash = window.location.hash;
-            if (!hash || !hash.startsWith('#')) return;
-            const productName = decodeURIComponent(hash.substring(1)).trim();
-            if (!productName) return;
-            const product = products.find(p =>
-                p.name.trim() === productName ||
-                p.name.trim().toLowerCase() === productName.toLowerCase()
-            );
-            if (product) {
-                document.getElementById('products-browse-section').style.display = 'block';
-                document.getElementById('categories-home-section').style.display = 'none';
-                document.getElementById('featured-section').style.display = 'none';
-                openProductModal(product.id);
-            }
-        }
+    const hash = window.location.hash;
+    if (!hash || !hash.startsWith('#')) return;
+    const productName = decodeURIComponent(hash.substring(1)).trim();
+    if (!productName) return;
+    const product = products.find(p =>
+        p.name.trim() === productName ||
+        p.name.trim().toLowerCase() === productName.toLowerCase()
+    );
+    if (product) {
+        document.getElementById('products-browse-section').style.display = 'block';
+        document.getElementById('categories-home-section').style.display = 'none';
+        document.getElementById('featured-section').style.display = 'none';
+        openProductModal(product.id);
+    }
+}
         
     </script>
 </body>
