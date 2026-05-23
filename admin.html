@@ -1873,11 +1873,12 @@ async function displayCategoriesWithProducts() {
         categoryBox.className = 'category-box';
 
         // ---- בנה HTML ראשי ----
-        categoryBox.innerHTML = `
+categoryBox.innerHTML = `
             <div class="category-box-header">
                 <h3>${category} <span style="color:#999;font-size:0.75em;">(${categoryProducts.length} מוצרים)</span></h3>
                 <div class="category-actions">
                     <button class="btn btn-primary btn-edit-category" data-category="${category}">ערוך שם</button>
+                    <button class="btn btn-success btn-copy-category-link" data-category="${category}" title="העתק קישור לקטגוריה" style="padding:8px 14px;font-size:0.9em;">🔗</button>
                     <button class="btn btn-danger btn-delete-category" data-category="${category}">מחק</button>
                 </div>
             </div>
@@ -1969,9 +1970,19 @@ async function displayCategoriesWithProducts() {
             });
         }
 
-        // ---- edit/delete category buttons ----
+// ---- edit/delete/link category buttons ----
         categoryBox.querySelector('.btn-edit-category').addEventListener('click', () => editCategoryName(category));
         categoryBox.querySelector('.btn-delete-category').addEventListener('click', () => deleteCategory(category));
+        categoryBox.querySelector('.btn-copy-category-link').addEventListener('click', (e) => {
+            const btn = e.currentTarget;
+            const link = `${window.location.origin.replace('/admin.html', '')}/#category:${encodeURIComponent(category)}`;
+            navigator.clipboard.writeText(link).then(() => {
+                const orig = btn.innerHTML;
+                btn.innerHTML = '✓';
+                btn.style.background = '#27ae60';
+                setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+            }).catch(() => alert('שגיאה בהעתקת הקישור'));
+        });
     }
 }
 
@@ -1987,12 +1998,13 @@ function renderSubcatList(container, category, subCats) {
         const chip = document.createElement('div');
         chip.style.cssText = 'background:#e9ecef;padding:8px 10px;border-radius:8px;font-size:0.88em;display:flex;align-items:center;gap:8px;';
 
-        chip.innerHTML = `
+chip.innerHTML = `
             <img class="sc-img-preview" src="${scImg || 'https://i.ibb.co/MkgM6wwD/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png'}" 
                  style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid #ccc;cursor:pointer;" title="שנה תמונה">
             <input type="file" class="sc-img-input" accept="image/*" style="display:none;">
             <span>${sc}</span>
             <span class="sc-img-status" style="font-size:0.78em;color:#888;"></span>
+            <button class="sc-link-btn" style="background:#27ae60;color:white;border:none;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:0.85em;" title="העתק קישור">🔗</button>
             <button class="sc-delete-btn" style="background:none;border:none;color:#e74c3c;cursor:pointer;font-size:1em;padding:0;line-height:1;">×</button>
         `;
 
@@ -2000,6 +2012,18 @@ function renderSubcatList(container, category, subCats) {
         const scImgInput = chip.querySelector('.sc-img-input');
         const scImgStatus = chip.querySelector('.sc-img-status');
         const scDeleteBtn = chip.querySelector('.sc-delete-btn');
+        const scLinkBtn = chip.querySelector('.sc-link-btn');
+
+        // קישור לתת-קטגוריה
+        scLinkBtn.addEventListener('click', () => {
+            const link = `${window.location.origin.replace('/admin.html', '')}/#subcategory:${encodeURIComponent(category)}:${encodeURIComponent(sc)}`;
+            navigator.clipboard.writeText(link).then(() => {
+                const orig = scLinkBtn.innerHTML;
+                scLinkBtn.innerHTML = '✓';
+                scLinkBtn.style.background = '#1e8449';
+                setTimeout(() => { scLinkBtn.innerHTML = orig; scLinkBtn.style.background = '#27ae60'; }, 2000);
+            }).catch(() => alert('שגיאה בהעתקת הקישור'));
+        });
 
         // העלאת תמונה לתת-קטגוריה
         scImgPreview.addEventListener('click', () => scImgInput.click());
