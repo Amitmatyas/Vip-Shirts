@@ -1527,7 +1527,36 @@
             <div id="customer-leads-list"></div>
         </div>
     </div>
+    
+<!-- מודאל בניית קישור מוצר -->
+<div id="product-link-modal" class="modal">
+    <div class="modal-content" style="max-width:520px;">
+        <span class="close-button" onclick="document.getElementById('product-link-modal').classList.remove('active')">&times;</span>
+        <h3 style="margin-bottom:18px;">🔗 בנה קישור למוצר</h3>
 
+        <div id="plm-product-info" style="display:flex;align-items:center;gap:14px;background:#f8f9fa;border-radius:10px;padding:14px;margin-bottom:20px;border:1px solid #e9ecef;">
+            <img id="plm-product-img" src="" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:2px solid #ddd;">
+            <div>
+                <div id="plm-product-name" style="font-weight:700;font-size:1.1em;color:#2c3e50;"></div>
+                <div id="plm-product-price" style="color:#dc3545;font-weight:600;margin-top:4px;"></div>
+            </div>
+        </div>
+
+        <div id="plm-options-container"></div>
+
+        <div style="background:#e8f5e9;border-radius:8px;padding:12px;margin:16px 0;border:1px solid #a5d6a7;">
+            <div style="font-size:0.82em;color:#388e3c;font-weight:600;margin-bottom:6px;">הקישור שנוצר:</div>
+            <div id="plm-generated-link" style="font-size:0.88em;color:#1b5e20;word-break:break-all;font-family:monospace;background:#fff;padding:8px;border-radius:6px;border:1px solid #c8e6c9;"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-dark" id="plm-copy-btn" style="flex:1;padding:13px;font-size:1em;">📋 העתק קישור</button>
+            <button class="btn btn-secondary" id="plm-reset-btn" style="padding:13px 18px;">🔄 אפס</button>
+        </div>
+        <div id="plm-copy-feedback" style="text-align:center;color:#27ae60;font-weight:600;margin-top:8px;height:20px;"></div>
+    </div>
+</div>
+    
     <script>
     // ============================================
     // FIREBASE CONFIG
@@ -2052,13 +2081,8 @@ function createProductMiniCard(product) {
         const p = products.find(x => x.id === product.id);
         openEditProductModal(product.id, p);
     });
-    productCard.querySelector('.btn-copy-mini').addEventListener('click', () => {
-        navigator.clipboard.writeText(productLink).then(() => {
-            const btn = productCard.querySelector('.btn-copy-mini');
-            const orig = btn.innerHTML;
-            btn.innerHTML = '✓'; btn.style.background = '#27ae60';
-            setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
-        }).catch(() => alert('שגיאה בהעתקת הקישור'));
+productCard.querySelector('.btn-copy-mini').addEventListener('click', () => {
+        openProductLinkModal(product.id);
     });
 
     return productCard;
@@ -2169,9 +2193,9 @@ function showSkeletonProducts(containerId, count = 6) {
                 <h3>${product.name}</h3>
                 ${priceHTML}
                 <div class="product-card-actions">
-                    <button class="btn btn-dark btn-edit-product-main" data-product-id="${product.id}">ערוך</button>
-                    <button class="btn btn-danger btn-delete-product-main" data-product-id="${product.id}">מחק</button>
-                    <button class="btn btn-success btn-copy-link-main" data-product-link="${productLink}" title="העתק קישור">🔗</button>
+                    <button class="btn btn-dar€k btn-edit-product-main" data-product-id="${product.id}">ערוך</button>
+                    <button class="btn btn-danger btn-delete-product-main" data-product-id="${product.id}">מחק</button>€
+                    <button class="btn btn-success btn-copy-link-main" data-product-id="${product.id}" title="בנה קישור">🔗</button>
                 </div>
             `;
             allProductsGrid.appendChild(productCard);
@@ -2186,14 +2210,9 @@ function showSkeletonProducts(containerId, count = 6) {
         document.querySelectorAll('.btn-delete-product-main').forEach(btn => {
             btn.addEventListener('click', () => deleteProductDirect(btn.dataset.productId));
         });
-        document.querySelectorAll('.btn-copy-link-main').forEach(btn => {
+document.querySelectorAll('.btn-copy-link-main').forEach(btn => {
             btn.addEventListener('click', () => {
-                const link = btn.dataset.productLink;
-                navigator.clipboard.writeText(link).then(() => {
-                    const orig = btn.innerHTML;
-                    btn.innerHTML = '✓'; btn.style.background = '#27ae60';
-                    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
-                }).catch(() => alert('שגיאה בהעתקת הקישור'));
+                openProductLinkModal(btn.dataset.productId);
             });
         });
 
@@ -3693,6 +3712,7 @@ window.addEventListener('click', (event) => {
         if (event.target === editCustomerModal) editCustomerModal.classList.remove('active');
         if (event.target === customerOrdersModal) customerOrdersModal.classList.remove('active');
         if (event.target === customerLeadsModal) customerLeadsModal.classList.remove('active');
+        if (event.target === document.getElementById('product-link-modal')) document.getElementById('product-link-modal').classList.remove('active');
     });
 
     // ============================================
@@ -4601,6 +4621,123 @@ await loadCategories();
         // Event delegation לעדכון תת-קטגוריות בטופס הוספת מוצר
 document.getElementById('product-category-checkboxes').addEventListener('change', () => {
     updateSubCategoryCheckboxes('product-category-checkboxes', 'product-subcategory-checkboxes', []);
+});
+        
+        // ============================================
+// PRODUCT LINK MODAL
+// ============================================
+let _plmProductId = null;
+let _plmSelectedOptions = {};
+
+function openProductLinkModal(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    _plmProductId = productId;
+    _plmSelectedOptions = {};
+
+    // מידע בסיסי
+    document.getElementById('plm-product-img').src = product.image;
+    document.getElementById('plm-product-name').textContent = product.name;
+    const effectivePrice = getEffectivePrice(product);
+    document.getElementById('plm-product-price').textContent = effectivePrice.toFixed(2) + ' ₪';
+
+    // בנה שדות אופציות
+    const container = document.getElementById('plm-options-container');
+    container.innerHTML = '';
+
+    if (product.customFields && product.customFields.length > 0) {
+        const title = document.createElement('div');
+        title.style.cssText = 'font-weight:700;color:#2c3e50;margin-bottom:12px;font-size:0.95em;';
+        title.textContent = 'בחר אפשרויות (ריק = הלקוח יבחר):';
+        container.appendChild(title);
+
+        product.customFields.forEach((field, idx) => {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            group.style.marginBottom = '12px';
+
+            const label = document.createElement('label');
+            label.textContent = field.name + (field.required ? ' *' : '') + ':';
+            label.style.cssText = 'display:block;margin-bottom:6px;font-weight:600;color:#555;font-size:0.92em;';
+            group.appendChild(label);
+
+            if (field.type === 'select') {
+                const select = document.createElement('select');
+                select.style.cssText = 'width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:0.95em;';
+                select.innerHTML = '<option value="">— לא מוגדר (הלקוח יבחר) —</option>';
+                (field.options || []).forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt.value;
+                    o.textContent = opt.value + (opt.extraPrice > 0 ? ` (+${opt.extraPrice.toFixed(2)}₪)` : '');
+                    select.appendChild(o);
+                });
+                select.addEventListener('change', () => {
+                    if (select.value) _plmSelectedOptions[field.name] = select.value;
+                    else delete _plmSelectedOptions[field.name];
+                    updatePlmLink(product);
+                });
+                group.appendChild(select);
+            } else if (field.type === 'text') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'הזן ' + field.name + ' (ריק = הלקוח יכתוב)';
+                input.style.cssText = 'width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:0.95em;';
+                input.addEventListener('input', () => {
+                    if (input.value.trim()) _plmSelectedOptions[field.name] = input.value.trim();
+                    else delete _plmSelectedOptions[field.name];
+                    updatePlmLink(product);
+                });
+                group.appendChild(input);
+            }
+
+            container.appendChild(group);
+        });
+    } else {
+        container.innerHTML = '<p style="color:#888;font-size:0.92em;margin-bottom:12px;">למוצר זה אין שדות אופציות.</p>';
+    }
+
+    updatePlmLink(product);
+    document.getElementById('plm-copy-feedback').textContent = '';
+    document.getElementById('product-link-modal').classList.add('active');
+}
+
+function updatePlmLink(product) {
+    const base = window.location.origin.replace('/admin.html', '');
+    let hash = '#product:' + encodeURIComponent(product.name);
+    const opts = Object.entries(_plmSelectedOptions);
+    if (opts.length > 0) {
+        hash += '?' + opts.map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+    }
+    const link = base + '/' + hash;
+    document.getElementById('plm-generated-link').textContent = link;
+    return link;
+}
+
+document.getElementById('plm-copy-btn').addEventListener('click', () => {
+    const link = document.getElementById('plm-generated-link').textContent;
+    navigator.clipboard.writeText(link).then(() => {
+        const fb = document.getElementById('plm-copy-feedback');
+        fb.textContent = '✓ הקישור הועתק בהצלחה!';
+        setTimeout(() => { fb.textContent = ''; }, 3000);
+        const btn = document.getElementById('plm-copy-btn');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ הועתק!';
+        btn.style.background = '#27ae60';
+        setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2500);
+    }).catch(() => alert('שגיאה בהעתקת הקישור'));
+});
+
+document.getElementById('plm-reset-btn').addEventListener('click', () => {
+    const product = products.find(p => p.id === _plmProductId);
+    if (product) openProductLinkModal(product.id);
+});
+
+// סגירת מודאל בלחיצה על הרקע
+document.getElementById('product-link-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('product-link-modal')) {
+        document.getElementById('product-link-modal').classList.remove('active');
+    }
 });
         
     </script>
