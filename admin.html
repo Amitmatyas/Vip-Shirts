@@ -2445,25 +2445,38 @@ document.getElementById('add-product-form').addEventListener('submit', async (e)
     if (salePriceRaw && saleIsPercent && (salePriceRaw <= 0 || salePriceRaw >= 100)) { alert('אחוז הנחה חייב להיות בין 1 ל-99'); return; }
     if (salePrice && !saleIsPercent && salePrice >= price) { alert('מחיר מבצע חייב להיות נמוך ממחיר רגיל!'); return; }
     
-    const customFields = extractCustomFields(customFieldsContainer);
-    const productData = {
-        name, description, price,
-        categories: selectedCats,
-        subCategories: subCategories,
-        image,
-        customFields: customFields.length > 0 ? customFields : null,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    if (if (salePrice && salePrice > 0) {
-        productData.salePrice = salePrice;
-        if (saleIsPercent) productData.saleIsPercent = true;
-    }
-    && salePrice > 0) productData.salePrice = salePrice;
-    if (saleEndDate) productData.saleEndDate = saleEndDate;
-    if (!isNaN(customShipping) && customShipping >= 0) productData.customShipping = customShipping;
+const customFields = extractCustomFields(customFieldsContainer);
+const productData = {
+    name, 
+    description, 
+    price,
+    categories: selectedCats,
+    subCategories: subCategories,
+    image,
+    customFields: customFields.length > 0 ? customFields : null,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+};
 
-    const sizeCharts = await processSizeChartFiles('size-charts-input', 'size-charts-preview', 'size-charts-status');
-    if (sizeCharts.length > 0) productData.sizeCharts = sizeCharts;
+if (salePrice && salePrice > 0) {
+    productData.salePrice = salePrice;
+    if (saleIsPercent) {
+        productData.saleIsPercent = true;
+    }
+}
+
+if (saleEndDate) {
+    productData.saleEndDate = saleEndDate;
+}
+
+if (!isNaN(customShipping) && customShipping >= 0) {
+    productData.customShipping = customShipping;
+}
+
+const sizeCharts = await processSizeChartFiles('size-charts-input', 'size-charts-preview', 'size-charts-status');
+if (sizeCharts.length > 0) {
+    productData.sizeCharts = sizeCharts;
+}
+
 
     try {
         await db.collection('soccer_shirts').add(productData);
