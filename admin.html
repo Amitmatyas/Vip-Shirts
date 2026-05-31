@@ -1265,7 +1265,7 @@
             </div>
         </div>
 
-        <!-- מחיר מבצע -->
+<!-- מחיר מבצע -->
         <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
             <div class="bulk-enable-field">
                 <input type="checkbox" id="bulk-enable-sale">
@@ -1280,6 +1280,33 @@
                     <label style="font-size:0.9em;color:#555;">תאריך סיום מבצע (ריק = ללא תפוגה):</label>
                     <input type="date" id="bulk-sale-end" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
                 </div>
+            </div>
+        </div>
+
+        <!-- הנחה חישובית -->
+        <div style="border:1px solid #e9ecef;border-radius:6px;padding:15px;margin-bottom:12px;">
+            <div class="bulk-enable-field">
+                <input type="checkbox" id="bulk-enable-discount">
+                <label for="bulk-enable-discount">הנחה חישובית (מחשב מחיר מבצע אוטומטית)</label>
+            </div>
+            <div class="bulk-field-content" id="bulk-discount-content" style="display:none;">
+                <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;">
+                        <input type="radio" name="bulk-discount-type" value="percent" checked> הנחה באחוזים (%)
+                    </label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:600;">
+                        <input type="radio" name="bulk-discount-type" value="fixed"> הנחה בשקלים (₪)
+                    </label>
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label style="font-size:0.9em;color:#555;" id="bulk-discount-label">כמה אחוזים להוריד מהמחיר הרגיל:</label>
+                    <input type="number" id="bulk-discount-value" step="0.01" min="0" placeholder="לדוגמה: 20" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label style="font-size:0.9em;color:#555;">תאריך סיום מבצע (ריק = ללא תפוגה):</label>
+                    <input type="date" id="bulk-discount-end" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;">
+                </div>
+                <p style="font-size:0.82em;color:#888;margin-top:8px;">⚡ המחיר המבצע יחושב אוטומטית לכל מוצר לפי המחיר הרגיל שלו</p>
             </div>
         </div>
 
@@ -4248,6 +4275,7 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
 [
     ['bulk-enable-price', 'bulk-price-content'],
     ['bulk-enable-sale', 'bulk-sale-content'],
+    ['bulk-enable-discount', 'bulk-discount-content'],
     ['bulk-enable-categories', 'bulk-categories-content'],
     ['bulk-enable-shipping', 'bulk-shipping-content'],
     ['bulk-enable-customfields', 'bulk-customfields-content'],
@@ -4263,6 +4291,20 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
             });
         }
     });
+
+// עדכון תווית הנחה חישובית בהתאם לסוג
+document.querySelectorAll('input[name="bulk-discount-type"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const label = document.getElementById('bulk-discount-label');
+        if (document.querySelector('input[name="bulk-discount-type"]:checked').value === 'percent') {
+            label.textContent = 'כמה אחוזים להוריד מהמחיר הרגיל:';
+            document.getElementById('bulk-discount-value').placeholder = 'לדוגמה: 20';
+        } else {
+            label.textContent = 'כמה שקלים להוריד מהמחיר הרגיל:';
+            document.getElementById('bulk-discount-value').placeholder = 'לדוגמה: 50';
+        }
+    });
+});
 
     // Bulk custom fields
     const bulkCFBtn = document.getElementById('bulk-add-custom-field');
@@ -4293,15 +4335,16 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
 document.getElementById('bulk-apply-btn').addEventListener('click', async () => {
     if (bulkSelectedIds.size === 0) { alert('אנא בחר לפחות מוצר אחד.'); return; }
 
-    const enablePrice       = document.getElementById('bulk-enable-price').checked;
+const enablePrice       = document.getElementById('bulk-enable-price').checked;
     const enableSale        = document.getElementById('bulk-enable-sale').checked;
+    const enableDiscount    = document.getElementById('bulk-enable-discount').checked;
     const enableCats        = document.getElementById('bulk-enable-categories').checked;
     const enableShipping    = document.getElementById('bulk-enable-shipping').checked;
     const enableCF          = document.getElementById('bulk-enable-customfields').checked;
     const enableDesc        = document.getElementById('bulk-enable-description').checked;
     const enableSizeCharts  = document.getElementById('bulk-enable-sizecharts').checked;
 
-    if (!enablePrice && !enableSale && !enableCats && !enableShipping && !enableCF && !enableDesc && !enableSizeCharts) {
+    if (!enablePrice && !enableSale && !enableDiscount && !enableCats && !enableShipping && !enableCF && !enableDesc && !enableSizeCharts) {
         alert('אנא בחר לפחות שדה אחד לעריכה.');
         return;
     }
@@ -4310,6 +4353,9 @@ document.getElementById('bulk-apply-btn').addEventListener('click', async () => 
     const newPrice     = enablePrice ? parseFloat(document.getElementById('bulk-price').value) : null;
     const newSalePrice = enableSale  ? (parseFloat(document.getElementById('bulk-sale-price').value) || null) : null;
     const newSaleEnd   = enableSale  ? (document.getElementById('bulk-sale-end').value || null) : null;
+    const discountType  = enableDiscount ? document.querySelector('input[name="bulk-discount-type"]:checked').value : null;
+    const discountValue = enableDiscount ? (parseFloat(document.getElementById('bulk-discount-value').value) || 0) : 0;
+    const discountEnd   = enableDiscount ? (document.getElementById('bulk-discount-end').value || null) : null;
 
     const catMode = document.querySelector('input[name="bulk-categories-mode"]:checked')?.value || 'replace';
     const newCats = enableCats
@@ -4365,13 +4411,12 @@ document.getElementById('bulk-apply-btn').addEventListener('click', async () => 
 
             const updateData = {};
 
-            if (enablePrice && !isNaN(newPrice) && newPrice >= 0) updateData.price = newPrice;
+if (enablePrice && !isNaN(newPrice) && newPrice >= 0) updateData.price = newPrice;
 
             if (enableSale) {
                 if (newSalePrice && newSalePrice > 0) {
                     updateData.salePrice = newSalePrice;
                 } else {
-                    // מחיקה רק אם השדה קיים במסמך
                     if (product.salePrice !== undefined) {
                         updateData.salePrice = firebase.firestore.FieldValue.delete();
                     }
@@ -4382,6 +4427,21 @@ document.getElementById('bulk-apply-btn').addEventListener('click', async () => 
                     if (product.saleEndDate !== undefined) {
                         updateData.saleEndDate = firebase.firestore.FieldValue.delete();
                     }
+                }
+            }
+
+            if (enableDiscount && discountValue > 0) {
+                const basePrice = updateData.price !== undefined ? updateData.price : product.price;
+                let calculatedSalePrice;
+                if (discountType === 'percent') {
+                    calculatedSalePrice = Math.round((basePrice * (1 - discountValue / 100)) * 100) / 100;
+                } else {
+                    calculatedSalePrice = Math.round((basePrice - discountValue) * 100) / 100;
+                }
+                if (calculatedSalePrice > 0 && calculatedSalePrice < basePrice) {
+                    updateData.salePrice = calculatedSalePrice;
+                    if (discountEnd) updateData.saleEndDate = discountEnd;
+                    else if (product.saleEndDate !== undefined) updateData.saleEndDate = firebase.firestore.FieldValue.delete();
                 }
             }
 
