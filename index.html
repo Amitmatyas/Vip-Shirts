@@ -2754,8 +2754,6 @@
         };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-db.enablePersistence({ synchronizeTabs: true })
-  .catch(err => console.log('Persistence unavailable:', err.code));
 
         const productsContainer = document.getElementById('products-container');
         const cartItemsList = document.getElementById('cart-items');
@@ -3903,47 +3901,57 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
 
         let subCategoriesMap = {};
 
-async function loadSettings() {
-    try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
-        if (settingsDoc.exists) {
-            settings = settingsDoc.data();
-            categories = settings.Categories || [];
-            subCategoriesMap = settings.SubCategories || {};
-            updateCategoryFilter();
-            renderCategoriesStrip();
-        } else {
-            settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
-            subCategoriesMap = {};
-        }
-    } catch (error) {
-        console.error('Error loading settings:', error);
+function applySettingsDoc(doc) {
+    if (doc.exists) {
+        const data = doc.data();
+        settings = data;
+        categories = data.Categories || [];
+        subCategoriesMap = data.SubCategories || {};
+        updateCategoryFilter();
+        renderCategoriesStrip();
+        renderFeaturedProducts();
+    } else {
         settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
         subCategoriesMap = {};
     }
 }
 
-        async function fetchProducts() {
+function loadSettings() {
     try {
-        const productsSnapshot = await withTimeout(
-            db.collection('soccer_shirts').get(),
-            10000
-        );
-        products = productsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        db.collection('Settings').doc('main').onSnapshot(doc => {
+            applySettingsDoc(doc);
+        }, err => {
+            console.warn('onSnapshot failed, falling back:', err);
+            db.collection('Settings').doc('main').get().then(applySettingsDoc).catch(console.error);
+        });
+    } catch(e) {
+        db.collection('Settings').doc('main').get().then(applySettingsDoc).catch(console.error);
+    }
+}
+
+function fetchProducts() {
+    const applyProducts = snap => {
+        products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         preloadAllProductImages(products);
         renderFeaturedProducts();
         handleDeepLink();
-    } catch (error) {
-        console.error('שגיאת טעינת מוצרים:', error);
-        productsContainer.innerHTML = `
-            <div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
+    };
+
+    const onError = err => {
+        console.warn('onSnapshot failed, falling back:', err);
+        db.collection('soccer_shirts').get().then(applyProducts).catch(e => {
+            productsContainer.innerHTML = `<div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
                 <div style="font-size:3em;margin-bottom:15px;">⚠️</div>
                 <p style="font-size:1.1em;color:#dc3545;font-weight:bold;">שגיאה בטעינת המוצרים</p>
-                <p style="color:#666;margin-bottom:20px;">בדוק את חיבור האינטרנט ונסה שוב</p>
-                <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">
-                    רענן דף
-                </button>
+                <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">רענן דף</button>
             </div>`;
+        });
+    };
+
+    try {
+        db.collection('soccer_shirts').onSnapshot(applyProducts, onError);
+    } catch(e) {
+        onError(e);
     }
 }
 
@@ -4912,27 +4920,17 @@ btn.style.display = 'inline-block';
 }
         
 document.addEventListener('DOMContentLoaded', async () => {
-            document.getElementById('products-browse-section').style.display = 'none';
-
-            loadCartFromStorage();
-            updateCartDisplay();
-
-            try {
-                await loadSettings();
-
-                await Promise.all([
-    loadAnnouncements(),
-    loadClubMember(),
-    loadCountdown()
-]);
-
-                await fetchProducts();
-
-                await fetchProducts();
-            } catch (error) {
-                console.error('שגיאת אתחול:', error);
-            }
-        });
+    document.getElementById('products-browse-section').style.display = 'none';
+    loadCartFromStorage();
+    updateCartDisplay();
+    try {
+        loadSettings();
+        fetchProducts();
+        await Promise.all([loadAnnouncements(), loadClubMember(), loadCountdown()]);
+    } catch(error) {
+        console.error('שגיאת אתחול:', error);
+    }
+});
 
         function openSizeChartZoom(src) {
             const modal = document.getElementById('size-chart-zoom-modal');
