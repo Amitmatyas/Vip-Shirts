@@ -52,31 +52,31 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        header {
-            background: #222;
-            color: #fff;
-            padding: 45px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 30px;
-            font-size: 2.1em;
-            letter-spacing: 3px;
-            border-bottom-left-radius: 16% 8%;
-            border-bottom-right-radius: 16% 8%;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-        }
+header {
+    background: #222;
+    color: #fff;
+    padding: 45px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* ממרכז את התמונה באופן מושלם */
+    gap: 30px;
+    border-bottom-left-radius: 16% 8%;
+    border-bottom-right-radius: 16% 8%;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
 
-        header img {
-            width: 150px;
-            height: auto;
-            margin: 0;
-        }
+header img {
+    width: 280px !important; /* הגדלת התמונה - ה-!important דורס את ה-150px שב-HTML */
+    height: auto !important;  /* מבטיח שהתמונה תשמור על פרופורציות ולא תתעוות */
+    margin: 0 auto;
+    display: block;
+}
 
-        header h1 {
-            margin: 0;
-            line-height: 1.1;
-        }
+/* מאחר ואין יותר h1 ב-HTML שלך, קוד ה-h1 הקודם כבר לא נחוץ */
+
+header h1 {
+    display: none; /* מסיר ומעלים את הטקסט לחלוטין מהתצוגה */
+}
 
         /* ===== ENHANCED CART TOGGLE BUTTON ===== */
         #cart-toggle-button {
@@ -2259,7 +2259,6 @@
      height="150"
      fetchpriority="high"
      loading="eager">
-    <h1 style="cursor:default;">VIP Shirts</h1>
 </header>
 
     <!-- ENHANCED TOGGLE BUTTON (desktop only) -->
