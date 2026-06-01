@@ -58,21 +58,22 @@ header {
     padding: 45px 40px;
     display: flex;
     align-items: center;
-    justify-content: center; /* ממרכז את התמונה באופן מושלם */
+    justify-content: center;
     gap: 30px;
     border-bottom-left-radius: 16% 8%;
     border-bottom-right-radius: 16% 8%;
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    position: sticky;
+    top: 0;
+    z-index: 900;
 }
 
 header img {
-    width: 280px !important; /* הגדלת התמונה - ה-!important דורס את ה-150px שב-HTML */
-    height: auto !important;  /* מבטיח שהתמונה תשמור על פרופורציות ולא תתעוות */
+    width: 150px !important;
+    height: auto !important;
     margin: 0 auto;
     display: block;
 }
-
-/* מאחר ואין יותר h1 ב-HTML שלך, קוד ה-h1 הקודם כבר לא נחוץ */
 
 header h1 {
     display: none; /* מסיר ומעלים את הטקסט לחלוטין מהתצוגה */
