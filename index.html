@@ -2751,6 +2751,12 @@ header h1 {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+           firebase.firestore().settings({
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+});
+firebase.firestore().enablePersistence({ synchronizeTabs: true })
+    .catch(err => console.warn('Persistence:', err));
+           
         const productsContainer = document.getElementById('products-container');
         const cartItemsList = document.getElementById('cart-items');
         const cartSubtotalElement = document.getElementById('cart-subtotal');
@@ -3913,16 +3919,13 @@ function applySettingsDoc(doc) {
 }
 
 function loadSettings() {
-    try {
-        db.collection('Settings').doc('main').onSnapshot(doc => {
-            applySettingsDoc(doc);
-        }, err => {
-            console.warn('onSnapshot failed, falling back:', err);
-            db.collection('Settings').doc('main').get().then(applySettingsDoc).catch(console.error);
+    return db.collection('Settings').doc('main').get()
+        .then(applySettingsDoc)
+        .catch(err => {
+            console.error('Settings error:', err);
+            settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
+            subCategoriesMap = {};
         });
-    } catch(e) {
-        db.collection('Settings').doc('main').get().then(applySettingsDoc).catch(console.error);
-    }
 }
 
 function fetchProducts() {
@@ -3945,7 +3948,7 @@ function fetchProducts() {
     };
 
     try {
-        db.collection('soccer_shirts').onSnapshot(applyProducts, onError);
+        db.collection('soccer_shirts').get().then(applyProducts).catch(onError);
     } catch(e) {
         onError(e);
     }
