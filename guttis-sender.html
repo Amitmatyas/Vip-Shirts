@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מרכז שליחת חשבוניות — VIP Shirts × גוטיס</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d0d0d;
+            --surface: #161616;
+            --surface2: #1f1f1f;
+            --border: #2a2a2a;
+            --accent: #c8f135;
+            --accent-dim: rgba(200,241,53,0.12);
+            --text: #f0f0f0;
+            --muted: #666;
+            --danger: #ff4d4d;
+            --success: #4dff91;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; direction: rtl; }
+
+        /* ── NAV ── */
+        .topnav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 28px; border-bottom: 1px solid var(--border);
+            background: var(--surface); position: sticky; top: 0; z-index: 200;
+        }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand img { height: 32px; filter: brightness(0) invert(1); opacity: 0.8; }
+        .brand .sep { width: 1px; height: 26px; background: var(--border); }
+        .brand .title { font-size: 0.8rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); }
+        .nav-right { display: flex; align-items: center; gap: 14px; }
+        .stat-pill { display: flex; align-items: center; gap: 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 0.82rem; }
+        .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+        .refresh-btn { background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 10px; color: var(--accent); font-family: inherit; font-size: 0.85rem; padding: 9px 16px; cursor: pointer; font-weight: 700; transition: all .2s; }
+        .refresh-btn:hover { background: var(--accent); color: #000; }
+
+        /* ── MAIN ── */
+        .main { padding: 28px; max-width: 1100px; margin: 0 auto; }
+
+        /* ── TOOLBAR ── */
+        .toolbar { display: flex; gap: 10px; margin-bottom: 22px; flex-wrap: wrap; align-items: center; }
+        .search-box { position: relative; flex: 1; min-width: 200px; }
+        .search-box input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 0.9rem; padding: 10px 14px 10px 38px; outline: none; transition: border-color .2s; }
+        .search-box input:focus { border-color: var(--accent); }
+        .search-box input::placeholder { color: var(--muted); }
+        .search-box .sicon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+        .filter-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 0.85rem; padding: 10px 16px; cursor: pointer; transition: all .2s; font-weight: 600; }
+        .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+
+        /* ── LOADER ── */
+        .loader { text-align: center; padding: 80px 0; color: var(--muted); }
+        .spinner { width: 38px; height: 38px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── GRID ── */
+        .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+
+        /* ── CARD ── */
+        .order-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 20px; cursor: pointer;
+            transition: all .2s; position: relative; overflow: hidden;
+        }
+        .order-card::before { content: ''; position: absolute; top: 0; right: 0; width: 3px; height: 100%; background: var(--border); transition: background .2s; }
+        .order-card:hover { border-color: #3a3a3a; transform: translateY(-2px); }
+        .order-card:hover::before { background: var(--accent); }
+
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .order-name { font-size: 1rem; font-weight: 800; }
+        .order-id { font-size: 0.7rem; color: var(--muted); font-family: monospace; margin-top: 2px; }
+        .order-total { font-size: 1.1rem; font-weight: 800; color: var(--accent); }
+
+        .card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .meta-tag { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 9px; font-size: 0.74rem; color: var(--muted); }
+        .meta-tag.em { color: #7eb8ff; border-color: rgba(126,184,255,.2); background: rgba(126,184,255,.05); }
+
+        .card-preview { font-size: 0.79rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 10px; margin-bottom: 14px; line-height: 1.5; }
+
+        /* expand toggle */
+        .card-expand-btn { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: inherit; font-size: 0.8rem; padding: 8px; cursor: pointer; transition: all .2s; margin-bottom: 10px; text-align: center; font-weight: 600; }
+        .card-expand-btn:hover { border-color: #444; color: var(--text); }
+
+        /* order details panel inside card */
+        .card-details { display: none; border-top: 1px solid var(--border); padding-top: 14px; margin-bottom: 12px; }
+        .card-details.open { display: block; }
+        .detail-section { margin-bottom: 14px; }
+        .detail-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+        .detail-value { font-size: 0.84rem; line-height: 1.65; color: var(--text); }
+        .detail-value strong { display: block; font-weight: 800; }
+
+        /* items list inside card */
+        .items-list { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 6px; }
+        .items-list th { background: var(--surface2); color: var(--muted); padding: 6px 10px; text-align: right; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; }
+        .items-list th:first-child { border-radius: 0 6px 6px 0; }
+        .items-list th:last-child { border-radius: 6px 0 0 6px; text-align: left; }
+        .items-list td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .items-list td:last-child { text-align: left; font-weight: 700; color: var(--accent); }
+        .items-list tr:last-child td { border-bottom: none; }
+        .item-nm { font-weight: 700; margin-bottom: 2px; }
+        .item-op { font-size: 0.73rem; color: var(--muted); line-height: 1.4; }
+
+        .totals-mini { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .tm-row { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--muted); padding: 3px 0; }
+        .tm-row.fin { font-weight: 800; color: var(--text); font-size: 0.9rem; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 8px; }
+        .tm-row .v { font-weight: 600; color: var(--text); }
+        .tm-row.fin .v { color: var(--accent); }
+
+        .inv-link-btn { display: block; width: 100%; margin-top: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: #7eb8ff; font-family: inherit; font-size: 0.82rem; padding: 8px; cursor: pointer; text-align: center; font-weight: 700; text-decoration: none; transition: all .2s; }
+        .inv-link-btn:hover { border-color: #7eb8ff; background: rgba(126,184,255,.07); }
+
+        /* send area */
+        .send-area { display: flex; gap: 8px; }
+        .send-btn { flex: 1; background: var(--accent); color: #000; border: none; border-radius: 9px; padding: 11px; font-family: inherit; font-size: 0.88rem; font-weight: 800; cursor: pointer; transition: all .2s; }
+        .send-btn:hover { background: #d4f545; }
+        .send-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+        .sent-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(77,255,145,.1); border: 1px solid rgba(77,255,145,.3); color: var(--success); border-radius: 7px; padding: 5px 12px; font-size: 0.78rem; font-weight: 700; width: 100%; justify-content: center; }
+
+        /* ── SEND MODAL ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 500; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 30px; width: 90%; max-width: 460px; }
+        .modal h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: var(--accent); }
+        .modal .sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 22px; }
+        .field { margin-bottom: 16px; }
+        .field label { display: block; font-size: 0.75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+        .field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: inherit; font-size: 0.9rem; padding: 10px 13px; outline: none; transition: border-color .2s; }
+        .field input:focus { border-color: var(--accent); }
+        .radio-group { display: flex; gap: 10px; }
+        .radio-opt { flex: 1; }
+        .radio-opt input[type=radio] { display: none; }
+        .radio-opt label { display: block; background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: 0.85rem; font-weight: 600; cursor: pointer; text-align: center; transition: all .2s; color: var(--muted); }
+        .radio-opt input[type=radio]:checked + label { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+        .custom-email-field { margin-top: 12px; display: none; }
+        .custom-email-field.visible { display: block; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-send-now { flex: 1; background: var(--accent); color: #000; border: none; border-radius: 9px; padding: 13px; font-family: inherit; font-weight: 800; font-size: 0.92rem; cursor: pointer; transition: all .2s; }
+        .btn-send-now:hover { background: #d4f545; }
+        .btn-cancel { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 9px; padding: 13px 18px; font-family: inherit; font-weight: 600; cursor: pointer; }
+
+        /* ── TOAST ── */
+        .toast-container { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 999; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .toast { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; font-size: 0.86rem; font-weight: 600; animation: slideUp .3s ease; max-width: 320px; text-align: center; }
+        .toast.success { border-color: rgba(77,255,145,.4); color: var(--success); }
+        .toast.error   { border-color: rgba(255,77,77,.4);  color: var(--danger); }
+        @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+        .empty { text-align: center; padding: 80px 0; color: var(--muted); }
+        .empty .icon { font-size: 2.4rem; margin-bottom: 12px; }
+
+        @media(max-width:600px) { .main{padding:14px} .topnav{padding:12px 14px} .orders-grid{grid-template-columns:1fr} .nav-right .stat-pill{display:none} }
+    </style>
+</head>
+<body>
+
+<nav class="topnav">
+    <div class="brand">
+        <img src="https://i.ibb.co/MkgM6wwD/3554-E7-D6-78-B2-43-C1-947-D-CD4-B1-D37-A560-2.png" alt="VIP Shirts">
+        <div class="sep"></div>
+        <div class="title">Invoice Sender</div>
+    </div>
+    <div class="nav-right">
+        <div class="stat-pill"><div class="dot"></div><span id="stat-total">טוען...</span></div>
+        <button class="refresh-btn" onclick="loadOrders()">↻ רענן</button>
+    </div>
+</nav>
+
+<div class="main">
+    <div class="toolbar">
+        <div class="search-box">
+            <span class="sicon">🔍</span>
+            <input type="text" id="search-input" placeholder="חפש לפי שם, אימייל, מספר הזמנה..." oninput="renderOrders()">
+        </div>
+        <button class="filter-btn active" id="filter-all"    onclick="setFilter('all')">הכל</button>
+        <button class="filter-btn"        id="filter-unsent" onclick="setFilter('unsent')">טרם נשלח</button>
+        <button class="filter-btn"        id="filter-sent"   onclick="setFilter('sent')">נשלח ✓</button>
+    </div>
+
+    <div id="loader" class="loader"><div class="spinner"></div><div>טוען הזמנות...</div></div>
+    <div id="orders-container" class="orders-grid" style="display:none;"></div>
+    <div id="empty-state" class="empty" style="display:none;"><div class="icon">📭</div><div>לא נמצאו הזמנות</div></div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<!-- SEND MODAL -->
+<div class="modal-overlay" id="send-modal">
+    <div class="modal">
+        <h2>📤 שליחת חשבונית</h2>
+        <div class="sub" id="modal-order-info">הזמנה #—</div>
+
+        <div class="field">
+            <label>שלח אל:</label>
+            <div class="radio-group">
+                <div class="radio-opt">
+                    <input type="radio" name="email-dest" id="dest-order" value="order" checked onchange="toggleCustomEmail()">
+                    <label for="dest-order">📧 מייל ההזמנה</label>
+                </div>
+                <div class="radio-opt">
+                    <input type="radio" name="email-dest" id="dest-custom" value="custom" onchange="toggleCustomEmail()">
+                    <label for="dest-custom">✏️ מותאם אישית</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="custom-email-field" id="custom-email-wrap">
+            <div class="field">
+                <label>כתובת מייל מותאמת</label>
+                <input type="email" id="custom-email-input" placeholder="example@email.com">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-send-now" onclick="confirmSend()">✈️ שלח עכשיו</button>
+            <button class="btn-cancel" onclick="closeModal()">ביטול</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script>
+// ── FIREBASE ──────────────────────────────────────────────────────
+firebase.initializeApp({
+    apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+    authDomain: "timetable-titus.firebaseapp.com",
+    projectId: "timetable-titus",
+    storageBucket: "timetable-titus.firebasestorage.app",
+    messagingSenderId: "199146911555",
+    appId: "1:199146911155:web:5d9436d716dfc6de7361f6"
+});
+const db = firebase.firestore();
+
+// ── EMAILJS ───────────────────────────────────────────────────────
+const EJS = {
+    pubkey:   'lg3bO3V98b_NSySt6',
+    service:  'service_b3uqkgg',
+    template: 'VIPGUTTIS'
+};
+emailjs.init(EJS.pubkey);
+
+// ── STATE ─────────────────────────────────────────────────────────
+let allOrders    = [];
+let sentSet      = new Set(JSON.parse(localStorage.getItem('sent_invoices') || '[]'));
+let currentFilter = 'all';
+let pendingOrderId = null;   // order waiting for modal confirm
+
+// ── LOAD ──────────────────────────────────────────────────────────
+async function loadOrders() {
+    document.getElementById('loader').style.display = 'block';
+    document.getElementById('orders-container').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'none';
+    try {
+        const snap = await db.collection('orders').orderBy('orderDate', 'desc').limit(200).get();
+        allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        document.getElementById('stat-total').textContent = allOrders.length + ' הזמנות';
+        renderOrders();
+    } catch (e) {
+        console.error(e);
+        document.getElementById('loader').innerHTML = '<div style="color:#ff4d4d;">שגיאה בטעינה</div>';
+    }
+}
+
+// ── FILTER ────────────────────────────────────────────────────────
+function setFilter(f) {
+    currentFilter = f;
+    ['all','unsent','sent'].forEach(x =>
+        document.getElementById('filter-' + x)?.classList.toggle('active', x === f)
+    );
+    renderOrders();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────
+function renderOrders() {
+    const q = (document.getElementById('search-input').value || '').trim().toLowerCase();
+    const filtered = allOrders.filter(o => {
+        const match = !q ||
+            (o.customerName  || '').toLowerCase().includes(q) ||
+            (o.customerEmail || '').toLowerCase().includes(q) ||
+            o.id.toLowerCase().includes(q);
+        const sent = sentSet.has(o.id);
+        const fMatch = currentFilter === 'all' ? true : currentFilter === 'sent' ? sent : !sent;
+        return match && fMatch;
+    });
+
+    const cont = document.getElementById('orders-container');
+    document.getElementById('loader').style.display = 'none';
+
+    if (!filtered.length) {
+        cont.style.display = 'none';
+        document.getElementById('empty-state').style.display = 'block';
+        return;
+    }
+    document.getElementById('empty-state').style.display = 'none';
+    cont.style.display = 'grid';
+    cont.innerHTML = filtered.map(buildCard).join('');
+}
+
+// ── BUILD CARD ────────────────────────────────────────────────────
+function buildCard(o) {
+    const isSent  = sentSet.has(o.id);
+    const shortId = o.id.substring(0, 8).toUpperCase();
+    const date    = o.orderDate
+        ? o.orderDate.toDate().toLocaleDateString('he-IL', { day:'numeric', month:'long', year:'numeric' })
+        : '—';
+    const items     = o.items || [];
+    const itemCount = items.reduce((s, i) => s + (i.quantity || 1), 0);
+    const preview   = items.slice(0,2).map(i => i.productName || i.name || '').filter(Boolean).join(', ')
+                    + (items.length > 2 ? ` ועוד ${items.length - 2}...` : '');
+    const total     = '₪' + (parseFloat(o.totalAmount) || 0).toLocaleString('he-IL');
+    const shipping  = parseFloat(o.shippingCost) || 0;
+    const subtotal  = parseFloat(o.subtotal) || 0;
+    const invoiceURL = `https://vipshirts.ftp.sh/guttis-invoice#${o.id}`;
+
+    // items rows for expanded view
+    const itemsRows = items.map(item => {
+        const isFree = item.isFreebie;
+        const price  = isFree ? 0 : (parseFloat(item.price) || 0);
+        const qty    = item.quantity || 1;
+        let opts = '';
+        if (item.selectedOptions) {
+            opts = Object.entries(item.selectedOptions).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(' | ');
+        }
+        return `<tr>
+            <td><div class="item-nm">${isFree ? '<span style="color:#4dff91;font-size:0.7rem;">[מתנה] </span>' : ''}${item.productName || item.name || '—'}</div>${opts ? `<div class="item-op">${opts}</div>` : ''}</td>
+            <td style="text-align:center;">${qty}</td>
+            <td>${isFree ? '<span style="color:#4dff91;">חינם</span>' : '₪' + (price * qty).toFixed(2)}</td>
+        </tr>`;
+    }).join('');
+
+    const couponRow = o.appliedCoupon
+        ? `<div class="tm-row"><span>קופון (${o.appliedCoupon})</span><span class="v" style="color:#4dff91;">−₪${(subtotal + shipping - (parseFloat(o.totalAmount)||0)).toFixed(2)}</span></div>`
+        : '';
+
+    const sendArea = isSent
+        ? `<div class="sent-badge">✓ חשבונית נשלחה</div>`
+        : `<div class="send-area">
+            <button class="send-btn" onclick="openModal('${o.id}', event)">📤 שלח חשבונית</button>
+          </div>`;
+
+    return `
+    <div class="order-card" id="card-${o.id}">
+        <div class="card-top">
+            <div>
+                <div class="order-name">${o.customerName || '—'}</div>
+                <div class="order-id">#${shortId}</div>
+            </div>
+            <div class="order-total">${total}</div>
+        </div>
+        <div class="card-meta">
+            <span class="meta-tag">📅 ${date}</span>
+            <span class="meta-tag">📦 ${itemCount} פריטים</span>
+            <span class="meta-tag em">✉️ ${o.customerEmail || '—'}</span>
+        </div>
+        <div class="card-preview">${preview}</div>
+
+        <button class="card-expand-btn" onclick="toggleDetails('${o.id}', this)">▼ הצג פרטי הזמנה</button>
+
+        <div class="card-details" id="details-${o.id}">
+            <div class="detail-section">
+                <div class="detail-label">פרטי לקוח</div>
+                <div class="detail-value">
+                    <strong>${o.customerName || '—'}</strong>
+                    ${o.customerPhone || ''}${o.customerPhone && o.customerEmail ? '<br>' : ''}${o.customerEmail || ''}
+                    ${o.customerAddress ? '<br>' + o.customerAddress : ''}
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-label">מוצרים</div>
+                <table class="items-list">
+                    <thead><tr><th>מוצר</th><th style="text-align:center;width:48px;">כמות</th><th style="text-align:left;width:80px;">סה"כ</th></tr></thead>
+                    <tbody>${itemsRows}</tbody>
+                </table>
+                <div class="totals-mini">
+                    <div class="tm-row"><span>סכום מוצרים</span><span class="v">₪${subtotal.toFixed(2)}</span></div>
+                    <div class="tm-row"><span>משלוח</span><span class="v">${shipping === 0 ? 'חינם' : '₪' + shipping.toFixed(2)}</span></div>
+                    ${couponRow}
+                    <div class="tm-row fin"><span>סה"כ לתשלום</span><span class="v">${total}</span></div>
+                </div>
+            </div>
+
+            ${o.orderNotes && o.orderNotes !== 'אין הערות' ? `<div class="detail-section"><div class="detail-label">הערות</div><div class="detail-value">${o.orderNotes}</div></div>` : ''}
+
+            <a class="inv-link-btn" href="${invoiceURL}" target="_blank">🔗 פתח חשבונית מלאה ↗</a>
+        </div>
+
+        ${sendArea}
+    </div>`;
+}
+
+// ── TOGGLE DETAILS ────────────────────────────────────────────────
+function toggleDetails(id, btn) {
+    const panel = document.getElementById('details-' + id);
+    const isOpen = panel.classList.toggle('open');
+    btn.textContent = isOpen ? '▲ הסתר פרטים' : '▼ הצג פרטי הזמנה';
+}
+
+// ── SEND MODAL ────────────────────────────────────────────────────
+function openModal(orderId, e) {
+    e.stopPropagation();
+    pendingOrderId = orderId;
+    const o = allOrders.find(x => x.id === orderId);
+    document.getElementById('modal-order-info').textContent =
+        `הזמנה #${orderId.substring(0,8).toUpperCase()} — ${o?.customerName || ''} (${o?.customerEmail || ''})`;
+    document.getElementById('dest-order').checked = true;
+    document.getElementById('custom-email-input').value = '';
+    document.getElementById('custom-email-wrap').classList.remove('visible');
+    document.getElementById('send-modal').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('send-modal').classList.remove('open');
+    pendingOrderId = null;
+}
+
+function toggleCustomEmail() {
+    const isCustom = document.getElementById('dest-custom').checked;
+    document.getElementById('custom-email-wrap').classList.toggle('visible', isCustom);
+}
+
+// ── CONFIRM & SEND ────────────────────────────────────────────────
+async function confirmSend() {
+    if (!pendingOrderId) return;
+    const o = allOrders.find(x => x.id === pendingOrderId);
+    if (!o) return;
+
+    const isCustom = document.getElementById('dest-custom').checked;
+    let toEmail = o.customerEmail;
+    if (isCustom) {
+        const val = document.getElementById('custom-email-input').value.trim();
+        if (!val || !val.includes('@')) { toast('⚠️ הכנס כתובת מייל תקינה', 'error'); return; }
+        toEmail = val;
+    }
+
+    closeModal();
+
+    // disable send button
+    const btn = document.querySelector(`#card-${pendingOrderId || o.id} .send-btn`);
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ שולח...'; }
+
+    try {
+        const shipping  = parseFloat(o.shippingCost) || 0;
+        const subtotal  = parseFloat(o.subtotal) || 0;
+        const date = o.orderDate
+            ? o.orderDate.toDate().toLocaleString('he-IL', { year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' })
+            : new Date().toLocaleString('he-IL');
+
+        const invoiceURL = `https://vipshirts.ftp.sh/guttis-invoice#${o.id}`;
+
+        const params = {
+            to_email:        toEmail,
+            to_name:         o.customerName || '',
+            name:            o.customerName || '',
+            email:           o.customerEmail || '',
+            phone:           o.customerPhone || '',
+            address:         o.customerAddress || '',
+            order_id:        o.id.substring(0, 8).toUpperCase(),
+            full_order_id:   o.id,
+            date:            date,
+            products_list:   buildProductsHTML(o.items || []),
+            subtotal:        subtotal.toFixed(2),
+            coupon_code:     o.appliedCoupon || '',
+            discount_amount: o.appliedCoupon
+                ? (subtotal + shipping - (parseFloat(o.totalAmount)||0)).toFixed(2)
+                : '0.00',
+            shipping_cost:   shipping === 0 ? 'חינם' : '₪' + shipping.toFixed(2),
+            total_amount:    (parseFloat(o.totalAmount) || 0).toFixed(2),
+            order_notes:     (o.orderNotes && o.orderNotes !== 'אין הערות' && o.orderNotes !== 'ללא הערות') ? o.orderNotes : '',
+            invoice_url:     invoiceURL
+        };
+
+        await emailjs.send(EJS.service, EJS.template, params);
+
+        sentSet.add(o.id);
+        localStorage.setItem('sent_invoices', JSON.stringify([...sentSet]));
+
+        // update card UI
+        const card = document.getElementById('card-' + o.id);
+        if (card) {
+            const sa = card.querySelector('.send-area');
+            if (sa) sa.outerHTML = `<div class="sent-badge">✓ חשבונית נשלחה ל-${toEmail}</div>`;
+        }
+
+        toast(`✅ נשלח בהצלחה ל-${toEmail}`, 'success');
+
+    } catch (err) {
+        console.error(err);
+        if (btn) { btn.disabled = false; btn.textContent = '📤 שלח חשבונית'; }
+        toast('❌ שגיאה בשליחה: ' + (err.text || err.message || 'נסה שוב'), 'error');
+    }
+}
+
+// ── BUILD PRODUCTS HTML (for email) ──────────────────────────────
+function buildProductsHTML(items) {
+    return items.map(item => {
+        const isFree = item.isFreebie;
+        const price  = isFree ? 0 : (parseFloat(item.price) || 0);
+        const qty    = item.quantity || 1;
+        let opts = '';
+        if (item.selectedOptions) {
+            opts = Object.entries(item.selectedOptions).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(' | ');
+        }
+        return `<tr>
+<td style="padding:12px;border-bottom:1px solid #eee;text-align:right;vertical-align:top;">
+  <div style="font-weight:bold;margin-bottom:4px;">${isFree ? '<span style="background:#eafff2;color:#27ae60;font-size:11px;padding:2px 7px;border-radius:4px;margin-left:6px;">מתנה</span>' : ''}${item.productName || item.name || '—'}</div>
+  ${opts ? `<div style="font-size:13px;color:#666;">(${opts})</div>` : ''}
+</td>
+<td style="padding:12px;border-bottom:1px solid #eee;text-align:center;">${qty}</td>
+<td style="padding:12px;border-bottom:1px solid #eee;text-align:center;">${isFree ? '<span style="color:#27ae60;">חינם</span>' : `<span style="color:#e74c3c;font-weight:bold;">₪${price.toFixed(2)}</span>`}</td>
+<td style="padding:12px;border-bottom:1px solid #eee;text-align:left;font-weight:bold;">${isFree ? '<span style="color:#27ae60;">חינם</span>' : '₪' + (price*qty).toFixed(2)}</td>
+</tr>`;
+    }).join('');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function toast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    document.getElementById('toast-container').appendChild(t);
+    setTimeout(() => t.remove(), 4500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.onload = loadOrders;
+</script>
+</body>
+</html>
