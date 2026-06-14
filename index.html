@@ -2353,6 +2353,9 @@ header h1 {
     font-family: 'Heebo', Arial, sans-serif;
     transition: background 0.2s, transform 0.15s;
     text-decoration: none;
+    /* fix: ensure pointer events work */
+    position: relative;
+    z-index: 1;
 }
 
 .mw-shirt-btn:hover {
@@ -2365,6 +2368,7 @@ header h1 {
     height: 26px;
     object-fit: contain;
     border-radius: 4px;
+    pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -5028,51 +5032,70 @@ async function translateTeamName(englishName) {
     } catch(e) { return englishName; }
 }
 
+/* ────────────────────────────────────────────────
+   MATCH WIDGET — shows only the next/live match
+   with a countdown timer until kickoff
+   ──────────────────────────────────────────────── */
 async function renderMatchWidget(cfg) {
     const widget = document.getElementById('match-widget');
     if (!widget) return;
-    if (!cfg.showMatch) { widget.style.display = 'none'; return; }
+
+    // Hide widget if mode doesn't include match
+    const mode = cfg.displayMode || (cfg.showMatch ? 'both' : 'countdown_only');
+    if (mode === 'countdown_only' || mode === 'none') {
+        widget.style.display = 'none';
+        return;
+    }
 
     try {
         const response = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
         const data = await response.json();
         if (!data.events || data.events.length === 0) { widget.style.display = 'none'; return; }
 
-        const liveMatch = data.events.find(e => e.status.type.state === "in");
-        const match = liveMatch || (() => {
-            const upcoming = data.events.filter(e => e.status.type.state === "pre");
-            return upcoming.length > 0 ? upcoming.sort((a,b) => new Date(a.date)-new Date(b.date))[0] : null;
+        // Priority: live match first, then next upcoming
+        const liveMatch = data.events.find(e => e.status.type.state === 'in');
+        const nextMatch = (() => {
+            const upcoming = data.events
+                .filter(e => e.status.type.state === 'pre')
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+            return upcoming.length > 0 ? upcoming[0] : null;
         })();
 
+        const match = liveMatch || nextMatch;
         if (!match) { widget.style.display = 'none'; return; }
 
         const competition = match.competitions[0];
         const home = competition.competitors.find(c => c.homeAway === 'home');
         const away = competition.competitors.find(c => c.homeAway === 'away');
-        const isLive = match.status.type.state === "in";
+        const isLive = match.status.type.state === 'in';
 
         const homeName = await translateTeamName(home.team.displayName);
         const awayName = await translateTeamName(away.team.displayName);
+        const DEFAULT_LOGO = 'https://a.espncdn.com/i/teamlogos/default-soccer.png';
 
-        const defaultLogo = 'https://a.espncdn.com/i/teamlogos/default-soccer.png';
+        // Shirt buttons — look up by match id in cfg.matchShirts
+        const matchId  = match.id;
+        const shirts   = (cfg.matchShirts || {})[matchId] || {};
+        const homeShirt = shirts.home || {};
+        const awayShirt = shirts.away || {};
 
-        // כפתורי חולצה
-        const homeShirt = cfg.homeShirt || {};
-        const awayShirt = cfg.awayShirt || {};
+        function makeShirtBtn(shirtCfg, teamName) {
+            if (!shirtCfg.productName) return '';
+            const label = shirtCfg.btnText || `חולצת ${teamName}`;
+            const imgTag = shirtCfg.image
+                ? `<img src="${shirtCfg.image}" alt="">`
+                : '';
+            return `<button class="mw-shirt-btn" onclick="openShirtByName('${shirtCfg.productName.replace(/'/g,"\\'")}')">
+                        ${imgTag}🛒 ${label}
+                    </button>`;
+        }
 
-        const homeShirtBtn = homeShirt.productName ? `
-            <button class="mw-shirt-btn" onclick="openShirtByName('${homeShirt.productName.replace(/'/g,"\\'")}')">
-                ${homeShirt.image ? `<img src="${homeShirt.image}" alt="">` : ''}
-                ${homeShirt.btnText || '🛒 חולצת הבית'}
-            </button>` : '';
-
-        const awayShirtBtn = awayShirt.productName ? `
-            <button class="mw-shirt-btn" onclick="openShirtByName('${awayShirt.productName.replace(/'/g,"\\'")}')">
-                ${awayShirt.image ? `<img src="${awayShirt.image}" alt="">` : ''}
-                ${awayShirt.btnText || '🛒 חולצת החוץ'}
-            </button>` : '';
-
-        const shirtRow = (homeShirtBtn || awayShirtBtn) ? `<div class="mw-shirts">${homeShirtBtn}${awayShirtBtn}</div>` : '';
+        const shirtRow = (homeShirt.productName || awayShirt.productName)
+            ? `<div class="mw-shirts">
+                   ${makeShirtBtn(homeShirt, homeName)}
+                   ${makeShirtBtn(awayShirt, awayName)}
+               </div>`
+            : '';
 
         if (isLive) {
             widget.innerHTML = `
@@ -5081,7 +5104,7 @@ async function renderMatchWidget(cfg) {
                 </div>
                 <div class="mw-teams">
                     <div class="mw-team">
-                        <img src="${home.team.logo || defaultLogo}" alt="${homeName}">
+                        <img src="${home.team.logo || DEFAULT_LOGO}" alt="${homeName}">
                         <div class="mw-team-name">${homeName}</div>
                         <div class="mw-score">${home.score}</div>
                     </div>
@@ -5090,7 +5113,7 @@ async function renderMatchWidget(cfg) {
                         <div class="mw-clock">${match.status.type.detail}</div>
                     </div>
                     <div class="mw-team">
-                        <img src="${away.team.logo || defaultLogo}" alt="${awayName}">
+                        <img src="${away.team.logo || DEFAULT_LOGO}" alt="${awayName}">
                         <div class="mw-team-name">${awayName}</div>
                         <div class="mw-score">${away.score}</div>
                     </div>
@@ -5098,30 +5121,60 @@ async function renderMatchWidget(cfg) {
                 ${shirtRow}
             `;
         } else {
-            const matchTime = new Date(match.date).toLocaleString('he-IL', {day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'});
+            // Upcoming — show countdown timer until kickoff
+            const matchDate = new Date(match.date);
+            const matchTimeStr = matchDate.toLocaleString('he-IL', {
+                day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
             widget.innerHTML = `
                 <div style="text-align:center;">
-                    <div class="mw-upcoming-label">⚽ המשחק הבא · ${matchTime}</div>
+                    <div class="mw-upcoming-label">⚽ המשחק הבא · ${matchTimeStr}</div>
                 </div>
                 <div class="mw-teams">
                     <div class="mw-team">
-                        <img src="${home.team.logo || defaultLogo}" alt="${homeName}">
+                        <img src="${home.team.logo || DEFAULT_LOGO}" alt="${homeName}">
                         <div class="mw-team-name">${homeName}</div>
                     </div>
                     <div class="mw-middle">
                         <div class="mw-vs">נגד</div>
+                        <div id="match-countdown-widget" style="margin-top:6px;"></div>
                     </div>
                     <div class="mw-team">
-                        <img src="${away.team.logo || defaultLogo}" alt="${awayName}">
+                        <img src="${away.team.logo || DEFAULT_LOGO}" alt="${awayName}">
                         <div class="mw-team-name">${awayName}</div>
                     </div>
                 </div>
                 ${shirtRow}
             `;
+
+            // Start in-widget countdown
+            if (window._matchWidgetCountdownIv) clearInterval(window._matchWidgetCountdownIv);
+            const cdEl = document.getElementById('match-countdown-widget');
+            function tickMatch() {
+                const diff = matchDate - Date.now();
+                if (!cdEl) { clearInterval(window._matchWidgetCountdownIv); return; }
+                if (diff <= 0) {
+                    cdEl.innerHTML = '<div class="mw-clock">המשחק מתחיל!</div>';
+                    clearInterval(window._matchWidgetCountdownIv);
+                    return;
+                }
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                const parts = [];
+                if (d > 0) parts.push(`${d}י`);
+                parts.push(String(h).padStart(2,'0'));
+                parts.push(String(m).padStart(2,'0'));
+                parts.push(String(s).padStart(2,'0'));
+                cdEl.innerHTML = `<div class="mw-clock" style="font-size:1em;letter-spacing:1px;">${parts.join(':')}</div>`;
+            }
+            tickMatch();
+            window._matchWidgetCountdownIv = setInterval(tickMatch, 1000);
         }
 
         widget.style.display = 'block';
-
     } catch(e) {
         console.error('Match widget error:', e);
         widget.style.display = 'none';
@@ -5134,12 +5187,16 @@ async function loadCountdown() {
         if (!doc.exists) return;
         const cfg = doc.data();
         countdownCfg = cfg;
-        if (!cfg.enabled) return;
+
+        const mode = cfg.displayMode || (cfg.enabled ? (cfg.showMatch ? 'both' : 'countdown_only') : 'none');
+        if (mode === 'none') return;
 
         const section = document.getElementById('countdown-section');
         section.style.display = 'block';
 
-        document.getElementById('countdown-title').textContent = cfg.title || '';
+        // Custom countdown (shown for 'both' and 'countdown_only')
+        const showCustom = (mode === 'both' || mode === 'countdown_only');
+        document.getElementById('countdown-title').textContent = showCustom ? (cfg.title || '') : '';
 
         if (cfg.bgImage) {
             document.getElementById('countdown-bg').style.backgroundImage = `url('${cfg.bgImage}')`;
@@ -5153,8 +5210,12 @@ async function loadCountdown() {
         document.querySelectorAll('.cd-colon').forEach(el => el.style.color = numColor);
         document.querySelectorAll('.cd-box').forEach(el => el.style.background = boxColor);
 
+        // Show/hide custom countdown boxes
+        const cdBoxesEl = document.querySelector('.countdown-boxes');
+        if (cdBoxesEl) cdBoxesEl.style.display = showCustom ? '' : 'none';
+
         const btn = document.getElementById('countdown-btn');
-        if (cfg.btnText) {
+        if (showCustom && cfg.btnText) {
             btn.textContent = cfg.btnText;
             btn.style.display = 'inline-block';
             btn.onclick = function(e) {
@@ -5165,7 +5226,7 @@ async function loadCountdown() {
             btn.style.display = 'none';
         }
 
-        if (cfg.targetDate) {
+        if (showCustom && cfg.targetDate) {
             const target = new Date(cfg.targetDate);
             clearInterval(countdownInterval);
             function tick() {
@@ -5180,9 +5241,8 @@ async function loadCountdown() {
             countdownInterval = setInterval(tick, 1000);
         }
 
-        // טעינת ווידג'ט משחק
+        // Match widget (shown for 'both' and 'match_only')
         await renderMatchWidget(cfg);
-        // רענון כל 60 שניות
         clearInterval(matchWidgetInterval);
         matchWidgetInterval = setInterval(() => renderMatchWidget(cfg), 60000);
 
