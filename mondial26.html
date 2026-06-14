@@ -10,381 +10,193 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --surface2: #181818;
-  --surface3: #222222;
-  --border: rgba(255,255,255,0.08);
-  --border-strong: rgba(255,255,255,0.18);
-  --text: #f5f5f5;
-  --text2: #aaaaaa;
-  --text3: #555555;
-  --accent: #ffffff;
-  --radius: 14px;
+  --bg: #0a0a0a; --surface: #111111; --surface2: #181818; --surface3: #222222;
+  --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.18);
+  --text: #f5f5f5; --text2: #aaaaaa; --text3: #555555; --accent: #ffffff;
+  --green: #4caf50; --radius: 14px;
 }
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.96) translateY(10px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
+@keyframes fadeSlideIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes spin { to{transform:rotate(360deg)} }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes modalIn { from{opacity:0;transform:scale(0.96) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
 body {
-  font-family: 'Heebo', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  padding: 48px 20px 100px;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  font-family:'Heebo',sans-serif; background:var(--bg); color:var(--text);
+  min-height:100vh; padding:48px 20px 100px;
 }
+.page-header { max-width:700px;margin:0 auto 48px;display:flex;align-items:center;gap:16px;animation:fadeSlideIn .4s ease both; }
+.logo-mark { width:44px;height:44px;border:1.5px solid var(--border-strong);border-radius:10px;display:grid;place-items:center;font-size:1.2em;flex-shrink:0;background:var(--surface); }
+.page-title { font-size:1.25em;font-weight:700;letter-spacing:-.3px; }
+.page-sub { font-size:.75em;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace; }
 
-/* ── Header ── */
-.page-header {
-  max-width: 660px; margin: 0 auto 56px;
-  display: flex; align-items: center; gap: 18px;
-  animation: fadeSlideIn 0.5s ease both;
-}
-.logo-mark {
-  width: 44px; height: 44px;
-  border: 1.5px solid var(--border-strong); border-radius: 10px;
-  display: grid; place-items: center; font-size: 1.2em;
-  flex-shrink: 0; background: var(--surface);
-}
-.page-title { font-size: 1.25em; font-weight: 700; letter-spacing: -0.3px; }
-.page-sub   { font-size: 0.78em; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.card { max-width:700px;margin:0 auto 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;animation:fadeSlideIn .4s ease both; }
+.card:nth-child(2){animation-delay:.05s}.card:nth-child(3){animation-delay:.10s}
+.card:nth-child(4){animation-delay:.15s}.card:nth-child(5){animation-delay:.20s}
+.card:nth-child(6){animation-delay:.25s}.card:nth-child(7){animation-delay:.30s}
+.card:focus-within { border-color:var(--border-strong); }
+.card-header { padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px; }
+.card-icon { width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;display:grid;place-items:center;font-size:.85em;flex-shrink:0; }
+.card-title { font-size:.9em;font-weight:700;letter-spacing:.2px; }
+.card-body { padding:20px; }
 
-/* ── Cards ── */
-.card {
-  max-width: 660px; margin: 0 auto 16px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-  transition: border-color 0.25s; animation: fadeSlideIn 0.5s ease both;
+.field-group { margin-bottom:16px; }
+.field-group:last-child { margin-bottom:0; }
+label { display:block;font-size:.7em;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;font-family:'DM Mono',monospace; }
+input[type="text"],input[type="datetime-local"],textarea,select {
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;font-size:.9em;font-family:'Heebo',sans-serif;color:var(--text);
+  transition:border-color .2s,box-shadow .2s;outline:none;direction:rtl;appearance:none;
 }
-.card:nth-child(2){animation-delay:.06s}.card:nth-child(3){animation-delay:.12s}
-.card:nth-child(4){animation-delay:.18s}.card:nth-child(5){animation-delay:.24s}
-.card:nth-child(6){animation-delay:.30s}.card:nth-child(7){animation-delay:.36s}
-.card:focus-within { border-color: var(--border-strong); }
+input::placeholder,textarea::placeholder { color:var(--text3); }
+input:focus,textarea:focus,select:focus { border-color:rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(255,255,255,.05); }
+select option { background:var(--surface2); }
+.hint { font-size:.7em;color:var(--text3);margin-top:5px;font-family:'DM Mono',monospace; }
+.divider { border:none;border-top:1px solid var(--border);margin:4px 0 16px; }
 
-.card-header {
-  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 14px;
-}
-.card-icon {
-  width: 32px; height: 32px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 8px;
-  display: grid; place-items: center; font-size: 0.9em; flex-shrink: 0;
-}
-.card-title { font-size: 0.9em; font-weight: 700; letter-spacing: 0.2px; }
-.card-body  { padding: 22px; }
+/* Toggle */
+.toggle-row { display:flex;justify-content:space-between;align-items:center; }
+.toggle-info { flex:1;margin-left:12px; }
+.toggle-label { font-size:.88em;font-weight:600; }
+.toggle-desc { font-size:.73em;color:var(--text3);margin-top:2px;font-family:'DM Mono',monospace; }
+.toggle { position:relative;width:44px;height:23px;flex-shrink:0; }
+.toggle input { opacity:0;width:0;height:0; }
+.slider { position:absolute;inset:0;background:var(--surface3);border:1px solid var(--border-strong);border-radius:24px;cursor:pointer;transition:background .3s,border-color .3s; }
+.slider::before { content:'';position:absolute;width:17px;height:17px;left:2px;top:2px;background:var(--text3);border-radius:50%;transition:transform .3s,background .3s; }
+input:checked+.slider { background:var(--text);border-color:var(--text); }
+input:checked+.slider::before { transform:translateX(21px);background:var(--bg); }
 
-/* ── Fields ── */
-.field-group { margin-bottom: 18px; }
-.field-group:last-child { margin-bottom: 0; }
+/* Display mode selector */
+.mode-grid { display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:4px; }
+.mode-option { background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .2s,background .2s;display:flex;flex-direction:column;gap:5px; }
+.mode-option:hover { border-color:var(--border-strong); }
+.mode-option.selected { border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.04); }
+.mode-option input[type="radio"] { display:none; }
+.mode-title { font-size:.88em;font-weight:700;color:var(--text); }
+.mode-desc { font-size:.7em;color:var(--text3);font-family:'DM Mono',monospace; }
+.mode-icon { font-size:1.3em;margin-bottom:2px; }
 
-label {
-  display: block; font-size: 0.72em; font-weight: 600; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px;
-  font-family: 'DM Mono', monospace;
-}
+/* Color */
+.color-row { display:flex;align-items:center;gap:10px; }
+.color-row input[type="color"] { width:40px;height:40px;padding:2px;border-radius:8px;border:1px solid var(--border-strong);cursor:pointer;background:var(--surface2);flex-shrink:0; }
+.color-row input[type="text"] { flex:1; }
 
-input[type="text"], input[type="datetime-local"], textarea, select {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 9px; padding: 11px 14px; font-size: 0.92em;
-  font-family: 'Heebo', sans-serif; color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s; outline: none; direction: rtl;
-  appearance: none;
-}
-input::placeholder, textarea::placeholder { color: var(--text3); }
-input:focus, textarea:focus, select:focus {
-  border-color: rgba(255,255,255,0.35);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
-}
-select option { background: var(--surface2); }
-textarea { min-height: 70px; resize: vertical; }
-.hint { font-size: 0.72em; color: var(--text3); margin-top: 6px; font-family: 'DM Mono', monospace; }
+/* Upload */
+.upload-zone { border:1.5px dashed var(--border-strong);border-radius:10px;padding:24px 20px;text-align:center;cursor:pointer;transition:border-color .25s,background .25s;position:relative;overflow:hidden;background:var(--surface2); }
+.upload-zone:hover { border-color:rgba(255,255,255,.4);background:var(--surface3); }
+.upload-zone.drag-over { border-color:var(--accent);background:rgba(255,255,255,.04); }
+.upload-zone input[type="file"] { position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%; }
+.upload-icon { font-size:1.6em;margin-bottom:6px; }
+.upload-text { font-size:.83em;color:var(--text2);font-weight:600; }
+.upload-sub { font-size:.7em;color:var(--text3);margin-top:3px;font-family:'DM Mono',monospace; }
+.upload-progress { margin-top:12px;display:none;align-items:center;gap:10px; }
+.upload-progress.active { display:flex; }
+.progress-bar-track { flex:1;height:3px;background:var(--surface3);border-radius:99px;overflow:hidden; }
+.progress-bar-fill { height:100%;width:0%;border-radius:99px;transition:width .3s ease;background:linear-gradient(90deg,rgba(255,255,255,.3) 0%,rgba(255,255,255,1) 50%,rgba(255,255,255,.3) 100%);background-size:200% 100%;animation:shimmer 1.5s infinite; }
+.progress-label { font-size:.7em;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap; }
+.img-preview-wrap { margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--border);display:none;position:relative; }
+.img-preview-wrap img { width:100%;height:140px;object-fit:cover;display:block;filter:grayscale(40%) brightness(.7); }
+.img-clear-btn { position:absolute;top:8px;left:8px;width:24px;height:24px;background:rgba(0,0,0,.75);border:1px solid var(--border-strong);border-radius:50%;cursor:pointer;display:grid;place-items:center;font-size:.7em;color:var(--text2);transition:background .2s,color .2s;z-index:2; }
+.img-clear-btn:hover { background:#000;color:var(--text); }
 
-/* ── Toggle ── */
-.toggle-row { display: flex; justify-content: space-between; align-items: center; }
-.toggle-info { flex: 1; }
-.toggle-label { font-size: 0.9em; font-weight: 600; }
-.toggle { position: relative; width: 46px; height: 24px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.slider {
-  position: absolute; inset: 0; background: var(--surface3);
-  border: 1px solid var(--border-strong); border-radius: 24px; cursor: pointer;
-  transition: background 0.3s, border-color 0.3s;
-}
-.slider::before {
-  content: ''; position: absolute; width: 18px; height: 18px;
-  left: 2px; top: 2px; background: var(--text3); border-radius: 50%;
-  transition: transform 0.3s, background 0.3s;
-}
-input:checked + .slider { background: var(--text); border-color: var(--text); }
-input:checked + .slider::before { transform: translateX(22px); background: var(--bg); }
+/* Matches */
+.matches-toolbar { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px; }
+.matches-search { flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:.88em;font-family:'Heebo',sans-serif;color:var(--text);outline:none;direction:rtl;transition:border-color .2s; }
+.matches-search:focus { border-color:rgba(255,255,255,.35); }
+.matches-search::placeholder { color:var(--text3); }
+.refresh-btn { background:var(--surface2);border:1px solid var(--border-strong);color:var(--text2);border-radius:8px;padding:9px 14px;font-size:.82em;font-family:'Heebo',sans-serif;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;flex-shrink:0; }
+.refresh-btn:hover { background:rgba(255,255,255,.08);color:var(--text); }
 
-/* ── Color ── */
-.color-row { display: flex; align-items: center; gap: 10px; }
-.color-row input[type="color"] {
-  width: 42px; height: 42px; padding: 2px; border-radius: 9px;
-  border: 1px solid var(--border-strong); cursor: pointer;
-  background: var(--surface2); flex-shrink: 0;
-}
-.color-row input[type="text"] { flex: 1; }
+.matches-list { display:flex;flex-direction:column;gap:8px; }
+.matches-loading { text-align:center;padding:28px;font-size:.83em;color:var(--text3);font-family:'DM Mono',monospace; }
+.matches-empty { text-align:center;padding:24px;font-size:.83em;color:var(--text3); }
+.matches-error { text-align:center;padding:20px;font-size:.82em;color:#ff7070; }
 
-/* ── Upload ── */
-.upload-zone {
-  border: 1.5px dashed var(--border-strong); border-radius: 10px;
-  padding: 28px 20px; text-align: center; cursor: pointer;
-  transition: border-color 0.25s, background 0.25s;
-  position: relative; overflow: hidden; background: var(--surface2);
-}
-.upload-zone:hover { border-color: rgba(255,255,255,0.4); background: var(--surface3); }
-.upload-zone.drag-over { border-color: var(--accent); background: rgba(255,255,255,0.04); }
-.upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.upload-icon { font-size: 1.8em; margin-bottom: 8px; }
-.upload-text { font-size: 0.85em; color: var(--text2); font-weight: 600; }
-.upload-sub  { font-size: 0.72em; color: var(--text3); margin-top: 4px; font-family: 'DM Mono', monospace; }
+.match-item { background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:border-color .2s; }
+.match-item.has-shirts { border-color:rgba(80,200,80,.35); }
+.match-item.is-live { border-color:rgba(255,60,60,.35); }
+.match-header { display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;transition:background .15s; }
+.match-header:hover { background:rgba(255,255,255,.03); }
+.match-teams-preview { flex:1;display:flex;align-items:center;gap:7px;min-width:0; }
+.match-team-logo { width:20px;height:20px;object-fit:contain;flex-shrink:0; }
+.match-team-name { font-size:.82em;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px; }
+.match-vs { font-size:.7em;color:var(--text3);flex-shrink:0; }
+.match-score { font-size:.88em;font-weight:700;color:#4caf50;flex-shrink:0; }
+.match-date-badge { font-size:.65em;font-family:'DM Mono',monospace;color:var(--text3);background:var(--surface3);padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0; }
+.live-badge { font-size:.65em;font-weight:700;color:#ff4444;background:rgba(255,68,68,.15);border:1px solid rgba(255,68,68,.3);padding:3px 8px;border-radius:6px;flex-shrink:0; }
+.match-shirt-dot { width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.12);flex-shrink:0;transition:background .2s; }
+.match-item.has-shirts .match-shirt-dot { background:var(--green); }
+.match-chevron { font-size:.65em;color:var(--text3);transition:transform .2s;flex-shrink:0; }
+.match-item.open .match-chevron { transform:rotate(180deg); }
+.match-body { border-top:1px solid var(--border);padding:14px;display:none; }
+.match-item.open .match-body { display:block; }
 
-.upload-progress { margin-top: 14px; display: none; align-items: center; gap: 10px; }
-.upload-progress.active { display: flex; }
-.progress-bar-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
-.progress-bar-fill {
-  height: 100%; width: 0%; border-radius: 99px; transition: width 0.3s ease;
-  background: linear-gradient(90deg,rgba(255,255,255,0.3) 0%,rgba(255,255,255,1) 50%,rgba(255,255,255,0.3) 100%);
-  background-size: 200% 100%; animation: shimmer 1.5s infinite;
-}
-.progress-label { font-size: 0.72em; color: var(--text3); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.two-col { display:grid;grid-template-columns:1fr 1fr;gap:12px; }
+@media(max-width:520px){.two-col{grid-template-columns:1fr;}}
+.shirt-card { background:var(--surface3);border:1px solid var(--border);border-radius:10px;padding:14px; }
+.shirt-card-title { font-size:.68em;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;font-family:'DM Mono',monospace;margin-bottom:12px; }
 
-.img-preview-wrap { margin-top: 14px; border-radius: 9px; overflow: hidden; border: 1px solid var(--border); display: none; position: relative; }
-.img-preview-wrap img { width: 100%; height: 160px; object-fit: cover; display: block; filter: grayscale(40%) brightness(0.7); }
-.img-clear-btn {
-  position: absolute; top: 8px; left: 8px; width: 26px; height: 26px;
-  background: rgba(0,0,0,0.7); border: 1px solid var(--border-strong);
-  border-radius: 50%; cursor: pointer; display: grid; place-items: center;
-  font-size: 0.75em; color: var(--text2); transition: background 0.2s, color 0.2s; z-index: 2;
-}
-.img-clear-btn:hover { background: #000; color: var(--text); }
+.shirt-pick-row { display:flex;gap:7px;align-items:center; }
+.shirt-pick-row input { flex:1;cursor:pointer; }
+.pick-btn { background:var(--surface);border:1px solid var(--border-strong);color:var(--text2);border-radius:8px;padding:0 13px;height:40px;font-size:.8em;font-family:'Heebo',sans-serif;cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;flex-shrink:0; }
+.pick-btn:hover { background:rgba(255,255,255,.08);color:var(--text); }
 
-.divider { border: none; border-top: 1px solid var(--border); margin: 4px 0 18px; }
+.shirt-preview { margin-top:9px;display:none;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px; }
+.shirt-preview.visible { display:flex; }
+.shirt-preview img { width:42px;height:42px;object-fit:contain;border-radius:6px;background:#1a1a1a;flex-shrink:0; }
+.shirt-preview-name { font-size:.82em;font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.shirt-remove { background:none;border:none;color:var(--text3);cursor:pointer;font-size:1em;padding:4px;transition:color .2s;flex-shrink:0; }
+.shirt-remove:hover { color:#ff6b6b; }
 
-/* ── Shirt Picker ── */
-.shirt-pick-row {
-  display: flex; gap: 8px; align-items: stretch;
-}
-.shirt-pick-row input {
-  flex: 1;
-}
-.pick-btn {
-  background: var(--surface3); border: 1px solid var(--border-strong);
-  color: var(--text2); border-radius: 9px; padding: 0 14px;
-  font-size: 0.82em; font-family: 'Heebo', sans-serif; cursor: pointer;
-  white-space: nowrap; transition: background 0.2s, color 0.2s; flex-shrink: 0;
-}
-.pick-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+/* Product Modal */
+#pm-overlay { position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px; }
+#pm-overlay.open { display:flex; }
+#pm-modal { background:var(--surface);border:1px solid var(--border-strong);border-radius:16px;width:100%;max-width:520px;max-height:78vh;display:flex;flex-direction:column;animation:modalIn .22s ease both;overflow:hidden; }
+.pm-header { padding:16px 18px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px; }
+.pm-title { font-size:.95em;font-weight:700;flex:1; }
+.pm-close { background:var(--surface2);border:1px solid var(--border);border-radius:7px;width:28px;height:28px;display:grid;place-items:center;cursor:pointer;color:var(--text2);font-size:.9em;transition:background .2s,color .2s; }
+.pm-close:hover { background:var(--surface3);color:var(--text); }
+.pm-search-wrap { padding:12px 18px 0; }
+.pm-search { width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:.88em;font-family:'Heebo',sans-serif;color:var(--text);outline:none;transition:border-color .2s;direction:rtl; }
+.pm-search:focus { border-color:rgba(255,255,255,.35); }
+.pm-search::placeholder { color:var(--text3); }
+.pm-grid { padding:12px 18px 18px;overflow-y:auto;flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:9px; }
+.pm-product { background:var(--surface2);border:1px solid var(--border);border-radius:9px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .15s;display:flex;flex-direction:column; }
+.pm-product:hover { border-color:rgba(255,255,255,.35);transform:translateY(-2px); }
+.pm-product img { width:100%;height:80px;object-fit:cover;display:block; }
+.pm-product-name { padding:7px 7px 9px;font-size:.72em;font-weight:600;color:var(--text);line-height:1.3;flex:1; }
+.pm-empty { grid-column:1/-1;text-align:center;padding:28px;color:var(--text3);font-size:.83em; }
 
-.shirt-selected-preview {
-  margin-top: 10px; display: none;
-  background: var(--surface3); border: 1px solid var(--border);
-  border-radius: 10px; padding: 10px 12px;
-  display: none; align-items: center; gap: 12px;
-}
-.shirt-selected-preview.visible { display: flex; }
-.shirt-selected-preview img { width: 48px; height: 48px; object-fit: contain; border-radius: 6px; background: #222; flex-shrink: 0; }
-.shirt-selected-name { font-size: 0.85em; font-weight: 600; color: var(--text); flex: 1; }
-.shirt-remove-btn {
-  background: none; border: none; color: var(--text3); cursor: pointer;
-  font-size: 1.1em; padding: 4px; transition: color 0.2s;
-}
-.shirt-remove-btn:hover { color: #ff6b6b; }
+/* Preview */
+#preview-strip { max-width:700px;margin:0 auto 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:none; }
+.preview-title { text-align:center;font-weight:700;font-size:.95em;margin-bottom:14px; }
+.preview-countdown { display:flex;gap:7px;justify-content:center;align-items:center; }
+.preview-box { background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 14px;text-align:center;min-width:58px; }
+.preview-num { font-size:1.6em;font-weight:900;display:block;line-height:1;font-family:'DM Mono',monospace; }
+.preview-lbl { font-size:.6em;color:var(--text3);margin-top:3px;display:block;font-family:'DM Mono',monospace; }
+.preview-sep { font-size:1.3em;font-weight:900;font-family:'DM Mono',monospace;color:var(--text3); }
 
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.shirt-card {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px;
-}
-.shirt-card-title {
-  font-size: 0.72em; font-weight: 700; color: var(--text3);
-  text-transform: uppercase; letter-spacing: 1.2px;
-  font-family: 'DM Mono', monospace; margin-bottom: 14px;
-}
+/* Save */
+.save-btn { max-width:700px;margin:10px auto 0;display:block;width:100%;padding:14px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);font-size:.93em;font-weight:700;font-family:'Heebo',sans-serif;cursor:pointer;transition:opacity .2s,transform .15s;letter-spacing:.5px;animation:fadeSlideIn .4s .35s ease both; }
+.save-btn:hover { opacity:.9;transform:translateY(-1px); }
+.save-btn:disabled { opacity:.35;cursor:not-allowed;transform:none; }
+.save-btn .spinner { display:none;width:15px;height:15px;border:2px solid rgba(0,0,0,.2);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto; }
+.save-btn.loading .btn-text { display:none; }
+.save-btn.loading .spinner { display:block; }
 
-/* ── Matches Accordion ── */
-.matches-list { display: flex; flex-direction: column; gap: 8px; }
-
-.match-item {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden;
-  transition: border-color 0.2s;
-}
-.match-item.has-shirts { border-color: rgba(255,255,255,0.22); }
-
-.match-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 14px; cursor: pointer; user-select: none;
-  transition: background 0.15s;
-}
-.match-header:hover { background: rgba(255,255,255,0.03); }
-
-.match-teams-preview {
-  flex: 1; display: flex; align-items: center; gap: 8px;
-}
-.match-team-logo { width: 22px; height: 22px; object-fit: contain; }
-.match-team-name { font-size: 0.85em; font-weight: 600; color: var(--text); }
-.match-vs { font-size: 0.72em; color: var(--text3); margin: 0 4px; }
-.match-date-badge {
-  font-size: 0.68em; font-family: 'DM Mono', monospace; color: var(--text3);
-  background: var(--surface3); padding: 3px 8px; border-radius: 6px; white-space: nowrap;
-}
-.match-shirt-dot {
-  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
-  background: rgba(255,255,255,0.15);
-}
-.match-item.has-shirts .match-shirt-dot { background: #4caf50; }
-.match-chevron { font-size: 0.7em; color: var(--text3); transition: transform 0.2s; flex-shrink: 0; }
-.match-item.open .match-chevron { transform: rotate(180deg); }
-
-.match-body {
-  border-top: 1px solid var(--border);
-  padding: 14px; display: none;
-}
-.match-item.open .match-body { display: block; }
-
-.matches-loading {
-  text-align: center; padding: 28px;
-  font-size: 0.85em; color: var(--text3); font-family: 'DM Mono', monospace;
-}
-.matches-error {
-  text-align: center; padding: 20px;
-  font-size: 0.82em; color: #ff7070;
-}
-.matches-refresh-btn {
-  background: var(--surface3); border: 1px solid var(--border-strong);
-  color: var(--text2); border-radius: 8px; padding: 8px 16px;
-  font-size: 0.82em; font-family: 'Heebo', sans-serif; cursor: pointer;
-  margin: 12px auto 0; display: block; transition: background 0.2s;
-}
-.matches-refresh-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
-
-/* ── Product Picker Modal ── */
-#product-modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.82);
-  z-index: 1000; display: none; align-items: center; justify-content: center;
-  backdrop-filter: blur(4px); padding: 20px;
-}
-#product-modal-overlay.open { display: flex; }
-
-#product-modal {
-  background: var(--surface); border: 1px solid var(--border-strong);
-  border-radius: 18px; width: 100%; max-width: 560px; max-height: 80vh;
-  display: flex; flex-direction: column; animation: modalIn 0.25s ease both;
-  overflow: hidden;
-}
-.pm-header {
-  padding: 18px 20px 14px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px;
-}
-.pm-title { font-size: 1em; font-weight: 700; flex: 1; }
-.pm-close {
-  background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-  width: 30px; height: 30px; display: grid; place-items: center;
-  cursor: pointer; color: var(--text2); font-size: 1em;
-  transition: background 0.2s, color 0.2s;
-}
-.pm-close:hover { background: var(--surface3); color: var(--text); }
-
-.pm-search-wrap { padding: 14px 20px 0; }
-.pm-search {
-  width: 100%; background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 9px; padding: 10px 14px; font-size: 0.9em;
-  font-family: 'Heebo', sans-serif; color: var(--text); outline: none;
-  transition: border-color 0.2s; direction: rtl;
-}
-.pm-search:focus { border-color: rgba(255,255,255,0.35); }
-.pm-search::placeholder { color: var(--text3); }
-
-.pm-grid {
-  padding: 14px 20px 20px; overflow-y: auto; flex: 1;
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
-}
-.pm-product {
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 10px; overflow: hidden; cursor: pointer;
-  transition: border-color 0.2s, transform 0.15s;
-  display: flex; flex-direction: column;
-}
-.pm-product:hover { border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
-.pm-product img { width: 100%; height: 90px; object-fit: cover; display: block; }
-.pm-product-name {
-  padding: 8px 8px 10px; font-size: 0.75em; font-weight: 600;
-  color: var(--text); line-height: 1.3; flex: 1;
-}
-.pm-empty { grid-column: 1/-1; text-align: center; padding: 30px; color: var(--text3); font-size: 0.85em; }
-
-/* ── Preview Strip ── */
-#preview-strip {
-  max-width: 660px; margin: 0 auto 16px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px 22px; display: none;
-}
-.preview-title { text-align: center; color: var(--text); margin-bottom: 16px; font-weight: 700; font-size: 1em; }
-.preview-countdown { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; }
-.preview-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 64px; }
-.preview-num { font-size: 1.8em; font-weight: 900; display: block; line-height: 1; font-family: 'DM Mono', monospace; }
-.preview-lbl { font-size: 0.62em; color: var(--text3); margin-top: 4px; display: block; font-family: 'DM Mono', monospace; }
-.preview-sep { font-size: 1.4em; font-weight: 900; font-family: 'DM Mono', monospace; }
-
-/* ── Save Btn ── */
-.save-btn {
-  max-width: 660px; margin: 8px auto 0; display: block; width: 100%;
-  padding: 15px; background: var(--text); color: var(--bg); border: none;
-  border-radius: var(--radius); font-size: 0.95em; font-weight: 700;
-  font-family: 'Heebo', sans-serif; cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s; letter-spacing: 0.5px;
-  animation: fadeSlideIn 0.5s 0.4s ease both;
-}
-.save-btn:hover { opacity: 0.92; transform: translateY(-1px); }
-.save-btn:active { transform: scale(0.99); }
-.save-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-.save-btn .spinner {
-  display: none; width: 16px; height: 16px;
-  border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--bg);
-  border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto;
-}
-.save-btn.loading .btn-text { display: none; }
-.save-btn.loading .spinner { display: block; }
-
-/* ── Toast ── */
-#status-toast {
-  position: fixed; bottom: 28px; left: 50%;
-  transform: translateX(-50%) translateY(60px);
-  background: var(--surface); border: 1px solid var(--border-strong);
-  border-radius: 50px; padding: 10px 24px; font-weight: 600; font-size: 0.85em;
-  font-family: 'DM Mono', monospace; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  opacity: 0; z-index: 2000; white-space: nowrap;
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
-}
-#status-toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
-#status-toast.success { border-color: rgba(255,255,255,0.4); color: var(--text); }
-#status-toast.error   { border-color: rgba(255,100,100,0.5); color: #ff7070; }
+/* Toast */
+#toast { position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--surface);border:1px solid var(--border-strong);border-radius:50px;padding:9px 22px;font-weight:600;font-size:.82em;font-family:'DM Mono',monospace;box-shadow:0 8px 32px rgba(0,0,0,.6);opacity:0;z-index:2000;white-space:nowrap;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s; }
+#toast.visible { transform:translateX(-50%) translateY(0);opacity:1; }
+#toast.success { border-color:rgba(255,255,255,.4);color:var(--text); }
+#toast.error   { border-color:rgba(255,100,100,.5);color:#ff7070; }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="page-header">
   <div class="logo-mark">⚽</div>
   <div>
-    <div class="page-title">הגדרות ספירה לאחור</div>
+    <div class="page-title">הגדרות ספירה לאחור ומשחקים</div>
     <div class="page-sub">VIP Shirts · admin panel</div>
   </div>
 </div>
@@ -394,36 +206,59 @@ input:checked + .slider::before { transform: translateX(22px); background: var(-
   <div class="preview-title" id="prev-title"></div>
   <div class="preview-countdown">
     <div class="preview-box"><span class="preview-num" id="prev-s">00</span><span class="preview-lbl">שניות</span></div>
-    <span class="preview-sep" id="prev-sep1">:</span>
+    <span class="preview-sep">:</span>
     <div class="preview-box"><span class="preview-num" id="prev-m">00</span><span class="preview-lbl">דקות</span></div>
-    <span class="preview-sep" id="prev-sep2">:</span>
+    <span class="preview-sep">:</span>
     <div class="preview-box"><span class="preview-num" id="prev-h">00</span><span class="preview-lbl">שעות</span></div>
-    <span class="preview-sep" id="prev-sep3">:</span>
+    <span class="preview-sep">:</span>
     <div class="preview-box"><span class="preview-num" id="prev-d">00</span><span class="preview-lbl">ימים</span></div>
   </div>
 </div>
 
-<!-- Card: הפעלה -->
+<!-- Card: מצב תצוגה -->
 <div class="card">
   <div class="card-header">
     <div class="card-icon">⚡</div>
-    <div><div class="card-title">הפעלה</div></div>
+    <div><div class="card-title">מצב תצוגה בחנות</div></div>
   </div>
   <div class="card-body">
-    <div class="toggle-row">
-      <div class="toggle-info">
-        <div class="toggle-label">הצג ספירה לאחור</div>
+    <div class="field-group" style="margin-bottom:0;">
+      <label>מה יוצג בחלק הספירה לאחור?</label>
+      <div class="mode-grid">
+        <label class="mode-option selected" id="mode-both">
+          <input type="radio" name="display-mode" value="both" checked>
+          <div class="mode-icon">⏱+⚽</div>
+          <div class="mode-title">ספירה + משחק</div>
+          <div class="mode-desc">שניהם יחד</div>
+        </label>
+        <label class="mode-option" id="mode-countdown-only">
+          <input type="radio" name="display-mode" value="countdown_only">
+          <div class="mode-icon">⏱</div>
+          <div class="mode-title">ספירה מותאמת בלבד</div>
+          <div class="mode-desc">ללא ווידג'ט משחק</div>
+        </label>
+        <label class="mode-option" id="mode-match-only">
+          <input type="radio" name="display-mode" value="match_only">
+          <div class="mode-icon">⚽</div>
+          <div class="mode-title">משחק הבא בלבד</div>
+          <div class="mode-desc">ספירה עד המשחק + חולצות</div>
+        </label>
+        <label class="mode-option" id="mode-none">
+          <input type="radio" name="display-mode" value="none">
+          <div class="mode-icon">🚫</div>
+          <div class="mode-title">כלום</div>
+          <div class="mode-desc">הסתרה מלאה</div>
+        </label>
       </div>
-      <label class="toggle"><input type="checkbox" id="enabled" checked><span class="slider"></span></label>
     </div>
   </div>
 </div>
 
-<!-- Card: תוכן -->
-<div class="card">
+<!-- Card: ספירה מותאמת אישית -->
+<div class="card" id="custom-countdown-card">
   <div class="card-header">
     <div class="card-icon">✏️</div>
-    <div><div class="card-title">תוכן</div></div>
+    <div><div class="card-title">ספירה לאחור מותאמת אישית</div></div>
   </div>
   <div class="card-body">
     <div class="field-group">
@@ -442,34 +277,27 @@ input:checked + .slider::before { transform: translateX(22px); background: var(-
     <div class="field-group" style="margin-bottom:0;">
       <label>קישור כפתור</label>
       <input type="text" id="btn-url" placeholder="#category:שם  |  #product:שם  |  https://...">
+      <div class="hint">#category:שם · #subcategory:קטגוריה:תת · #product:שם · https://url</div>
     </div>
   </div>
 </div>
 
 <!-- Card: משחקים וחולצות -->
-<div class="card">
+<div class="card" id="matches-card">
   <div class="card-header">
     <div class="card-icon">🆚</div>
-    <div><div class="card-title">משחקים וחולצות</div></div>
+    <div><div class="card-title">משחקים וחולצות (FIFA World Cup)</div></div>
   </div>
   <div class="card-body">
+    <p style="font-size:.8em;color:var(--text3);margin-bottom:16px;font-family:'DM Mono',monospace;">בחנות יוצג רק המשחק הבא / המשחק החי הנוכחי. כאן ניתן לקשר חולצות לכל משחק.</p>
 
-    <div class="toggle-row" style="margin-bottom:20px;">
-      <div class="toggle-info">
-        <div class="toggle-label">הצג ווידג'ט משחק</div>
-      </div>
-      <label class="toggle"><input type="checkbox" id="show-match" checked><span class="slider"></span></label>
+    <div class="matches-toolbar">
+      <input type="text" class="matches-search" id="matches-search" placeholder="חפש קבוצה..." oninput="filterMatches()">
+      <button class="refresh-btn" onclick="loadMatches()">↻ רענן</button>
     </div>
 
-    <div id="matches-list-wrap">
-      <div class="matches-loading" id="matches-loading">⏳ טוען משחקים מ-ESPN...</div>
-      <div class="matches-list" id="matches-list" style="display:none;"></div>
-      <div class="matches-error" id="matches-error" style="display:none;">
-        לא ניתן לטעון משחקים
-        <button class="matches-refresh-btn" onclick="loadMatches()">נסה שוב</button>
-      </div>
-    </div>
-
+    <div id="matches-status" class="matches-loading">⏳ טוען משחקים מ-ESPN...</div>
+    <div class="matches-list" id="matches-list"></div>
   </div>
 </div>
 
@@ -508,8 +336,8 @@ input:checked + .slider::before { transform: translateX(22px); background: var(-
     <div class="field-group">
       <label>צבע מספרים</label>
       <div class="color-row">
-        <input type="color" id="num-color-picker" value="#ffffff">
-        <input type="text"  id="num-color-text"   value="#ffffff" maxlength="7">
+        <input type="color" id="num-color-picker" value="#f5c518">
+        <input type="text"  id="num-color-text"   value="#f5c518" maxlength="7">
       </div>
     </div>
     <div class="field-group">
@@ -521,7 +349,7 @@ input:checked + .slider::before { transform: translateX(22px); background: var(-
     </div>
     <div class="field-group" style="margin-bottom:0;">
       <label>שקיפות שכבת כהה (0–1)</label>
-      <input type="text" id="overlay-opacity" placeholder="0.45">
+      <input type="text" id="overlay-opacity" placeholder="0.45" value="0.45">
     </div>
   </div>
 </div>
@@ -531,17 +359,17 @@ input:checked + .slider::before { transform: translateX(22px); background: var(-
   <div class="spinner"></div>
 </button>
 
-<div id="status-toast"></div>
+<div id="toast"></div>
 
 <!-- Product Picker Modal -->
-<div id="product-modal-overlay">
-  <div id="product-modal">
+<div id="pm-overlay">
+  <div id="pm-modal">
     <div class="pm-header">
       <div class="pm-title">בחר חולצה</div>
-      <button class="pm-close" onclick="closeProductModal()">✕</button>
+      <button class="pm-close" onclick="closePM()">✕</button>
     </div>
     <div class="pm-search-wrap">
-      <input type="text" class="pm-search" id="pm-search" placeholder="חפש מוצר..." oninput="filterProducts()">
+      <input type="text" class="pm-search" id="pm-search" placeholder="חפש מוצר..." oninput="filterPM()">
     </div>
     <div class="pm-grid" id="pm-grid"></div>
   </div>
@@ -559,241 +387,257 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
 const IMGBB_API_KEY = '949918f473144748f8dea05705ac165a';
 
 /* ── State ── */
-let allProducts = [];
-let allMatches  = [];
-let matchShirts = {}; // { matchId: { home: {productName,image,btnText}, away: {...} } }
-let currentPickerTarget = null; // { matchId, side }
-let previewInterval;
+let allProducts  = [];
+let allMatches   = [];
+let matchShirts  = {}; // { matchId: { home:{productName,image,btnText}, away:{...} } }
+let pmTarget     = null; // { matchId, side }
+let previewIv    = null;
+let matchFilter  = '';
 
-/* ── Load products from Firestore ── */
+/* ── Mode selector ── */
+document.querySelectorAll('input[name="display-mode"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.mode-option').forEach(el => el.classList.remove('selected'));
+    radio.closest('.mode-option').classList.add('selected');
+    const mode = radio.value;
+    const showCustom  = mode === 'both' || mode === 'countdown_only';
+    const showMatches = mode === 'both' || mode === 'match_only';
+    document.getElementById('custom-countdown-card').style.display = showCustom  ? '' : 'none';
+    document.getElementById('matches-card').style.display           = showMatches ? '' : 'none';
+  });
+});
+
+/* ── Load products ── */
 async function loadProducts() {
   try {
     const snap = await db.collection('soccer_shirts').get();
     allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch(e) { console.error('Products load error:', e); }
+  } catch(e) { console.error('Products error:', e); }
 }
 
-/* ── Load matches from ESPN ── */
+/* ── Load matches ── */
 async function loadMatches() {
-  const loading = document.getElementById('matches-loading');
-  const list    = document.getElementById('matches-list');
-  const errEl   = document.getElementById('matches-error');
-  loading.style.display = 'block';
-  list.style.display    = 'none';
-  errEl.style.display   = 'none';
+  const status = document.getElementById('matches-status');
+  const list   = document.getElementById('matches-list');
+  status.textContent = '⏳ טוען משחקים מ-ESPN...';
+  status.style.display = 'block';
+  status.style.color = 'var(--text3)';
+  list.innerHTML = '';
 
   try {
     const res  = await fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard');
     const data = await res.json();
+    const events = (data.events || []).filter(e => e.status.type.state !== 'post');
 
-    if (!data.events || data.events.length === 0) {
-      loading.textContent = 'אין משחקים זמינים כרגע';
+    if (events.length === 0) {
+      status.textContent = 'אין משחקים זמינים כרגע';
       return;
     }
-
-    allMatches = data.events;
-    renderMatchesList();
-    loading.style.display = 'none';
-    list.style.display    = 'flex';
+    allMatches = events;
+    status.style.display = 'none';
+    renderMatches();
   } catch(e) {
     console.error(e);
-    loading.style.display = 'none';
-    errEl.style.display   = 'block';
+    status.style.color = '#ff7070';
+    status.textContent = '✕ שגיאה בטעינת משחקים — לחץ "רענן" לנסות שוב';
   }
 }
 
-function renderMatchesList() {
-  const list = document.getElementById('matches-list');
+function filterMatches() {
+  matchFilter = document.getElementById('matches-search').value.trim().toLowerCase();
+  renderMatches();
+}
+
+function renderMatches() {
+  const list    = document.getElementById('matches-list');
+  const DEFAULT = 'https://a.espncdn.com/i/teamlogos/default-soccer.png';
   list.innerHTML = '';
 
-  allMatches.forEach(match => {
-    const comp  = match.competitions[0];
-    const home  = comp.competitors.find(c => c.homeAway === 'home');
-    const away  = comp.competitors.find(c => c.homeAway === 'away');
-    const id    = match.id;
-    const saved = matchShirts[id] || {};
-    const hasShirts = !!(saved.home?.productName || saved.away?.productName);
-    const isLive    = match.status.type.state === 'in';
-    const isPre     = match.status.type.state === 'pre';
-    const dateStr   = new Date(match.date).toLocaleDateString('he-IL', {day:'numeric',month:'numeric',hour:'2-digit',minute:'2-digit'});
-    const defaultLogo = 'https://a.espncdn.com/i/teamlogos/default-soccer.png';
+  const filtered = matchFilter
+    ? allMatches.filter(m => {
+        const comp = m.competitions[0];
+        return comp.competitors.some(c => c.team.displayName.toLowerCase().includes(matchFilter));
+      })
+    : allMatches;
 
-    const item = document.createElement('div');
-    item.className = 'match-item' + (hasShirts ? ' has-shirts' : '');
-    item.dataset.id = id;
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="matches-empty">לא נמצאו משחקים</div>';
+    return;
+  }
 
-    item.innerHTML = `
+  filtered.forEach(match => {
+    const comp    = match.competitions[0];
+    const home    = comp.competitors.find(c => c.homeAway === 'home');
+    const away    = comp.competitors.find(c => c.homeAway === 'away');
+    const id      = match.id;
+    const saved   = matchShirts[id] || {};
+    const hasS    = !!(saved.home?.productName || saved.away?.productName);
+    const isLive  = match.status.type.state === 'in';
+    const dateStr = new Date(match.date).toLocaleDateString('he-IL', { day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit' });
+    const hName   = home.team.shortDisplayName || home.team.displayName;
+    const aName   = away.team.shortDisplayName || away.team.displayName;
+
+    const el = document.createElement('div');
+    el.className = 'match-item' + (hasS ? ' has-shirts' : '') + (isLive ? ' is-live' : '');
+    el.dataset.id = id;
+
+    el.innerHTML = `
       <div class="match-header" onclick="toggleMatch('${id}')">
         <div class="match-teams-preview">
-          <img class="match-team-logo" src="${home.team.logo || defaultLogo}" onerror="this.src='${defaultLogo}'">
-          <span class="match-team-name">${home.team.shortDisplayName || home.team.displayName}</span>
-          <span class="match-vs">${isLive ? home.score+' - '+away.score : 'נגד'}</span>
-          <span class="match-team-name">${away.team.shortDisplayName || away.team.displayName}</span>
-          <img class="match-team-logo" src="${away.team.logo || defaultLogo}" onerror="this.src='${defaultLogo}'">
+          <img class="match-team-logo" src="${home.team.logo||DEFAULT}" onerror="this.src='${DEFAULT}'">
+          <span class="match-team-name">${hName}</span>
+          ${isLive
+            ? `<span class="match-score">${home.score} - ${away.score}</span>`
+            : `<span class="match-vs">נגד</span>`}
+          <span class="match-team-name">${aName}</span>
+          <img class="match-team-logo" src="${away.team.logo||DEFAULT}" onerror="this.src='${DEFAULT}'">
         </div>
-        <span class="match-date-badge">${isLive ? '🔴 LIVE' : dateStr}</span>
-        <div class="match-shirt-dot" title="${hasShirts ? 'חולצות מוגדרות' : 'ללא חולצות'}"></div>
+        ${isLive
+          ? `<span class="live-badge">🔴 LIVE</span>`
+          : `<span class="match-date-badge">${dateStr}</span>`}
+        <div class="match-shirt-dot"></div>
         <span class="match-chevron">▼</span>
       </div>
       <div class="match-body">
         <div class="two-col">
+          <!-- Home shirt -->
           <div class="shirt-card">
-            <div class="shirt-card-title">חולצת בית · ${home.team.shortDisplayName || home.team.displayName}</div>
+            <div class="shirt-card-title">חולצת בית · ${hName}</div>
             <div class="field-group" style="margin-bottom:10px;">
               <label>טקסט כפתור</label>
-              <input type="text" id="btn-home-${id}" placeholder="🛒 לחולצת הבית" value="${saved.home?.btnText||''}">
+              <input type="text" id="btn-home-${id}" placeholder="חולצת ${hName}" value="${saved.home?.btnText||''}">
             </div>
-            <label>מוצר</label>
+            <label>מוצר מקושר</label>
             <div class="shirt-pick-row">
-              <input type="text" id="name-home-${id}" placeholder="בחר מוצר..." readonly value="${saved.home?.productName||''}" style="cursor:pointer;" onclick="openProductModal('${id}','home')">
-              <button class="pick-btn" onclick="openProductModal('${id}','home')">בחר</button>
+              <input type="text" id="name-home-${id}" placeholder="בחר מוצר..." readonly
+                value="${saved.home?.productName||''}" style="cursor:pointer;"
+                onclick="openPM('${id}','home')">
+              <button class="pick-btn" onclick="openPM('${id}','home')">בחר</button>
             </div>
-            <div class="shirt-selected-preview ${saved.home?.productName ? 'visible' : ''}" id="preview-home-${id}">
-              <img src="${saved.home?.image||''}" id="preview-img-home-${id}">
-              <span class="shirt-selected-name" id="preview-name-home-${id}">${saved.home?.productName||''}</span>
-              <button class="shirt-remove-btn" onclick="removeShirt('${id}','home')">✕</button>
+            <div class="shirt-preview ${saved.home?.productName?'visible':''}" id="sp-home-${id}">
+              <img src="${saved.home?.image||''}" id="spi-home-${id}">
+              <span class="shirt-preview-name" id="spn-home-${id}">${saved.home?.productName||''}</span>
+              <button class="shirt-remove" onclick="removeShirt('${id}','home')">✕</button>
             </div>
           </div>
+          <!-- Away shirt -->
           <div class="shirt-card">
-            <div class="shirt-card-title">חולצת חוץ · ${away.team.shortDisplayName || away.team.displayName}</div>
+            <div class="shirt-card-title">חולצת חוץ · ${aName}</div>
             <div class="field-group" style="margin-bottom:10px;">
               <label>טקסט כפתור</label>
-              <input type="text" id="btn-away-${id}" placeholder="🛒 לחולצת החוץ" value="${saved.away?.btnText||''}">
+              <input type="text" id="btn-away-${id}" placeholder="חולצת ${aName}" value="${saved.away?.btnText||''}">
             </div>
-            <label>מוצר</label>
+            <label>מוצר מקושר</label>
             <div class="shirt-pick-row">
-              <input type="text" id="name-away-${id}" placeholder="בחר מוצר..." readonly value="${saved.away?.productName||''}" style="cursor:pointer;" onclick="openProductModal('${id}','away')">
-              <button class="pick-btn" onclick="openProductModal('${id}','away')">בחר</button>
+              <input type="text" id="name-away-${id}" placeholder="בחר מוצר..." readonly
+                value="${saved.away?.productName||''}" style="cursor:pointer;"
+                onclick="openPM('${id}','away')">
+              <button class="pick-btn" onclick="openPM('${id}','away')">בחר</button>
             </div>
-            <div class="shirt-selected-preview ${saved.away?.productName ? 'visible' : ''}" id="preview-away-${id}">
-              <img src="${saved.away?.image||''}" id="preview-img-away-${id}">
-              <span class="shirt-selected-name" id="preview-name-away-${id}">${saved.away?.productName||''}</span>
-              <button class="shirt-remove-btn" onclick="removeShirt('${id}','away')">✕</button>
+            <div class="shirt-preview ${saved.away?.productName?'visible':''}" id="sp-away-${id}">
+              <img src="${saved.away?.image||''}" id="spi-away-${id}">
+              <span class="shirt-preview-name" id="spn-away-${id}">${saved.away?.productName||''}</span>
+              <button class="shirt-remove" onclick="removeShirt('${id}','away')">✕</button>
             </div>
           </div>
         </div>
       </div>
     `;
-
-    list.appendChild(item);
+    list.appendChild(el);
   });
 }
 
 function toggleMatch(id) {
-  const item = document.querySelector(`.match-item[data-id="${id}"]`);
-  if (!item) return;
-  item.classList.toggle('open');
+  document.querySelector(`.match-item[data-id="${id}"]`)?.classList.toggle('open');
 }
 
 function removeShirt(matchId, side) {
   if (!matchShirts[matchId]) matchShirts[matchId] = {};
-  matchShirts[matchId][side] = { productName: '', image: '', btnText: '' };
-  document.getElementById(`name-${side}-${matchId}`).value = '';
-  const preview = document.getElementById(`preview-${side}-${matchId}`);
-  if (preview) preview.classList.remove('visible');
-  updateMatchDot(matchId);
+  matchShirts[matchId][side] = { productName:'', image:'', btnText:'' };
+  const ni = document.getElementById(`name-${side}-${matchId}`);
+  const sp = document.getElementById(`sp-${side}-${matchId}`);
+  if (ni) ni.value = '';
+  if (sp) sp.classList.remove('visible');
+  updateDot(matchId);
 }
 
-function updateMatchDot(matchId) {
-  const saved = matchShirts[matchId] || {};
-  const hasShirts = !!(saved.home?.productName || saved.away?.productName);
-  const item = document.querySelector(`.match-item[data-id="${matchId}"]`);
-  if (item) item.classList.toggle('has-shirts', hasShirts);
+function updateDot(matchId) {
+  const s = matchShirts[matchId] || {};
+  const has = !!(s.home?.productName || s.away?.productName);
+  const el = document.querySelector(`.match-item[data-id="${matchId}"]`);
+  if (el) el.classList.toggle('has-shirts', has);
 }
 
-/* ── Product Modal ── */
-function openProductModal(matchId, side) {
-  currentPickerTarget = { matchId, side };
+/* ── Product Picker Modal ── */
+function openPM(matchId, side) {
+  pmTarget = { matchId, side };
   document.getElementById('pm-search').value = '';
-  renderProductGrid(allProducts);
-  document.getElementById('product-modal-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('pm-search').focus(), 100);
+  renderPMGrid(allProducts);
+  document.getElementById('pm-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('pm-search').focus(), 80);
 }
-
-function closeProductModal() {
-  document.getElementById('product-modal-overlay').classList.remove('open');
-  currentPickerTarget = null;
+function closePM() {
+  document.getElementById('pm-overlay').classList.remove('open');
+  pmTarget = null;
 }
+document.getElementById('pm-overlay').addEventListener('click', e => { if (e.target.id === 'pm-overlay') closePM(); });
 
-document.getElementById('product-modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeProductModal();
-});
-
-function filterProducts() {
+function filterPM() {
   const q = document.getElementById('pm-search').value.toLowerCase().trim();
-  const filtered = q ? allProducts.filter(p => p.name.toLowerCase().includes(q)) : allProducts;
-  renderProductGrid(filtered);
+  renderPMGrid(q ? allProducts.filter(p => p.name.toLowerCase().includes(q)) : allProducts);
 }
-
-function renderProductGrid(list) {
+function renderPMGrid(list) {
   const grid = document.getElementById('pm-grid');
   grid.innerHTML = '';
-  if (list.length === 0) {
-    grid.innerHTML = '<div class="pm-empty">לא נמצאו מוצרים</div>';
-    return;
-  }
+  if (!list.length) { grid.innerHTML = '<div class="pm-empty">לא נמצאו מוצרים</div>'; return; }
   list.forEach(p => {
     const el = document.createElement('div');
     el.className = 'pm-product';
-    el.innerHTML = `
-      <img src="${p.image||''}" alt="${p.name}" onerror="this.style.display='none'">
-      <div class="pm-product-name">${p.name}</div>
-    `;
+    el.innerHTML = `<img src="${p.image||''}" alt="${p.name}" onerror="this.style.display='none'"><div class="pm-product-name">${p.name}</div>`;
     el.addEventListener('click', () => selectProduct(p));
     grid.appendChild(el);
   });
 }
-
-function selectProduct(product) {
-  if (!currentPickerTarget) return;
-  const { matchId, side } = currentPickerTarget;
-
+function selectProduct(p) {
+  if (!pmTarget) return;
+  const { matchId, side } = pmTarget;
   if (!matchShirts[matchId]) matchShirts[matchId] = {};
   if (!matchShirts[matchId][side]) matchShirts[matchId][side] = {};
-  matchShirts[matchId][side].productName = product.name;
-  matchShirts[matchId][side].image       = product.image || '';
-
-  // update UI
-  const nameInput = document.getElementById(`name-${side}-${matchId}`);
-  if (nameInput) nameInput.value = product.name;
-
-  const previewEl = document.getElementById(`preview-${side}-${matchId}`);
-  const previewImg = document.getElementById(`preview-img-${side}-${matchId}`);
-  const previewName = document.getElementById(`preview-name-${side}-${matchId}`);
-  if (previewEl)   previewEl.classList.add('visible');
-  if (previewImg)  previewImg.src = product.image || '';
-  if (previewName) previewName.textContent = product.name;
-
-  updateMatchDot(matchId);
-  closeProductModal();
+  matchShirts[matchId][side].productName = p.name;
+  matchShirts[matchId][side].image = p.image || '';
+  const ni = document.getElementById(`name-${side}-${matchId}`);
+  const sp = document.getElementById(`sp-${side}-${matchId}`);
+  const si = document.getElementById(`spi-${side}-${matchId}`);
+  const sn = document.getElementById(`spn-${side}-${matchId}`);
+  if (ni) ni.value = p.name;
+  if (sp) sp.classList.add('visible');
+  if (si) si.src = p.image || '';
+  if (sn) sn.textContent = p.name;
+  updateDot(matchId);
+  closePM();
 }
 
-/* ── Sync shirt btn text from inputs before save ── */
-function syncMatchShirtsFromInputs() {
-  allMatches.forEach(match => {
-    const id = match.id;
-    const homeBtn = document.getElementById(`btn-home-${id}`);
-    const awayBtn = document.getElementById(`btn-away-${id}`);
-    if (homeBtn) {
-      if (!matchShirts[id]) matchShirts[id] = {};
-      if (!matchShirts[id].home) matchShirts[id].home = {};
-      matchShirts[id].home.btnText = homeBtn.value.trim();
-    }
-    if (awayBtn) {
-      if (!matchShirts[id]) matchShirts[id] = {};
-      if (!matchShirts[id].away) matchShirts[id].away = {};
-      matchShirts[id].away.btnText = awayBtn.value.trim();
-    }
+/* ── Sync btn texts before save ── */
+function syncBtnTexts() {
+  allMatches.forEach(m => {
+    const id = m.id;
+    ['home','away'].forEach(side => {
+      const inp = document.getElementById(`btn-${side}-${id}`);
+      if (inp) {
+        if (!matchShirts[id]) matchShirts[id] = {};
+        if (!matchShirts[id][side]) matchShirts[id][side] = {};
+        matchShirts[id][side].btnText = inp.value.trim();
+      }
+    });
   });
 }
 
 /* ── Colors ── */
-function syncColor(pickerId, textId) {
-  const p = document.getElementById(pickerId), t = document.getElementById(textId);
+function syncColor(pickId, textId) {
+  const p = document.getElementById(pickId), t = document.getElementById(textId);
   p.addEventListener('input', () => { t.value = p.value; updatePreview(); });
   t.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(t.value)) { p.value = t.value; updatePreview(); } });
 }
@@ -805,33 +649,32 @@ const uploadZone = document.getElementById('upload-zone');
 const fileInput  = document.getElementById('bg-file-input');
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) uploadImage(e.dataTransfer.files[0]); });
-fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadImage(fileInput.files[0]); });
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) uploadBg(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadBg(fileInput.files[0]); });
 
-async function uploadImage(file) {
-  const progress = document.getElementById('upload-progress');
-  const fill     = document.getElementById('progress-fill');
-  const label    = document.getElementById('progress-label');
-  progress.classList.add('active'); fill.style.width = '0%'; label.textContent = 'מעלה...';
-  let fakeP = 0;
-  const fakeInterval = setInterval(() => { fakeP = Math.min(fakeP + Math.random()*12, 85); fill.style.width = fakeP+'%'; }, 200);
-  const formData = new FormData(); formData.append('image', file);
+async function uploadBg(file) {
+  const prog  = document.getElementById('upload-progress');
+  const fill  = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  prog.classList.add('active'); fill.style.width = '0%'; label.textContent = 'מעלה...';
+  let fp = 0;
+  const iv = setInterval(() => { fp = Math.min(fp + Math.random()*12, 85); fill.style.width = fp+'%'; }, 200);
+  const fd = new FormData(); fd.append('image', file);
   try {
-    const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method:'POST', body:formData });
+    const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method:'POST', body:fd });
     const json = await res.json();
-    clearInterval(fakeInterval);
+    clearInterval(iv);
     if (json.success) {
       fill.style.width = '100%'; label.textContent = 'הועלה ✓';
       const url = json.data.url;
       document.getElementById('bg-image').value = url;
       document.getElementById('bg-preview-img').src = url;
       document.getElementById('bg-preview-wrap').style.display = 'block';
-      setTimeout(() => progress.classList.remove('active'), 1200);
-      showToast('✓ תמונה הועלתה', 'success');
+      setTimeout(() => prog.classList.remove('active'), 1200);
+      toast('✓ תמונה הועלתה','success');
     } else throw new Error();
-  } catch(e) { clearInterval(fakeInterval); progress.classList.remove('active'); showToast('✕ שגיאה בהעלאה', 'error'); }
+  } catch(e) { clearInterval(iv); prog.classList.remove('active'); toast('✕ שגיאה בהעלאה','error'); }
 }
-
 function clearBgImage() {
   document.getElementById('bg-image').value = '';
   document.getElementById('bg-preview-wrap').style.display = 'none';
@@ -842,76 +685,91 @@ function clearBgImage() {
 /* ── Live Preview ── */
 function updatePreview() {
   const dateVal = document.getElementById('target-date').value;
-  const strip = document.getElementById('preview-strip');
+  const strip   = document.getElementById('preview-strip');
   if (!dateVal) { strip.style.display = 'none'; return; }
   strip.style.display = 'block';
-
-  const numColor = document.getElementById('num-color-text').value || '#fff';
-  const boxColor = document.getElementById('box-color-text').value || '#000';
-  document.querySelectorAll('.preview-num,.preview-sep').forEach(el => el.style.color = numColor);
-  document.querySelectorAll('.preview-box').forEach(el => el.style.background = boxColor);
+  const nc = document.getElementById('num-color-text').value || '#fff';
+  const bc = document.getElementById('box-color-text').value || '#000';
+  document.querySelectorAll('.preview-num,.preview-sep').forEach(el => el.style.color = nc);
+  document.querySelectorAll('.preview-box').forEach(el => el.style.background = bc);
   document.getElementById('prev-title').textContent = document.getElementById('title').value || '';
-
-  clearInterval(previewInterval);
-  function tick() {
+  clearInterval(previewIv);
+  const fn = () => {
     const diff = new Date(dateVal) - Date.now();
-    if (diff <= 0) { clearInterval(previewInterval); return; }
+    if (diff <= 0) { clearInterval(previewIv); return; }
     document.getElementById('prev-d').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
     document.getElementById('prev-h').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
     document.getElementById('prev-m').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
     document.getElementById('prev-s').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
-  }
-  tick(); previewInterval = setInterval(tick, 1000);
+  };
+  fn(); previewIv = setInterval(fn, 1000);
 }
 document.getElementById('target-date').addEventListener('input', updatePreview);
 document.getElementById('title').addEventListener('input', updatePreview);
 
 /* ── Toast ── */
-function showToast(msg, type='success') {
-  const t = document.getElementById('status-toast');
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
   t.textContent = msg; t.className = `visible ${type}`;
   setTimeout(() => t.className = '', 3500);
 }
 
 /* ── Save ── */
 async function saveSettings() {
-  syncMatchShirtsFromInputs();
+  syncBtnTexts();
   const btn = document.getElementById('save-btn');
   btn.disabled = true; btn.classList.add('loading');
 
+  const mode = document.querySelector('input[name="display-mode"]:checked').value;
   const data = {
-    enabled:        document.getElementById('enabled').checked,
+    displayMode:    mode,
+    // legacy compat
+    enabled:        mode !== 'none',
+    showMatch:      mode === 'both' || mode === 'match_only',
     title:          document.getElementById('title').value.trim(),
     targetDate:     document.getElementById('target-date').value,
     btnText:        document.getElementById('btn-text').value.trim(),
     btnUrl:         document.getElementById('btn-url').value.trim(),
     bgImage:        document.getElementById('bg-image').value.trim(),
-    numColor:       document.getElementById('num-color-text').value.trim() || '#ffffff',
+    numColor:       document.getElementById('num-color-text').value.trim() || '#f5c518',
     boxColor:       document.getElementById('box-color-text').value.trim() || '#000000',
     overlayOpacity: parseFloat(document.getElementById('overlay-opacity').value) || 0.45,
-    showMatch:      document.getElementById('show-match').checked,
     matchShirts:    matchShirts,
     updatedAt:      firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try {
     await db.collection('Settings').doc('countdown').set(data);
-    showToast('✓ נשמר בהצלחה', 'success');
-  } catch(e) { showToast('✕ שגיאה בשמירה', 'error'); console.error(e); }
+    toast('✓ נשמר בהצלחה','success');
+  } catch(e) { toast('✕ שגיאה בשמירה','error'); console.error(e); }
   finally { btn.disabled = false; btn.classList.remove('loading'); }
 }
 
-/* ── Load ── */
+/* ── Load saved settings ── */
 async function loadSettings() {
   try {
     const doc = await db.collection('Settings').doc('countdown').get();
     if (!doc.exists) return;
     const d = doc.data();
-    if (d.enabled !== undefined) document.getElementById('enabled').checked = d.enabled;
-    if (d.title)          document.getElementById('title').value          = d.title;
-    if (d.targetDate)     document.getElementById('target-date').value    = d.targetDate;
-    if (d.btnText)        document.getElementById('btn-text').value       = d.btnText;
-    if (d.btnUrl)         document.getElementById('btn-url').value        = d.btnUrl;
+
+    // Determine display mode
+    let mode = d.displayMode;
+    if (!mode) {
+      // migrate from old format
+      if (!d.enabled)      mode = 'none';
+      else if (!d.showMatch) mode = 'countdown_only';
+      else                 mode = 'both';
+    }
+    const radio = document.querySelector(`input[name="display-mode"][value="${mode}"]`);
+    if (radio) {
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change'));
+    }
+
+    if (d.title)       document.getElementById('title').value       = d.title;
+    if (d.targetDate)  document.getElementById('target-date').value = d.targetDate;
+    if (d.btnText)     document.getElementById('btn-text').value    = d.btnText;
+    if (d.btnUrl)      document.getElementById('btn-url').value     = d.btnUrl;
     if (d.bgImage) {
       document.getElementById('bg-image').value = d.bgImage;
       document.getElementById('bg-preview-img').src = d.bgImage;
@@ -920,10 +778,8 @@ async function loadSettings() {
     if (d.numColor) { document.getElementById('num-color-picker').value = d.numColor; document.getElementById('num-color-text').value = d.numColor; }
     if (d.boxColor) { document.getElementById('box-color-picker').value = d.boxColor; document.getElementById('box-color-text').value = d.boxColor; }
     if (d.overlayOpacity !== undefined) document.getElementById('overlay-opacity').value = d.overlayOpacity;
-    if (d.showMatch !== undefined) document.getElementById('show-match').checked = d.showMatch;
-    if (d.matchShirts) {
-      matchShirts = d.matchShirts;
-    }
+    if (d.matchShirts) matchShirts = d.matchShirts;
+
     updatePreview();
   } catch(e) { console.error(e); }
 }
