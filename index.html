@@ -28,7 +28,7 @@
             margin-right: min(450px, 90vw);
         }
 
-#announcement-bar {
+        #announcement-bar {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     color: white;
     padding: 12px 20px;
@@ -36,19 +36,20 @@
     font-weight: 500;
     font-size: 1.05em;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    position: relative;
+    position: relative; /* שונה מ-sticky ל-relative */
     z-index: 999;
     overflow: hidden;
     min-height: 20px;
 }
-        .announcement-text {
-            animation: fadeInOut 0.5s ease-in-out;
-        }
 
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
+.announcement-text {
+    animation: fadeInOut 0.5s ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
 
 header {
     background: #222;
@@ -61,8 +62,7 @@ header {
     border-bottom-left-radius: 16% 8%;
     border-bottom-right-radius: 16% 8%;
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 900;
 }
 
