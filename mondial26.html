@@ -33,17 +33,8 @@
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-@keyframes pulse-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
-  70%  { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
-  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-}
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-@keyframes toastIn {
-  from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
 }
 
 body {
@@ -52,121 +43,62 @@ body {
   color: var(--text);
   min-height: 100vh;
   padding: 48px 20px 100px;
-  /* subtle grain */
-  background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
-/* ── Header ── */
 .page-header {
-  max-width: 660px;
-  margin: 0 auto 56px;
-  display: flex;
-  align-items: center;
-  gap: 18px;
+  max-width: 660px; margin: 0 auto 56px;
+  display: flex; align-items: center; gap: 18px;
   animation: fadeSlideIn 0.5s ease both;
 }
 .logo-mark {
   width: 44px; height: 44px;
-  border: 1.5px solid var(--border-strong);
-  border-radius: 10px;
-  display: grid; place-items: center;
-  font-size: 1.2em;
-  flex-shrink: 0;
-  background: var(--surface);
+  border: 1.5px solid var(--border-strong); border-radius: 10px;
+  display: grid; place-items: center; font-size: 1.2em;
+  flex-shrink: 0; background: var(--surface);
 }
-.page-title {
-  font-size: 1.25em;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--text);
-}
-.page-sub {
-  font-size: 0.78em;
-  color: var(--text3);
-  margin-top: 2px;
-  font-family: 'DM Mono', monospace;
-}
+.page-title { font-size: 1.25em; font-weight: 700; letter-spacing: -0.3px; }
+.page-sub   { font-size: 0.78em; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
 
-/* ── Cards ── */
 .card {
-  max-width: 660px;
-  margin: 0 auto 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color 0.25s;
-  animation: fadeSlideIn 0.5s ease both;
+  max-width: 660px; margin: 0 auto 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  transition: border-color 0.25s; animation: fadeSlideIn 0.5s ease both;
 }
-.card:nth-child(2)  { animation-delay: 0.06s; }
-.card:nth-child(3)  { animation-delay: 0.12s; }
-.card:nth-child(4)  { animation-delay: 0.18s; }
-.card:nth-child(5)  { animation-delay: 0.24s; }
-.card:nth-child(6)  { animation-delay: 0.30s; }
-.card:focus-within  { border-color: var(--border-strong); }
+.card:nth-child(2) { animation-delay:.06s } .card:nth-child(3) { animation-delay:.12s }
+.card:nth-child(4) { animation-delay:.18s } .card:nth-child(5) { animation-delay:.24s }
+.card:nth-child(6) { animation-delay:.30s } .card:nth-child(7) { animation-delay:.36s }
+.card:focus-within { border-color: var(--border-strong); }
 
 .card-header {
-  padding: 18px 22px 14px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
 }
 .card-icon {
-  width: 32px; height: 32px;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  display: grid; place-items: center;
-  font-size: 0.9em;
-  flex-shrink: 0;
+  width: 32px; height: 32px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px;
+  display: grid; place-items: center; font-size: 0.9em; flex-shrink: 0;
 }
-.card-title {
-  font-size: 0.9em;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.2px;
-}
-.card-subtitle {
-  font-size: 0.75em;
-  color: var(--text3);
-  margin-top: 2px;
-  font-family: 'DM Mono', monospace;
-}
+.card-title   { font-size: 0.9em; font-weight: 700; letter-spacing: 0.2px; }
+.card-subtitle{ font-size: 0.75em; color: var(--text3); margin-top: 2px; font-family: 'DM Mono', monospace; }
 
 .card-body { padding: 22px; }
 
-/* ── Fields ── */
 .field-group { margin-bottom: 18px; }
 .field-group:last-child { margin-bottom: 0; }
 
 label {
-  display: block;
-  font-size: 0.72em;
-  font-weight: 600;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  margin-bottom: 8px;
+  display: block; font-size: 0.72em; font-weight: 600; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 8px;
   font-family: 'DM Mono', monospace;
 }
 
-input[type="text"],
-input[type="url"],
-input[type="datetime-local"],
-textarea {
-  width: 100%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 11px 14px;
-  font-size: 0.92em;
-  font-family: 'Heebo', sans-serif;
-  color: var(--text);
-  transition: border-color 0.2s, box-shadow 0.2s;
-  outline: none;
-  direction: rtl;
+input[type="text"], input[type="url"], input[type="datetime-local"], textarea {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 9px; padding: 11px 14px; font-size: 0.92em;
+  font-family: 'Heebo', sans-serif; color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s; outline: none; direction: rtl;
 }
 input::placeholder, textarea::placeholder { color: var(--text3); }
 input:focus, textarea:focus {
@@ -174,51 +106,27 @@ input:focus, textarea:focus {
   box-shadow: 0 0 0 3px rgba(255,255,255,0.05);
 }
 textarea { min-height: 70px; resize: vertical; }
-.hint {
-  font-size: 0.72em;
-  color: var(--text3);
-  margin-top: 6px;
-  font-family: 'DM Mono', monospace;
-}
+.hint { font-size: 0.72em; color: var(--text3); margin-top: 6px; font-family: 'DM Mono', monospace; }
 
-/* ── Toggle ── */
-.toggle-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+.toggle-row { display: flex; justify-content: space-between; align-items: center; }
 .toggle-info { flex: 1; }
-.toggle-label { font-size: 0.9em; font-weight: 600; color: var(--text); }
+.toggle-label { font-size: 0.9em; font-weight: 600; }
 .toggle-desc  { font-size: 0.78em; color: var(--text3); margin-top: 3px; font-family: 'DM Mono', monospace; }
-.toggle {
-  position: relative; width: 46px; height: 24px; flex-shrink: 0;
-}
+.toggle { position: relative; width: 46px; height: 24px; flex-shrink: 0; }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .slider {
-  position: absolute; inset: 0;
-  background: var(--surface3);
-  border: 1px solid var(--border-strong);
-  border-radius: 24px; cursor: pointer;
+  position: absolute; inset: 0; background: var(--surface3);
+  border: 1px solid var(--border-strong); border-radius: 24px; cursor: pointer;
   transition: background 0.3s, border-color 0.3s;
 }
 .slider::before {
-  content: ''; position: absolute;
-  width: 18px; height: 18px;
-  left: 2px; top: 2px;
-  background: var(--text3);
-  border-radius: 50%;
+  content: ''; position: absolute; width: 18px; height: 18px;
+  left: 2px; top: 2px; background: var(--text3); border-radius: 50%;
   transition: transform 0.3s, background 0.3s;
 }
-input:checked + .slider {
-  background: var(--text);
-  border-color: var(--text);
-}
-input:checked + .slider::before {
-  transform: translateX(22px);
-  background: var(--bg);
-}
+input:checked + .slider { background: var(--text); border-color: var(--text); }
+input:checked + .slider::before { transform: translateX(22px); background: var(--bg); }
 
-/* ── Color ── */
 .color-row { display: flex; align-items: center; gap: 10px; }
 .color-row input[type="color"] {
   width: 42px; height: 42px; padding: 2px; border-radius: 9px;
@@ -227,259 +135,128 @@ input:checked + .slider::before {
 }
 .color-row input[type="text"] { flex: 1; }
 
-/* ── Image Upload ── */
 .upload-zone {
-  border: 1.5px dashed var(--border-strong);
-  border-radius: 10px;
-  padding: 28px 20px;
-  text-align: center;
-  cursor: pointer;
+  border: 1.5px dashed var(--border-strong); border-radius: 10px;
+  padding: 28px 20px; text-align: center; cursor: pointer;
   transition: border-color 0.25s, background 0.25s;
-  position: relative;
-  overflow: hidden;
-  background: var(--surface2);
+  position: relative; overflow: hidden; background: var(--surface2);
 }
-.upload-zone:hover {
-  border-color: rgba(255,255,255,0.4);
-  background: var(--surface3);
-}
-.upload-zone.drag-over {
-  border-color: var(--accent);
-  background: rgba(255,255,255,0.04);
-}
+.upload-zone:hover { border-color: rgba(255,255,255,0.4); background: var(--surface3); }
+.upload-zone.drag-over { border-color: var(--accent); background: rgba(255,255,255,0.04); }
 .upload-zone input[type="file"] {
   position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
 }
-.upload-icon { font-size: 1.8em; margin-bottom: 8px; }
-.upload-text { font-size: 0.85em; color: var(--text2); font-weight: 600; }
-.upload-sub  { font-size: 0.72em; color: var(--text3); margin-top: 4px; font-family: 'DM Mono', monospace; }
+.upload-icon  { font-size: 1.8em; margin-bottom: 8px; }
+.upload-text  { font-size: 0.85em; color: var(--text2); font-weight: 600; }
+.upload-sub   { font-size: 0.72em; color: var(--text3); margin-top: 4px; font-family: 'DM Mono', monospace; }
 
-.upload-progress {
-  margin-top: 14px;
-  display: none;
-  align-items: center;
-  gap: 10px;
-}
+.upload-progress { margin-top: 14px; display: none; align-items: center; gap: 10px; }
 .upload-progress.active { display: flex; }
-.progress-bar-track {
-  flex: 1; height: 3px;
-  background: var(--surface3);
-  border-radius: 99px;
-  overflow: hidden;
-}
+.progress-bar-track { flex: 1; height: 3px; background: var(--surface3); border-radius: 99px; overflow: hidden; }
 .progress-bar-fill {
-  height: 100%;
-  background: var(--text);
-  width: 0%;
-  border-radius: 99px;
+  height: 100%; background: var(--text); width: 0%; border-radius: 99px;
   transition: width 0.3s ease;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.3) 0%,
-    rgba(255,255,255,1) 50%,
-    rgba(255,255,255,0.3) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg,rgba(255,255,255,0.3) 0%,rgba(255,255,255,1) 50%,rgba(255,255,255,0.3) 100%);
+  background-size: 200% 100%; animation: shimmer 1.5s infinite;
 }
-.progress-label {
-  font-size: 0.72em;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-  white-space: nowrap;
-}
+.progress-label { font-size: 0.72em; color: var(--text3); font-family: 'DM Mono', monospace; white-space: nowrap; }
 
 .img-preview-wrap {
-  margin-top: 14px;
-  border-radius: 9px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  display: none;
-  position: relative;
+  margin-top: 14px; border-radius: 9px; overflow: hidden;
+  border: 1px solid var(--border); display: none; position: relative;
 }
-.img-preview-wrap img {
-  width: 100%; height: 160px;
-  object-fit: cover; display: block;
-  filter: grayscale(40%) brightness(0.7);
-}
+.img-preview-wrap img { width: 100%; height: 160px; object-fit: cover; display: block; filter: grayscale(40%) brightness(0.7); }
 .img-preview-url {
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(0,0,0,0.7);
-  padding: 6px 10px;
-  font-size: 0.68em;
-  color: var(--text3);
-  font-family: 'DM Mono', monospace;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  direction: ltr;
+  background: rgba(0,0,0,0.7); padding: 6px 10px; font-size: 0.68em;
+  color: var(--text3); font-family: 'DM Mono', monospace;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: ltr;
 }
 .img-clear-btn {
-  position: absolute; top: 8px; left: 8px;
-  width: 26px; height: 26px;
-  background: rgba(0,0,0,0.7);
-  border: 1px solid var(--border-strong);
-  border-radius: 50%;
-  cursor: pointer;
-  display: grid; place-items: center;
-  font-size: 0.75em;
-  color: var(--text2);
-  transition: background 0.2s, color 0.2s;
-  z-index: 2;
+  position: absolute; top: 8px; left: 8px; width: 26px; height: 26px;
+  background: rgba(0,0,0,0.7); border: 1px solid var(--border-strong);
+  border-radius: 50%; cursor: pointer; display: grid; place-items: center;
+  font-size: 0.75em; color: var(--text2); transition: background 0.2s, color 0.2s; z-index: 2;
 }
 .img-clear-btn:hover { background: #000; color: var(--text); }
 
-/* ── Divider ── */
-.divider {
-  border: none;
-  border-top: 1px solid var(--border);
-  margin: 4px 0 18px;
+.divider { border: none; border-top: 1px solid var(--border); margin: 4px 0 18px; }
+
+/* ── Shirt fields ── */
+.shirt-section {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 10px;
 }
+.shirt-section-title {
+  font-size: 0.72em; font-weight: 700; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.2px;
+  font-family: 'DM Mono', monospace; margin-bottom: 12px;
+}
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.shirt-mini-preview {
+  margin-top: 8px; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border); display: none;
+}
+.shirt-mini-preview img { width: 100%; height: 90px; object-fit: contain; background: #111; display: block; }
 
 /* ── Preview Strip ── */
 #preview-strip {
-  max-width: 660px;
-  margin: 0 auto 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 22px;
-  display: none;
+  max-width: 660px; margin: 0 auto 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px; display: none;
   animation: fadeSlideIn 0.35s ease both;
 }
 #preview-strip h3 {
-  font-size: 0.68em;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text3);
-  margin-bottom: 16px;
-  font-family: 'DM Mono', monospace;
-  font-weight: 500;
+  font-size: 0.68em; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text3); margin-bottom: 16px; font-family: 'DM Mono', monospace; font-weight: 500;
 }
-.preview-title {
-  text-align: center;
-  color: var(--text);
-  margin-bottom: 16px;
-  font-weight: 700;
-  font-size: 1em;
-  letter-spacing: 0.2px;
-}
-.preview-countdown {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.preview-box {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 16px;
-  text-align: center;
-  min-width: 64px;
-}
-.preview-num {
-  font-size: 1.8em;
-  font-weight: 900;
-  color: var(--text);
-  display: block;
-  line-height: 1;
-  font-family: 'DM Mono', monospace;
-}
-.preview-lbl {
-  font-size: 0.62em;
-  color: var(--text3);
-  margin-top: 4px;
-  display: block;
-  font-family: 'DM Mono', monospace;
-}
-.preview-sep {
-  color: var(--text3);
-  font-size: 1.4em;
-  font-weight: 900;
-  font-family: 'DM Mono', monospace;
-}
+.preview-title { text-align: center; color: var(--text); margin-bottom: 16px; font-weight: 700; font-size: 1em; }
+.preview-countdown { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; align-items: center; }
+.preview-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; text-align: center; min-width: 64px; }
+.preview-num { font-size: 1.8em; font-weight: 900; color: var(--text); display: block; line-height: 1; font-family: 'DM Mono', monospace; }
+.preview-lbl { font-size: 0.62em; color: var(--text3); margin-top: 4px; display: block; font-family: 'DM Mono', monospace; }
+.preview-sep { color: var(--text3); font-size: 1.4em; font-weight: 900; font-family: 'DM Mono', monospace; }
 
 /* ── Save Button ── */
 .save-btn {
-  max-width: 660px;
-  margin: 8px auto 0;
-  display: block;
-  width: 100%;
-  padding: 15px;
-  background: var(--text);
-  color: var(--bg);
-  border: none;
-  border-radius: var(--radius);
-  font-size: 0.95em;
-  font-weight: 700;
-  font-family: 'Heebo', sans-serif;
-  cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  letter-spacing: 0.5px;
-  animation: fadeSlideIn 0.5s 0.36s ease both;
-  position: relative;
-  overflow: hidden;
+  max-width: 660px; margin: 8px auto 0; display: block; width: 100%;
+  padding: 15px; background: var(--text); color: var(--bg); border: none;
+  border-radius: var(--radius); font-size: 0.95em; font-weight: 700;
+  font-family: 'Heebo', sans-serif; cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s; letter-spacing: 0.5px;
+  animation: fadeSlideIn 0.5s 0.36s ease both; position: relative; overflow: hidden;
 }
-.save-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.5s ease;
-}
-.save-btn:hover::after { transform: translateX(100%); }
 .save-btn:hover { opacity: 0.92; transform: translateY(-1px); }
 .save-btn:active { transform: scale(0.99); }
-.save-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-  transform: none;
-}
+.save-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 .save-btn .spinner {
-  display: none;
-  width: 16px; height: 16px;
-  border: 2px solid rgba(0,0,0,0.2);
-  border-top-color: var(--bg);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-  margin: 0 auto;
+  display: none; width: 16px; height: 16px;
+  border: 2px solid rgba(0,0,0,0.2); border-top-color: var(--bg);
+  border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto;
 }
 .save-btn.loading .btn-text { display: none; }
 .save-btn.loading .spinner { display: block; }
 
 /* ── Toast ── */
 #status-toast {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
+  position: fixed; bottom: 28px; left: 50%;
   transform: translateX(-50%) translateY(60px);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 50px;
-  padding: 10px 24px;
-  font-weight: 600;
-  font-size: 0.85em;
-  font-family: 'DM Mono', monospace;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  opacity: 0;
-  z-index: 999;
-  white-space: nowrap;
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: 50px; padding: 10px 24px; font-weight: 600; font-size: 0.85em;
+  font-family: 'DM Mono', monospace; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  opacity: 0; z-index: 999; white-space: nowrap;
   transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
 }
-#status-toast.visible {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
-}
+#status-toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
 #status-toast.success { border-color: rgba(255,255,255,0.4); color: var(--text); }
 #status-toast.error   { border-color: rgba(255,100,100,0.5); color: #ff7070; }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="page-header">
   <div class="logo-mark">⚽</div>
   <div>
@@ -507,10 +284,7 @@ input:checked + .slider::before {
 <div class="card">
   <div class="card-header">
     <div class="card-icon">⚡</div>
-    <div>
-      <div class="card-title">הפעלה</div>
-      <div class="card-subtitle">visibility · homepage</div>
-    </div>
+    <div><div class="card-title">הפעלה</div><div class="card-subtitle">visibility · homepage</div></div>
   </div>
   <div class="card-body">
     <div class="toggle-row">
@@ -518,10 +292,7 @@ input:checked + .slider::before {
         <div class="toggle-label">הצג ספירה לאחור</div>
         <div class="toggle-desc">מוצג מתחת למוצרים המומלצים</div>
       </div>
-      <label class="toggle">
-        <input type="checkbox" id="enabled" checked>
-        <span class="slider"></span>
-      </label>
+      <label class="toggle"><input type="checkbox" id="enabled" checked><span class="slider"></span></label>
     </div>
   </div>
 </div>
@@ -530,15 +301,12 @@ input:checked + .slider::before {
 <div class="card">
   <div class="card-header">
     <div class="card-icon">✏️</div>
-    <div>
-      <div class="card-title">תוכן</div>
-      <div class="card-subtitle">title · date · button</div>
-    </div>
+    <div><div class="card-title">תוכן</div><div class="card-subtitle">title · date · button</div></div>
   </div>
   <div class="card-body">
     <div class="field-group">
       <label>כותרת</label>
-      <input type="text" id="title" placeholder="">
+      <input type="text" id="title" placeholder="🏆 גמר המונדיאל">
     </div>
     <div class="field-group">
       <label>תאריך ושעת יעד</label>
@@ -547,12 +315,83 @@ input:checked + .slider::before {
     <hr class="divider">
     <div class="field-group">
       <label>טקסט כפתור</label>
-      <input type="text" id="btn-text" placeholder="">
+      <input type="text" id="btn-text" placeholder="לחצו לרכישה">
     </div>
     <div class="field-group">
       <label>קישור כפתור</label>
-      <input type="url" id="btn-url" placeholder="https://...">
+      <input type="text" id="btn-url" placeholder="#category:שם-קטגוריה  או  https://...">
+      <div class="hint">ניתן להשתמש ב: #category:שם | #subcategory:קטגוריה:תת | #product:שם | https://...</div>
     </div>
+  </div>
+</div>
+
+<!-- Card: Match / Teams -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-icon">🆚</div>
+    <div><div class="card-title">משחק ו-חולצות</div><div class="card-subtitle">match display · team shirts</div></div>
+  </div>
+  <div class="card-body">
+
+    <div class="field-group">
+      <label>הצג ווידג'ט משחק מונדיאל?</label>
+      <div class="toggle-row" style="margin-top:4px;">
+        <div class="toggle-info">
+          <div class="toggle-label">הצג תוצאה / ספירה לפני משחק</div>
+          <div class="toggle-desc">שולף נתונים חיים מ-ESPN</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="show-match" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="two-col">
+      <!-- Home Team Shirt -->
+      <div>
+        <div class="shirt-section">
+          <div class="shirt-section-title">⚽ חולצה – קבוצת בית</div>
+          <div class="field-group" style="margin-bottom:10px;">
+            <label>שם מוצר (כפי שמופיע בחנות)</label>
+            <input type="text" id="home-shirt-name" placeholder="חולצת ברזיל בית 2026">
+          </div>
+          <div class="field-group" style="margin-bottom:10px;">
+            <label>טקסט כפתור</label>
+            <input type="text" id="home-shirt-btn-text" placeholder="🛒 לחולצת הבית">
+          </div>
+          <div class="field-group" style="margin-bottom:0;">
+            <label>תמונה מקדימה (URL)</label>
+            <input type="text" id="home-shirt-image" placeholder="https://..." oninput="previewShirtImage('home')">
+            <div class="shirt-mini-preview" id="home-shirt-preview">
+              <img id="home-shirt-preview-img" src="" alt="תצוגה מקדימה">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Away Team Shirt -->
+      <div>
+        <div class="shirt-section">
+          <div class="shirt-section-title">⚽ חולצה – קבוצת חוץ</div>
+          <div class="field-group" style="margin-bottom:10px;">
+            <label>שם מוצר (כפי שמופיע בחנות)</label>
+            <input type="text" id="away-shirt-name" placeholder="חולצת ארגנטינה חוץ 2026">
+          </div>
+          <div class="field-group" style="margin-bottom:10px;">
+            <label>טקסט כפתור</label>
+            <input type="text" id="away-shirt-btn-text" placeholder="🛒 לחולצת החוץ">
+          </div>
+          <div class="field-group" style="margin-bottom:0;">
+            <label>תמונה מקדימה (URL)</label>
+            <input type="text" id="away-shirt-image" placeholder="https://..." oninput="previewShirtImage('away')">
+            <div class="shirt-mini-preview" id="away-shirt-preview">
+              <img id="away-shirt-preview-img" src="" alt="תצוגה מקדימה">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -560,10 +399,7 @@ input:checked + .slider::before {
 <div class="card">
   <div class="card-header">
     <div class="card-icon">🖼️</div>
-    <div>
-      <div class="card-title">תמונת רקע</div>
-      <div class="card-subtitle">upload · imgbb · auto-saved url</div>
-    </div>
+    <div><div class="card-title">תמונת רקע</div><div class="card-subtitle">upload · imgbb · auto-saved url</div></div>
   </div>
   <div class="card-body">
     <div class="upload-zone" id="upload-zone">
@@ -572,21 +408,15 @@ input:checked + .slider::before {
       <div class="upload-text">גרור תמונה לכאן או לחץ לבחירה</div>
       <div class="upload-sub">JPG · PNG · WEBP · עד 32MB</div>
     </div>
-
     <div class="upload-progress" id="upload-progress">
-      <div class="progress-bar-track">
-        <div class="progress-bar-fill" id="progress-fill"></div>
-      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill"></div></div>
       <div class="progress-label" id="progress-label">מעלה...</div>
     </div>
-
     <div class="img-preview-wrap" id="bg-preview-wrap">
       <button class="img-clear-btn" id="bg-clear-btn" type="button" onclick="clearBgImage()">✕</button>
       <img id="bg-preview-img" src="" alt="">
       <div class="img-preview-url" id="bg-url-display"></div>
     </div>
-
-    <!-- hidden field storing the saved URL -->
     <input type="hidden" id="bg-image" value="">
   </div>
 </div>
@@ -595,10 +425,7 @@ input:checked + .slider::before {
 <div class="card">
   <div class="card-header">
     <div class="card-icon">◑</div>
-    <div>
-      <div class="card-title">עיצוב</div>
-      <div class="card-subtitle">colors · overlay</div>
-    </div>
+    <div><div class="card-title">עיצוב</div><div class="card-subtitle">colors · overlay</div></div>
   </div>
   <div class="card-body">
     <div class="field-group">
@@ -623,7 +450,6 @@ input:checked + .slider::before {
   </div>
 </div>
 
-<!-- Save -->
 <button class="save-btn" id="save-btn" onclick="saveSettings()">
   <span class="btn-text">שמור הגדרות</span>
   <div class="spinner"></div>
@@ -632,7 +458,6 @@ input:checked + .slider::before {
 <div id="status-toast"></div>
 
 <script>
-/* ── Firebase ── */
 const firebaseConfig = {
   apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
   authDomain: "timetable-titus.firebaseapp.com",
@@ -644,148 +469,102 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-/* ── imgBB ── */
 const IMGBB_API_KEY = '949918f473144748f8dea05705ac165a';
 
-/* ── Color sync ── */
+/* Color sync */
 function syncColor(pickerId, textId) {
-  const p = document.getElementById(pickerId);
-  const t = document.getElementById(textId);
+  const p = document.getElementById(pickerId), t = document.getElementById(textId);
   p.addEventListener('input', () => { t.value = p.value; updatePreview(); });
-  t.addEventListener('input', () => {
-    if (/^#[0-9a-fA-F]{6}$/.test(t.value)) { p.value = t.value; updatePreview(); }
-  });
+  t.addEventListener('input', () => { if (/^#[0-9a-fA-F]{6}$/.test(t.value)) { p.value = t.value; updatePreview(); } });
 }
-syncColor('num-color-picker', 'num-color-text');
-syncColor('box-color-picker', 'box-color-text');
+syncColor('num-color-picker','num-color-text');
+syncColor('box-color-picker','box-color-text');
 
-/* ── Upload ── */
+/* Shirt image preview */
+function previewShirtImage(side) {
+  const url = document.getElementById(`${side}-shirt-image`).value.trim();
+  const wrap = document.getElementById(`${side}-shirt-preview`);
+  const img  = document.getElementById(`${side}-shirt-preview-img`);
+  if (url) { img.src = url; wrap.style.display = 'block'; }
+  else       wrap.style.display = 'none';
+}
+
+/* Upload */
 const uploadZone = document.getElementById('upload-zone');
 const fileInput  = document.getElementById('bg-file-input');
-
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault();
-  uploadZone.classList.remove('drag-over');
-  if (e.dataTransfer.files[0]) uploadImage(e.dataTransfer.files[0]);
-});
-fileInput.addEventListener('change', () => {
-  if (fileInput.files[0]) uploadImage(fileInput.files[0]);
-});
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('drag-over'); if (e.dataTransfer.files[0]) uploadImage(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) uploadImage(fileInput.files[0]); });
 
 async function uploadImage(file) {
-  const progress     = document.getElementById('upload-progress');
-  const fill         = document.getElementById('progress-fill');
-  const label        = document.getElementById('progress-label');
-  const previewWrap  = document.getElementById('bg-preview-wrap');
-  const previewImg   = document.getElementById('bg-preview-img');
-  const urlDisplay   = document.getElementById('bg-url-display');
-  const hiddenUrl    = document.getElementById('bg-image');
-
-  progress.classList.add('active');
-  fill.style.width = '0%';
-  label.textContent = 'מעלה...';
-
-  // fake progress animation
+  const progress = document.getElementById('upload-progress');
+  const fill     = document.getElementById('progress-fill');
+  const label    = document.getElementById('progress-label');
+  progress.classList.add('active'); fill.style.width = '0%'; label.textContent = 'מעלה...';
   let fakeP = 0;
-  const fakeInterval = setInterval(() => {
-    fakeP = Math.min(fakeP + Math.random() * 12, 85);
-    fill.style.width = fakeP + '%';
-  }, 200);
-
-  const formData = new FormData();
-  formData.append('image', file);
-
+  const fakeInterval = setInterval(() => { fakeP = Math.min(fakeP + Math.random()*12, 85); fill.style.width = fakeP+'%'; }, 200);
+  const formData = new FormData(); formData.append('image', file);
   try {
-    const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-      method: 'POST', body: formData
-    });
+    const res  = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method:'POST', body:formData });
     const json = await res.json();
     clearInterval(fakeInterval);
-
     if (json.success) {
-      fill.style.width = '100%';
-      label.textContent = 'הועלה ✓';
-
+      fill.style.width = '100%'; label.textContent = 'הועלה ✓';
       const url = json.data.url;
-      hiddenUrl.value   = url;
-      previewImg.src    = url;
-      urlDisplay.textContent = url;
-      previewWrap.style.display = 'block';
-
+      document.getElementById('bg-image').value = url;
+      document.getElementById('bg-preview-img').src = url;
+      document.getElementById('bg-url-display').textContent = url;
+      document.getElementById('bg-preview-wrap').style.display = 'block';
       setTimeout(() => progress.classList.remove('active'), 1200);
       showToast('✓ תמונה הועלתה', 'success');
-    } else {
-      throw new Error('imgBB error');
-    }
-  } catch (err) {
-    clearInterval(fakeInterval);
-    progress.classList.remove('active');
-    showToast('✕ שגיאה בהעלאה', 'error');
-    console.error(err);
-  }
+    } else throw new Error('imgBB error');
+  } catch (err) { clearInterval(fakeInterval); progress.classList.remove('active'); showToast('✕ שגיאה בהעלאה', 'error'); }
 }
 
 function clearBgImage() {
-  document.getElementById('bg-image').value        = '';
+  document.getElementById('bg-image').value = '';
   document.getElementById('bg-preview-wrap').style.display = 'none';
-  document.getElementById('bg-preview-img').src    = '';
-  document.getElementById('bg-url-display').textContent   = '';
-  document.getElementById('bg-file-input').value   = '';
+  document.getElementById('bg-preview-img').src = '';
+  document.getElementById('bg-url-display').textContent = '';
+  document.getElementById('bg-file-input').value = '';
 }
 
-/* ── Live Preview ── */
+/* Live Preview */
 let previewInterval;
 function updatePreview() {
   const dateVal = document.getElementById('target-date').value;
   if (!dateVal) { document.getElementById('preview-strip').style.display = 'none'; return; }
   document.getElementById('preview-strip').style.display = 'block';
-
-  const numColor = document.getElementById('num-color-text').value || '#ffffff';
-  document.querySelectorAll('.preview-num, .preview-sep').forEach(el => el.style.color = numColor);
-
-  const boxColor = document.getElementById('box-color-text').value || '#000';
-  document.querySelectorAll('.preview-box').forEach(el => el.style.background = boxColor);
-
+  const numColor = document.getElementById('num-color-text').value || '#fff';
+  document.querySelectorAll('.preview-num,.preview-sep').forEach(el => el.style.color = numColor);
+  document.querySelectorAll('.preview-box').forEach(el => el.style.background = document.getElementById('box-color-text').value || '#000');
   document.getElementById('prev-title').textContent = document.getElementById('title').value || '';
-
   clearInterval(previewInterval);
   function tick() {
     const diff = new Date(dateVal) - Date.now();
     if (diff <= 0) { clearInterval(previewInterval); return; }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('prev-d').textContent = String(d).padStart(2,'0');
-    document.getElementById('prev-h').textContent = String(h).padStart(2,'0');
-    document.getElementById('prev-m').textContent = String(m).padStart(2,'0');
-    document.getElementById('prev-s').textContent = String(s).padStart(2,'0');
+    document.getElementById('prev-d').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
+    document.getElementById('prev-h').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('prev-m').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('prev-s').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
   }
-  tick();
-  previewInterval = setInterval(tick, 1000);
+  tick(); previewInterval = setInterval(tick, 1000);
 }
-
 document.getElementById('target-date').addEventListener('input', updatePreview);
 document.getElementById('title').addEventListener('input', updatePreview);
-document.getElementById('num-color-text').addEventListener('input', updatePreview);
-document.getElementById('box-color-text').addEventListener('input', updatePreview);
 
-/* ── Toast ── */
-function showToast(msg, type = 'success') {
+/* Toast */
+function showToast(msg, type='success') {
   const t = document.getElementById('status-toast');
-  t.textContent = msg;
-  t.className = `visible ${type}`;
+  t.textContent = msg; t.className = `visible ${type}`;
   setTimeout(() => t.className = '', 3500);
 }
 
-/* ── Save ── */
+/* Save */
 async function saveSettings() {
   const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  btn.classList.add('loading');
-
+  btn.disabled = true; btn.classList.add('loading');
   const data = {
     enabled:        document.getElementById('enabled').checked,
     title:          document.getElementById('title').value.trim(),
@@ -796,51 +575,59 @@ async function saveSettings() {
     numColor:       document.getElementById('num-color-text').value.trim() || '#ffffff',
     boxColor:       document.getElementById('box-color-text').value.trim() || '#000000',
     overlayOpacity: parseFloat(document.getElementById('overlay-opacity').value) || 0.45,
-    updatedAt:      firebase.firestore.FieldValue.serverTimestamp()
+    showMatch:      document.getElementById('show-match').checked,
+    homeShirt: {
+      productName: document.getElementById('home-shirt-name').value.trim(),
+      btnText:     document.getElementById('home-shirt-btn-text').value.trim(),
+      image:       document.getElementById('home-shirt-image').value.trim()
+    },
+    awayShirt: {
+      productName: document.getElementById('away-shirt-name').value.trim(),
+      btnText:     document.getElementById('away-shirt-btn-text').value.trim(),
+      image:       document.getElementById('away-shirt-image').value.trim()
+    },
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
-
   try {
     await db.collection('Settings').doc('countdown').set(data);
     showToast('✓ נשמר בהצלחה', 'success');
-  } catch (e) {
-    showToast('✕ שגיאה בשמירה', 'error');
-    console.error(e);
-  } finally {
-    btn.disabled = false;
-    btn.classList.remove('loading');
-  }
+  } catch(e) { showToast('✕ שגיאה בשמירה', 'error'); console.error(e); }
+  finally { btn.disabled = false; btn.classList.remove('loading'); }
 }
 
-/* ── Load ── */
+/* Load */
 async function loadSettings() {
   try {
     const doc = await db.collection('Settings').doc('countdown').get();
     if (!doc.exists) return;
     const d = doc.data();
     if (d.enabled !== undefined) document.getElementById('enabled').checked = d.enabled;
-    if (d.title)          document.getElementById('title').value          = d.title;
-    if (d.targetDate)     document.getElementById('target-date').value    = d.targetDate;
-    if (d.btnText)        document.getElementById('btn-text').value       = d.btnText;
-    if (d.btnUrl)         document.getElementById('btn-url').value        = d.btnUrl;
+    if (d.title)      document.getElementById('title').value      = d.title;
+    if (d.targetDate) document.getElementById('target-date').value = d.targetDate;
+    if (d.btnText)    document.getElementById('btn-text').value   = d.btnText;
+    if (d.btnUrl)     document.getElementById('btn-url').value    = d.btnUrl;
     if (d.bgImage) {
       document.getElementById('bg-image').value = d.bgImage;
-      const wrap = document.getElementById('bg-preview-wrap');
-      const img  = document.getElementById('bg-preview-img');
-      const url  = document.getElementById('bg-url-display');
-      img.src           = d.bgImage;
-      url.textContent   = d.bgImage;
-      wrap.style.display = 'block';
+      document.getElementById('bg-preview-img').src = d.bgImage;
+      document.getElementById('bg-url-display').textContent = d.bgImage;
+      document.getElementById('bg-preview-wrap').style.display = 'block';
     }
-    if (d.numColor) {
-      document.getElementById('num-color-picker').value = d.numColor;
-      document.getElementById('num-color-text').value   = d.numColor;
+    if (d.numColor) { document.getElementById('num-color-picker').value = d.numColor; document.getElementById('num-color-text').value = d.numColor; }
+    if (d.boxColor) { document.getElementById('box-color-picker').value = d.boxColor; document.getElementById('box-color-text').value = d.boxColor; }
+    if (d.overlayOpacity !== undefined) document.getElementById('overlay-opacity').value = d.overlayOpacity;
+    if (d.showMatch !== undefined) document.getElementById('show-match').checked = d.showMatch;
+    if (d.homeShirt) {
+      document.getElementById('home-shirt-name').value     = d.homeShirt.productName || '';
+      document.getElementById('home-shirt-btn-text').value = d.homeShirt.btnText || '';
+      document.getElementById('home-shirt-image').value    = d.homeShirt.image || '';
+      if (d.homeShirt.image) previewShirtImage('home');
     }
-    if (d.boxColor) {
-      document.getElementById('box-color-picker').value = d.boxColor;
-      document.getElementById('box-color-text').value   = d.boxColor;
+    if (d.awayShirt) {
+      document.getElementById('away-shirt-name').value     = d.awayShirt.productName || '';
+      document.getElementById('away-shirt-btn-text').value = d.awayShirt.btnText || '';
+      document.getElementById('away-shirt-image').value    = d.awayShirt.image || '';
+      if (d.awayShirt.image) previewShirtImage('away');
     }
-    if (d.overlayOpacity !== undefined)
-      document.getElementById('overlay-opacity').value = d.overlayOpacity;
     updatePreview();
   } catch(e) { console.error(e); }
 }
