@@ -5079,17 +5079,17 @@ async function renderMatchWidget(cfg) {
         const homeShirt = shirts.home || {};
         const awayShirt = shirts.away || {};
 
-        function makeShirtBtn(shirtCfg, teamName) {
-            if (!shirtCfg.productName) return '';
-            const label = shirtCfg.btnText || `חולצת ${teamName}`;
-            const imgTag = shirtCfg.image
-                ? `<img src="${shirtCfg.image}" alt="">`
-                : '';
-            return `<button class="mw-shirt-btn" onclick="openShirtByName('${shirtCfg.productName.replace(/'/g,"\\'")}')">
-                        ${imgTag}🛒 ${label}
-                    </button>`;
-        }
-
+function makeShirtBtn(shirtCfg, teamName) {
+    if (!shirtCfg.productName) return '';
+    const label = shirtCfg.btnText || `חולצת ${teamName}`;
+    const imgTag = shirtCfg.image
+        ? `<img src="${shirtCfg.image}" alt="">`
+        : '';
+    return `<button class="mw-shirt-btn" onclick="openShirtByName('${shirtCfg.productName.replace(/'/g,"\\'")}')">
+                ${imgTag}${label}
+            </button>`;
+}
+           
         const shirtRow = (homeShirt.productName || awayShirt.productName)
             ? `<div class="mw-shirts">
                    ${makeShirtBtn(homeShirt, homeName)}
