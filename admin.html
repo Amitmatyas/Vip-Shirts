@@ -1077,6 +1077,7 @@
     <div class="menu-item" data-section="orders">הזמנות</div>
     <div class="menu-item" data-section="leads">פניות</div>
     <div class="menu-item" data-section="customers">מועדון לקוחות</div>
+    <div class="menu-item" data-section="giftcards">שוברים</div>
     <div class="menu-item" data-section="bulk-edit">עריכה מרובה</div>
     <div class="menu-item" data-section="settings">הגדרות</div>
     <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
@@ -1244,6 +1245,38 @@
                 <div id="customers-list"><p>טוען לקוחות...</p></div>
             </div>
         
+<!-- שוברי מתנה -->
+<div class="content-section" id="giftcards-section">
+    <div class="content-header"><h2>🎁 ניהול שוברי מתנה</h2></div>
+
+    <div class="search-container">
+        <input type="text" id="giftcard-search" placeholder="חיפוש לפי קוד, שם שולח, שם מקבל או אימייל...">
+        <button class="btn btn-primary" id="search-giftcard-btn">חפש</button>
+        <button class="btn btn-secondary" id="clear-giftcard-search-btn">נקה</button>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:12px 20px;">
+            <div style="font-size:0.82em;color:#388e3c;font-weight:600;">פעילים</div>
+            <div id="gc-stat-active" style="font-size:1.4em;font-weight:800;color:#2c3e50;">0</div>
+        </div>
+        <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:12px 20px;">
+            <div style="font-size:0.82em;color:#856404;font-weight:600;">נוצלו חלקית</div>
+            <div id="gc-stat-partial" style="font-size:1.4em;font-weight:800;color:#2c3e50;">0</div>
+        </div>
+        <div style="background:#f8f9fa;border:1px solid #ddd;border-radius:8px;padding:12px 20px;">
+            <div style="font-size:0.82em;color:#666;font-weight:600;">נוצלו במלואם</div>
+            <div id="gc-stat-redeemed" style="font-size:1.4em;font-weight:800;color:#2c3e50;">0</div>
+        </div>
+        <div style="background:#fde8ea;border:1px solid #dc3545;border-radius:8px;padding:12px 20px;">
+            <div style="font-size:0.82em;color:#c0392b;font-weight:600;">יתרה כוללת</div>
+            <div id="gc-stat-balance" style="font-size:1.4em;font-weight:800;color:#2c3e50;">0 ₪</div>
+        </div>
+    </div>
+
+    <div id="giftcards-list"><p>טוען שוברי מתנה...</p></div>
+</div>
+
 <!-- עריכה מרובה -->
 <div class="content-section" id="bulk-edit-section">
     <div class="content-header"><h2>עריכת מוצרים מרובים</h2></div>
@@ -1550,6 +1583,15 @@
         </div>
     </div>
     
+<!-- מודאל עריכת שובר מתנה -->
+<div id="edit-giftcard-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h3>עריכת שובר מתנה</h3>
+        <div id="edit-giftcard-form-container"></div>
+    </div>
+</div>
+
 <!-- מודאל בניית קישור מוצר -->
 <div id="product-link-modal" class="modal">
     <div class="modal-content" style="max-width:520px;">
@@ -1707,6 +1749,7 @@ async function onSuccessfulLogin() {
         await fetchOrders();
         await fetchContactLeads();
         await fetchCustomers();
+        await fetchGiftCards();
         await loadShippingSettings();
         await loadCoupons();
         await loadAnnouncements();
@@ -1761,7 +1804,7 @@ logoutButton.addEventListener('click', () => {
     // ============================================
     // NAVIGATION
     // ============================================
-    const menuItems = document.querySelectorAll('.menu-item');
+const menuItems = document.querySelectorAll('.menu-item');
     const contentSections = document.querySelectorAll('.content-section');
     menuItems.forEach(item => {
         item.addEventListener('click', () => {
@@ -1770,6 +1813,7 @@ logoutButton.addEventListener('click', () => {
             item.classList.add('active');
             contentSections.forEach(cs => cs.classList.remove('active'));
             document.getElementById(`${section}-section`).classList.add('active');
+            if (section === 'giftcards') fetchGiftCards(currentGiftCardSearchTerm);
         });
     });
 
@@ -3817,7 +3861,6 @@ window.saveEditAnnouncement = async function(index) {
             linkOrderModal.classList.remove('active');
             editProductModal.classList.remove('active');
         });
-    });
 window.addEventListener('click', (event) => {
         if (event.target === orderDetailsModal) orderDetailsModal.classList.remove('active');
         if (event.target === leadDetailsModal) leadDetailsModal.classList.remove('active');
@@ -3827,6 +3870,7 @@ window.addEventListener('click', (event) => {
         if (event.target === customerOrdersModal) customerOrdersModal.classList.remove('active');
         if (event.target === customerLeadsModal) customerLeadsModal.classList.remove('active');
         if (event.target === document.getElementById('product-link-modal')) document.getElementById('product-link-modal').classList.remove('active');
+        if (event.target === document.getElementById('edit-giftcard-modal')) document.getElementById('edit-giftcard-modal').classList.remove('active');
     });
 
     // ============================================
@@ -4252,7 +4296,7 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
     }
 }
 
-    async function deleteCustomer(customerId) {
+async function deleteCustomer(customerId) {
         if (!confirm('⚠️ האם אתה בטוח שברצונך למחוק לקוח זה?\n\nפעולה זו תמחק:\n• את פרטי הלקוח\n• את כל נקודות המועדון שלו\n\nההזמנות והפניות שלו יישארו במערכת.')) {
             return;
         }
@@ -4264,6 +4308,242 @@ async function viewCustomerLeads(customerId, customerEmail, customerPhone) {
         } catch (error) {
             console.error('Error deleting customer:', error);
             alert('שגיאה במחיקת לקוח');
+        }
+    }
+
+    // ============================================
+    // GIFT CARDS MANAGEMENT
+    // ============================================
+    const giftCardSearchInput = document.getElementById('giftcard-search');
+    const searchGiftCardBtn = document.getElementById('search-giftcard-btn');
+    const clearGiftCardSearchBtn = document.getElementById('clear-giftcard-search-btn');
+    const editGiftCardModal = document.getElementById('edit-giftcard-modal');
+    let currentGiftCardSearchTerm = '';
+    let currentEditingGiftCardId = null;
+
+    searchGiftCardBtn.addEventListener('click', () => {
+        currentGiftCardSearchTerm = giftCardSearchInput.value.trim().toLowerCase();
+        fetchGiftCards(currentGiftCardSearchTerm);
+    });
+    clearGiftCardSearchBtn.addEventListener('click', () => {
+        giftCardSearchInput.value = '';
+        currentGiftCardSearchTerm = '';
+        fetchGiftCards();
+    });
+    giftCardSearchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            currentGiftCardSearchTerm = giftCardSearchInput.value.trim().toLowerCase();
+            fetchGiftCards(currentGiftCardSearchTerm);
+        }
+    });
+
+    function giftCardStatusLabel(status) {
+        switch (status) {
+            case 'redeemed': return '<span style="color:#999;font-weight:700;">⬛ נוצל במלואו</span>';
+            case 'partially_used': return '<span style="color:#856404;font-weight:700;">🟡 נוצל חלקית</span>';
+            default: return '<span style="color:#27ae60;font-weight:700;">🟢 פעיל</span>';
+        }
+    }
+
+    async function fetchGiftCards(searchTerm = '') {
+        const list = document.getElementById('giftcards-list');
+        list.innerHTML = '<p>טוען שוברי מתנה...</p>';
+
+        try {
+            const snapshot = await db.collection('GiftCards').get();
+            let cards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // מיון לפי תאריך יצירה, החדש ביותר ראשון
+            cards.sort((a, b) => {
+                const da = a.createdAt ? a.createdAt.toDate() : new Date(0);
+                const db_ = b.createdAt ? b.createdAt.toDate() : new Date(0);
+                return db_ - da;
+            });
+
+            // סטטיסטיקות (על כל הנתונים, לא רק על המסונן)
+            let activeCount = 0, partialCount = 0, redeemedCount = 0, totalBalance = 0;
+            cards.forEach(c => {
+                if (c.status === 'redeemed') redeemedCount++;
+                else if (c.status === 'partially_used') partialCount++;
+                else activeCount++;
+                totalBalance += (c.remainingAmount || 0);
+            });
+            document.getElementById('gc-stat-active').textContent = activeCount;
+            document.getElementById('gc-stat-partial').textContent = partialCount;
+            document.getElementById('gc-stat-redeemed').textContent = redeemedCount;
+            document.getElementById('gc-stat-balance').textContent = totalBalance.toFixed(2) + ' ₪';
+
+            if (searchTerm) {
+                cards = cards.filter(c => {
+                    const code = (c.code || '').toLowerCase();
+                    const sName = (c.senderName || '').toLowerCase();
+                    const rName = (c.recipientName || '').toLowerCase();
+                    const sEmail = (c.senderEmail || '').toLowerCase();
+                    const rEmail = (c.recipientEmail || '').toLowerCase();
+                    return code.includes(searchTerm) || sName.includes(searchTerm) ||
+                           rName.includes(searchTerm) || sEmail.includes(searchTerm) || rEmail.includes(searchTerm);
+                });
+            }
+
+            if (cards.length === 0) {
+                list.innerHTML = searchTerm
+                    ? '<p>לא נמצאו שוברי מתנה התואמים לחיפוש.</p>'
+                    : '<p>אין שוברי מתנה עדיין.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            cards.forEach(card => {
+                const createdDate = card.createdAt ? new Date(card.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+                const giftLink = `${window.location.origin}/gift.html#${encodeURIComponent(card.code)}`;
+                const invoiceLink = `${window.location.origin}/gift-invoice.html#${card.id}`;
+
+                const cardEl = document.createElement('div');
+                cardEl.className = 'order-card';
+                cardEl.style.cursor = 'default';
+                cardEl.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:start;gap:20px;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:240px;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+                                <strong style="font-size:1.2em;font-family:monospace;color:#2c3e50;">${card.code}</strong>
+                                ${giftCardStatusLabel(card.status)}
+                            </div>
+                            <p><strong>💰 סכום מקורי:</strong> ${(card.amount||0).toFixed(2)} ₪ &nbsp; | &nbsp; <strong>יתרה:</strong> <span style="color:#27ae60;font-weight:700;">${(card.remainingAmount!=null?card.remainingAmount:card.amount).toFixed(2)} ₪</span></p>
+                            <p><strong>📤 שולח:</strong> ${card.senderName||''} (${card.senderEmail||''})</p>
+                            <p><strong>📥 מקבל:</strong> ${card.recipientName||''} (${card.recipientEmail||''})</p>
+                            <p><strong>📦 אופן מסירה:</strong> ${card.deliveryMethod === 'email' ? 'מייל' : 'קישור ישיר'}</p>
+                            <p><strong>📅 נוצר בתאריך:</strong> ${createdDate}</p>
+                            ${(card.redemptions && card.redemptions.length > 0) ? `
+                                <div style="margin-top:8px;background:#f8f9fa;border-radius:6px;padding:8px 12px;font-size:0.88em;">
+                                    <strong>היסטוריית מימוש:</strong>
+                                    ${card.redemptions.map(r => `<div>• ${r.amountUsed.toFixed(2)}₪ בהזמנה #${(r.orderId||'').substring(0,8)} (${new Date(r.date).toLocaleDateString('he-IL')})</div>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px;min-width:160px;">
+                            <button class="btn btn-dark btn-edit-giftcard" data-id="${card.id}">✏️ ערוך</button>
+                            <button class="btn btn-secondary btn-copy-gift-link" data-link="${giftLink}">🔗 קישור שובר</button>
+                            <button class="btn btn-secondary btn-copy-gift-invoice" data-link="${invoiceLink}">🧾 קישור קבלה</button>
+                            <button class="btn btn-danger btn-delete-giftcard" data-id="${card.id}">🗑️ מחק</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(cardEl);
+            });
+
+            document.querySelectorAll('.btn-edit-giftcard').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const card = cards.find(c => c.id === btn.dataset.id);
+                    openEditGiftCardModal(btn.dataset.id, card);
+                });
+            });
+            document.querySelectorAll('.btn-delete-giftcard').forEach(btn => {
+                btn.addEventListener('click', () => deleteGiftCard(btn.dataset.id));
+            });
+            document.querySelectorAll('.btn-copy-gift-link, .btn-copy-gift-invoice').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(btn.dataset.link).then(() => {
+                        const orig = btn.innerHTML;
+                        btn.innerHTML = '✓ הועתק';
+                        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+                    });
+                });
+            });
+
+        } catch (error) {
+            list.innerHTML = '<p style="color:red;">שגיאה בטעינת שוברי מתנה.</p>';
+            console.error(error);
+        }
+    }
+
+    function openEditGiftCardModal(id, card) {
+        currentEditingGiftCardId = id;
+        const formContainer = document.getElementById('edit-giftcard-form-container');
+        formContainer.innerHTML = `
+            <form id="edit-giftcard-form">
+                <div class="form-group">
+                    <label>קוד שובר:</label>
+                    <input type="text" id="egc-code" value="${card.code || ''}" required style="font-family:monospace;">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div class="form-group">
+                        <label>סכום מקורי (₪):</label>
+                        <input type="number" id="egc-amount" value="${card.amount || 0}" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>יתרה נוכחית (₪):</label>
+                        <input type="number" id="egc-remaining" value="${card.remainingAmount != null ? card.remainingAmount : card.amount}" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>סטטוס:</label>
+                    <select id="egc-status">
+                        <option value="active" ${card.status === 'active' ? 'selected' : ''}>פעיל</option>
+                        <option value="partially_used" ${card.status === 'partially_used' ? 'selected' : ''}>נוצל חלקית</option>
+                        <option value="redeemed" ${card.status === 'redeemed' ? 'selected' : ''}>נוצל במלואו</option>
+                    </select>
+                </div>
+
+                <div style="font-weight:700;color:#dc3545;margin:18px 0 10px;">פרטי שולח</div>
+                <div class="form-group"><label>שם מלא:</label><input type="text" id="egc-sender-name" value="${card.senderName || ''}"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div class="form-group"><label>טלפון:</label><input type="tel" id="egc-sender-phone" value="${card.senderPhone || ''}"></div>
+                    <div class="form-group"><label>אימייל:</label><input type="email" id="egc-sender-email" value="${card.senderEmail || ''}"></div>
+                </div>
+                <div class="form-group"><label>כתובת:</label><input type="text" id="egc-sender-address" value="${card.senderAddress || ''}"></div>
+
+                <div style="font-weight:700;color:#28a745;margin:18px 0 10px;">פרטי מקבל</div>
+                <div class="form-group"><label>שם מלא:</label><input type="text" id="egc-recipient-name" value="${card.recipientName || ''}"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div class="form-group"><label>טלפון:</label><input type="tel" id="egc-recipient-phone" value="${card.recipientPhone || ''}"></div>
+                    <div class="form-group"><label>אימייל:</label><input type="email" id="egc-recipient-email" value="${card.recipientEmail || ''}"></div>
+                </div>
+                <div class="form-group"><label>ברכה אישית:</label><textarea id="egc-message">${card.message || ''}</textarea></div>
+
+                <button type="submit" class="btn btn-dark" style="width:100%;margin-top:10px;">💾 שמור שינויים</button>
+            </form>
+        `;
+
+        document.getElementById('edit-giftcard-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updateData = {
+                code: document.getElementById('egc-code').value.trim(),
+                amount: parseFloat(document.getElementById('egc-amount').value) || 0,
+                remainingAmount: parseFloat(document.getElementById('egc-remaining').value) || 0,
+                status: document.getElementById('egc-status').value,
+                senderName: document.getElementById('egc-sender-name').value.trim(),
+                senderPhone: document.getElementById('egc-sender-phone').value.trim(),
+                senderEmail: document.getElementById('egc-sender-email').value.trim(),
+                senderAddress: document.getElementById('egc-sender-address').value.trim(),
+                recipientName: document.getElementById('egc-recipient-name').value.trim(),
+                recipientPhone: document.getElementById('egc-recipient-phone').value.trim(),
+                recipientEmail: document.getElementById('egc-recipient-email').value.trim(),
+                message: document.getElementById('egc-message').value.trim()
+            };
+
+            try {
+                await db.collection('GiftCards').doc(id).update(updateData);
+                alert('שובר המתנה עודכן בהצלחה!');
+                editGiftCardModal.classList.remove('active');
+                await fetchGiftCards(currentGiftCardSearchTerm);
+            } catch (error) {
+                console.error('Error updating gift card:', error);
+                alert('שגיאה בעדכון שובר המתנה');
+            }
+        });
+
+        editGiftCardModal.classList.add('active');
+    }
+
+    async function deleteGiftCard(id) {
+        if (!confirm('⚠️ האם אתה בטוח שברצונך למחוק שובר מתנה זה? פעולה זו אינה הפיכה.')) return;
+        try {
+            await db.collection('GiftCards').doc(id).delete();
+            alert('שובר המתנה נמחק בהצלחה!');
+            await fetchGiftCards(currentGiftCardSearchTerm);
+        } catch (error) {
+            console.error('Error deleting gift card:', error);
+            alert('שגיאה במחיקת שובר המתנה');
         }
     }
 
