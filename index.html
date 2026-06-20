@@ -3382,7 +3382,20 @@ let cart = [];
         let giftDeliveryMethod = '';
         let giftCurrentStep = 1;
         let giftPaypalLoaded = false;
-        let appliedGiftCard = null;
+              let appliedGiftCard = null;
+
+        // ===== ADMIN MODE HELPERS =====
+        function isAdminMode() {
+            return window.location.href.toLowerCase().includes('admin');
+        }
+
+        function isAdminClubMember() {
+            return !!(currentClubMember && currentClubMember.phone === '0552724255');
+        }
+
+        function isAdminCheckoutActive() {
+            return isAdminMode() && isAdminClubMember();
+        }
 
         // ===== MOBILE NAV HELPERS =====
         function setMobileActive(btnId) {
@@ -3935,10 +3948,95 @@ function updatePointsDisplay() {
             return `VIP-${part1}-${part2}`;
         }
 
+// ===== לוגיקה משותפת ליצירת שובר מתנה (משמשת גם את PayPal וגם את כפתור האדמין) =====
+        async function finalizeGiftCard(giftPaymentMeta) {
+            const code = generateGiftCode();
+            const giftData = {
+                code: code,
+                amount: giftSelectedAmount,
+                remainingAmount: giftSelectedAmount,
+                senderName: giftSenderData.name,
+                senderPhone: giftSenderData.phone,
+                senderEmail: giftSenderData.email,
+                senderAddress: giftSenderData.address,
+                recipientName: giftRecipientData.name,
+                recipientPhone: giftRecipientData.phone,
+                recipientEmail: giftRecipientData.email,
+                message: giftRecipientData.message,
+                deliveryMethod: giftDeliveryMethod,
+                status: 'active',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                paymentType: giftPaymentMeta.paymentType,
+                paypalOrderId: giftPaymentMeta.paypalOrderId,
+                redemptions: []
+            };
+
+            const giftRef = await db.collection('GiftCards').add(giftData);
+            const giftLink = `${window.location.origin}/gift.html#${encodeURIComponent(code)}`;
+            const invoiceLink = `${window.location.origin}/gift-invoice.html#${giftRef.id}`;
+
+            // קבלה לשולח - תמיד נשלחת
+            await sendGiftReceiptEmail(giftData, invoiceLink);
+
+            // מייל מתנה למקבל - רק אם נבחרה שליחה מיידית
+            if (giftDeliveryMethod === 'email') {
+                await sendGiftToRecipientEmail(giftData, giftLink);
+            }
+
+            goToGiftStep('success');
+            const successText = document.getElementById('gift-success-text');
+            const linkBox = document.getElementById('gift-link-reveal-box');
+            if (giftDeliveryMethod === 'email') {
+                successText.textContent = `השובר נשלח בהצלחה למייל של ${giftRecipientData.name}! קבלה נשלחה גם למייל שלך.`;
+                linkBox.style.display = 'none';
+            } else {
+                successText.textContent = 'השובר מוכן! העתיקו את הקישור ושלחו אותו למקבל.';
+                document.getElementById('gift-final-link').value = giftLink;
+                linkBox.style.display = 'block';
+            }
+        }
+
         function renderGiftPayPalButton() {
             const container = document.getElementById('gift-paypal-button-container');
-            if (!container || typeof paypal === 'undefined') return;
+            if (!container) return;
             container.innerHTML = '';
+
+            // ===== מצב אדמין: כפתור "שלח הזמנה" במקום PayPal =====
+            if (isAdminCheckoutActive()) {
+                const adminBtn = document.createElement('button');
+                adminBtn.type = 'button';
+                adminBtn.textContent = '📦 שלח הזמנה';
+                adminBtn.style.cssText = `
+                    width: 100%;
+                    background: #28a745;
+                    color: #fff;
+                    border: none;
+                    padding: 14px;
+                    border-radius: 50px;
+                    font-size: 1.05em;
+                    font-weight: 800;
+                    cursor: pointer;
+                    font-family: 'Heebo', Arial, sans-serif;
+                    box-shadow: 0 4px 14px rgba(40,167,69,0.4);
+                    transition: background 0.2s, transform 0.15s;
+                `;
+                adminBtn.addEventListener('click', async () => {
+                    adminBtn.disabled = true;
+                    adminBtn.textContent = 'שולח הזמנה...';
+                    try {
+                        await finalizeGiftCard({ paymentType: 'admin_manual', paypalOrderId: null });
+                    } catch (error) {
+                        console.error('Gift card error:', error);
+                        alert('אירעה שגיאה ביצירת השובר. אנא צור קשר עם התמיכה.');
+                        adminBtn.disabled = false;
+                        adminBtn.textContent = '📦 שלח הזמנה';
+                    }
+                });
+                container.appendChild(adminBtn);
+                return;
+            }
+
+            if (typeof paypal === 'undefined') return;
 
             paypal.Buttons({
                 style: { color: 'blue', shape: 'pill', label: 'pay', height: 45, layout: 'vertical' },
@@ -3953,49 +4051,7 @@ function updatePointsDisplay() {
                 onApprove: function (data, actions) {
                     return actions.order.capture().then(async function (details) {
                         try {
-                            const code = generateGiftCode();
-                            const giftData = {
-                                code: code,
-                                amount: giftSelectedAmount,
-                                remainingAmount: giftSelectedAmount,
-                                senderName: giftSenderData.name,
-                                senderPhone: giftSenderData.phone,
-                                senderEmail: giftSenderData.email,
-                                senderAddress: giftSenderData.address,
-                                recipientName: giftRecipientData.name,
-                                recipientPhone: giftRecipientData.phone,
-                                recipientEmail: giftRecipientData.email,
-                                message: giftRecipientData.message,
-                                deliveryMethod: giftDeliveryMethod,
-                                status: 'active',
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                                paypalOrderId: details.id,
-                                redemptions: []
-                            };
-
-                            const giftRef = await db.collection('GiftCards').add(giftData);
-                            const giftLink = `${window.location.origin}/gift.html#${encodeURIComponent(code)}`;
-                            const invoiceLink = `${window.location.origin}/gift-invoice.html#${giftRef.id}`;
-
-                            // קבלה לשולח - תמיד נשלחת
-                            await sendGiftReceiptEmail(giftData, invoiceLink);
-
-                            // מייל מתנה למקבל - רק אם נבחרה שליחה מיידית
-                            if (giftDeliveryMethod === 'email') {
-                                await sendGiftToRecipientEmail(giftData, giftLink);
-                            }
-
-                            goToGiftStep('success');
-                            const successText = document.getElementById('gift-success-text');
-                            const linkBox = document.getElementById('gift-link-reveal-box');
-                            if (giftDeliveryMethod === 'email') {
-                                successText.textContent = `השובר נשלח בהצלחה למייל של ${giftRecipientData.name}! קבלה נשלחה גם למייל שלך.`;
-                                linkBox.style.display = 'none';
-                            } else {
-                                successText.textContent = 'השובר מוכן! העתיקו את הקישור ושלחו אותו למקבל.';
-                                document.getElementById('gift-final-link').value = giftLink;
-                                linkBox.style.display = 'block';
-                            }
+                            await finalizeGiftCard({ paymentType: 'paypal', paypalOrderId: details.id });
                         } catch (error) {
                             console.error('Gift card error:', error);
                             alert('אירעה שגיאה ביצירת השובר. אנא צור קשר עם התמיכה.');
@@ -4005,55 +4061,6 @@ function updatePointsDisplay() {
                 onCancel: function () { alert('התשלום בוטל.'); },
                 onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
             }).render('#gift-paypal-button-container');
-        }
-
-        document.getElementById('gift-copy-final-link')?.addEventListener('click', () => {
-            const input = document.getElementById('gift-final-link');
-            navigator.clipboard.writeText(input.value).then(() => {
-                const btn = document.getElementById('gift-copy-final-link');
-                const orig = btn.textContent;
-                btn.textContent = '✓ הועתק!';
-                setTimeout(() => { btn.textContent = orig; }, 2000);
-            });
-        });
-
-        document.getElementById('gift-finish-btn')?.addEventListener('click', closeGiftModal);
-
-        async function sendGiftReceiptEmail(giftData, invoiceLink) {
-            try {
-                await emailjs.send('service_rgddgik', 'invoicegift', {
-                    to_email: giftData.senderEmail,
-                    sender_name: giftData.senderName,
-                    recipient_name: giftData.recipientName,
-                    amount: giftData.amount.toFixed(2),
-                    gift_code: giftData.code,
-                    invoice_link: invoiceLink,
-                    delivery_method: giftData.deliveryMethod === 'email' ? 'נשלח במייל למקבל' : 'קישור ישיר',
-                    date: new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                }, 'txz5kyfLVTI4Bef77');
-                return true;
-            } catch (error) {
-                console.error('Error sending gift receipt email:', error);
-                return false;
-            }
-        }
-
-        async function sendGiftToRecipientEmail(giftData, giftLink) {
-            try {
-                await emailjs.send('service_rgddgik', 'gift', {
-                    to_email: giftData.recipientEmail,
-                    recipient_name: giftData.recipientName,
-                    sender_name: giftData.senderName,
-                    amount: giftData.amount.toFixed(2),
-                    gift_code: giftData.code,
-                    gift_message: giftData.message,
-                    gift_link: giftLink
-                }, 'txz5kyfLVTI4Bef77');
-                return true;
-            } catch (error) {
-                console.error('Error sending gift email to recipient:', error);
-                return false;
-            }
         }
 
         // ============================================
@@ -5453,6 +5460,188 @@ productModal.style.display = 'flex';
             return `${street} ${house}, ${city}, ${country} ${zip}`;
         }
 
+// ===== לוגיקה משותפת ליצירת הזמנה (משמשת גם את PayPal וגם את כפתור האדמין) =====
+        async function finalizeOrder(orderPaymentMeta) {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const address = getFullAddress();
+
+            let clubMemberId = currentClubMember ? currentClubMember.id : null;
+            const joinClubChecked = document.getElementById('join-club-checkbox').checked;
+
+            if (!currentClubMember && joinClubChecked) {
+                const clubPassword = document.getElementById('club-password').value;
+                if (clubPassword && clubPassword.length >= 6) {
+                    try {
+                        const newMember = {
+                            name: name,
+                            email: email,
+                            phone: phone,
+                            password: clubPassword,
+                            points: 0,
+                            address: address,
+                            joinDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            totalSpent: 0,
+                            orderCount: 0
+                        };
+                        
+                        const memberRef = await db.collection('ClubMembers').add(newMember);
+                        clubMemberId = memberRef.id;
+                        currentClubMember = { id: memberRef.id, ...newMember };
+                        saveClubMember();
+                        updateClubButton();
+                    } catch (error) {
+                        console.error('Error creating club member:', error);
+                    }
+                }
+            }
+
+            const pointsEarned = Math.floor(total * 0.01);
+
+            const giftDiscountApplied = appliedGiftCard ? Math.min(appliedGiftCard.remainingAmount, subtotal + shippingCost) : 0;
+
+            const orderRef = await db.collection('orders').add({
+                customerName: name,
+                customerEmail: email,
+                customerPhone: phone,
+                customerAddress: address,
+                items: cart.map(item => ({
+                    productId: item.id,
+                    productName: item.name,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    originalPrice: item.originalPrice || null,
+                    selectedOptions: item.selectedOptions || null,
+                    isFreebie: item.isFreebie || false
+                })),
+                subtotal: parseFloat(subtotal.toFixed(2)),
+                shippingCost: parseFloat(shippingCost.toFixed(2)),
+                totalAmount: parseFloat(total.toFixed(2)),
+                appliedCoupon: appliedGiftCard ? appliedGiftCard.code : (appliedCoupon ? appliedCoupon.Code : null),
+                couponDetails: appliedCoupon || null,
+                giftCardUsed: appliedGiftCard ? { id: appliedGiftCard.id, code: appliedGiftCard.code, amountUsed: parseFloat(giftDiscountApplied.toFixed(2)) } : null,
+                clubMemberId: clubMemberId,
+                pointsUsed: pointsToUse,
+                pointsEarned: pointsEarned,
+                orderDate: firebase.firestore.FieldValue.serverTimestamp(),
+                status: 'completed',
+                completed: false,
+                paymentType: orderPaymentMeta.paymentType,
+                paypalOrderId: orderPaymentMeta.paypalOrderId,
+                orderNotes: document.getElementById('order-notes').value.trim() || null,
+            });
+
+            // עדכון יתרת שובר המתנה אם נוצל
+            if (appliedGiftCard && giftDiscountApplied > 0) {
+                try {
+                    const newRemaining = parseFloat((appliedGiftCard.remainingAmount - giftDiscountApplied).toFixed(2));
+                    await db.collection('GiftCards').doc(appliedGiftCard.id).update({
+                        remainingAmount: newRemaining,
+                        status: newRemaining <= 0 ? 'redeemed' : 'partially_used',
+                        redemptions: firebase.firestore.FieldValue.arrayUnion({
+                            orderId: orderRef.id,
+                            amountUsed: giftDiscountApplied,
+                            date: new Date().toISOString()
+                        })
+                    });
+                } catch (e) { console.error('Error updating gift card balance:', e); }
+            }
+
+            if (clubMemberId) {
+                try {
+                    await db.collection('ClubMembers').doc(clubMemberId).update({
+                        points: firebase.firestore.FieldValue.increment(pointsEarned - pointsToUse),
+                        totalSpent: firebase.firestore.FieldValue.increment(total),
+                        orderCount: firebase.firestore.FieldValue.increment(1)
+                    });
+                    
+                    if (currentClubMember) {
+                        currentClubMember.points = (currentClubMember.points || 0) + pointsEarned - pointsToUse;
+                        currentClubMember.totalSpent = (currentClubMember.totalSpent || 0) + total;
+                        currentClubMember.orderCount = (currentClubMember.orderCount || 0) + 1;
+                        saveClubMember();
+                    }
+                } catch (error) {
+                    console.error('Error updating club points:', error);
+                }
+            }
+
+            const emailSent = await sendReceiptEmail({
+                orderId: orderRef.id,
+                customerName: name,
+                customerEmail: email,
+                customerPhone: phone,
+                customerAddress: address,
+                items: cart,
+                subtotal: subtotal,
+                shippingCost: shippingCost,
+                totalAmount: total,
+                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                couponDetails: appliedCoupon
+            });
+
+            if (emailSent) {
+                alert(`תודה לך, ${name}! ההזמנה בוצעה בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל: ${total.toFixed(2)} ₪`);
+            } else {
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `
+                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+                    background: rgba(0,0,0,0.75); z-index: 9999;
+                    display: flex; align-items: center; justify-content: center;
+                `;
+                overlay.innerHTML = `
+                    <div style="background: white; border-radius: 16px; padding: 40px; max-width: 400px; width: 90%; text-align: center; direction: rtl;">
+                        <div style="font-size: 2.5em; margin-bottom: 15px;">✅</div>
+                        <h2 style="color: #1a1a1a; margin-bottom: 10px;">ההזמנה בוצעה בהצלחה!</h2>
+                        <p style="color: #555; margin-bottom: 8px;">תודה לך, ${name}!</p>
+                        <p style="color: #555; margin-bottom: 20px;">סך הכל: <strong>${total.toFixed(2)} ₪</strong></p>
+                        <div style="background: #fff5e6; border: 1px solid #ffd54f; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
+                            <p style="color: #d35400; font-weight: 600; margin-bottom: 5px;">⚠️ שגיאה בשליחת הקבלה למייל</p>
+                            <p style="color: #666; font-size: 0.9em;">מעביר אותך לחשבונית בעוד...</p>
+                        </div>
+                        <div style="font-size: 3em; font-weight: 900; color: #dc3545;" id="countdown-num">3</div>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+
+                let count = 3;
+                const countdownEl = overlay.querySelector('#countdown-num');
+                const timer = setInterval(() => {
+                    count--;
+                    countdownEl.textContent = count;
+                    if (count <= 0) {
+                        clearInterval(timer);
+                        document.body.removeChild(overlay);
+                        window.open(`invoice.html#${orderRef.id}`, '_blank');
+                    }
+                }, 1000);
+            }
+
+            cart = [];
+            appliedCoupon = null;
+            appliedGiftCard = null;
+            pointsToUse = 0;
+            pointsDiscount = 0;
+            couponInput.value = '';
+            couponInput.disabled = false;
+            applyCouponBtn.disabled = false;
+            couponMessage.innerHTML = '';
+
+            const pointsSlider = document.getElementById('points-slider');
+            if (pointsSlider) {
+                pointsSlider.value = pointsSlider.min || 10;
+            }
+
+            localStorage.removeItem('vipshirts_cart');
+            localStorage.removeItem('vipshirts_coupon');
+            updateCartDisplay();
+            updateClubModal();
+            checkoutForm.reset();
+            closeCart();
+        }
+
         function renderPayPalButton() {
             const container = document.getElementById('paypal-button-container');
             if (!container) return;
@@ -5460,6 +5649,41 @@ productModal.style.display = 'flex';
             container.innerHTML = "";
             
             if (cart.length === 0) return;
+
+            // ===== מצב אדמין: כפתור "שלח הזמנה" במקום PayPal =====
+            if (isAdminCheckoutActive()) {
+                const adminBtn = document.createElement('button');
+                adminBtn.type = 'button';
+                adminBtn.textContent = '📦 שלח הזמנה';
+                adminBtn.style.cssText = `
+                    width: 100%;
+                    background: #28a745;
+                    color: #fff;
+                    border: none;
+                    padding: 14px;
+                    border-radius: 50px;
+                    font-size: 1.05em;
+                    font-weight: 800;
+                    cursor: pointer;
+                    font-family: 'Heebo', Arial, sans-serif;
+                    box-shadow: 0 4px 14px rgba(40,167,69,0.4);
+                    transition: background 0.2s, transform 0.15s;
+                `;
+                adminBtn.addEventListener('click', async () => {
+                    adminBtn.disabled = true;
+                    adminBtn.textContent = 'שולח הזמנה...';
+                    try {
+                        await finalizeOrder({ paymentType: 'admin_manual', paypalOrderId: null });
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert("אירעה שגיאה בתהליך שליחת ההזמנה. נסה שוב.");
+                        adminBtn.disabled = false;
+                        adminBtn.textContent = '📦 שלח הזמנה';
+                    }
+                });
+                container.appendChild(adminBtn);
+                return;
+            }
 
             paypal.Buttons({
                 style: { 
@@ -5480,184 +5704,7 @@ productModal.style.display = 'flex';
                 onApprove: function (data, actions) {
                     return actions.order.capture().then(async function (details) {
                         try {
-                            const name = document.getElementById('name').value;
-                            const email = document.getElementById('email').value;
-                            const phone = document.getElementById('phone').value;
-                            const address = getFullAddress();
-
-                            let clubMemberId = currentClubMember ? currentClubMember.id : null;
-                            const joinClubChecked = document.getElementById('join-club-checkbox').checked;
-
-                            if (!currentClubMember && joinClubChecked) {
-                                const clubPassword = document.getElementById('club-password').value;
-                                if (clubPassword && clubPassword.length >= 6) {
-                                    try {
-                                        const newMember = {
-                                            name: name,
-                                            email: email,
-                                            phone: phone,
-                                            password: clubPassword,
-                                            points: 0,
-                                            address: address,
-                                            joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-                                            totalSpent: 0,
-                                            orderCount: 0
-                                        };
-                                        
-                                        const memberRef = await db.collection('ClubMembers').add(newMember);
-                                        clubMemberId = memberRef.id;
-                                        currentClubMember = { id: memberRef.id, ...newMember };
-                                        saveClubMember();
-                                        updateClubButton();
-                                    } catch (error) {
-                                        console.error('Error creating club member:', error);
-                                    }
-                                }
-                            }
-
-                            const pointsEarned = Math.floor(total * 0.01);
-
-const giftDiscountApplied = appliedGiftCard ? Math.min(appliedGiftCard.remainingAmount, subtotal + shippingCost) : 0;
-
-                            const orderRef = await db.collection('orders').add({
-                                customerName: name,
-                                customerEmail: email,
-                                customerPhone: phone,
-                                customerAddress: address,
-                                items: cart.map(item => ({
-                                    productId: item.id,
-                                    productName: item.name,
-                                    name: item.name,
-                                    quantity: item.quantity,
-                                    price: item.price,
-                                    originalPrice: item.originalPrice || null,
-                                    selectedOptions: item.selectedOptions || null,
-                                    isFreebie: item.isFreebie || false
-                                })),
-                                subtotal: parseFloat(subtotal.toFixed(2)),
-                                shippingCost: parseFloat(shippingCost.toFixed(2)),
-                                totalAmount: parseFloat(total.toFixed(2)),
-                                appliedCoupon: appliedGiftCard ? appliedGiftCard.code : (appliedCoupon ? appliedCoupon.Code : null),
-                                couponDetails: appliedCoupon || null,
-                                giftCardUsed: appliedGiftCard ? { id: appliedGiftCard.id, code: appliedGiftCard.code, amountUsed: parseFloat(giftDiscountApplied.toFixed(2)) } : null,
-                                clubMemberId: clubMemberId,
-                                pointsUsed: pointsToUse,
-                                pointsEarned: pointsEarned,
-                                orderDate: firebase.firestore.FieldValue.serverTimestamp(),
-                                status: 'completed',
-                                completed: false,
-                                paymentType: 'paypal',
-                                paypalOrderId: details.id,
-                                orderNotes: document.getElementById('order-notes').value.trim() || null,
-                            });
-
-                            // עדכון יתרת שובר המתנה אם נוצל
-                            if (appliedGiftCard && giftDiscountApplied > 0) {
-                                try {
-                                    const newRemaining = parseFloat((appliedGiftCard.remainingAmount - giftDiscountApplied).toFixed(2));
-                                    await db.collection('GiftCards').doc(appliedGiftCard.id).update({
-                                        remainingAmount: newRemaining,
-                                        status: newRemaining <= 0 ? 'redeemed' : 'partially_used',
-                                        redemptions: firebase.firestore.FieldValue.arrayUnion({
-                                            orderId: orderRef.id,
-                                            amountUsed: giftDiscountApplied,
-                                            date: new Date().toISOString()
-                                        })
-                                    });
-                                } catch (e) { console.error('Error updating gift card balance:', e); }
-                            }
-
-                            if (clubMemberId) {
-                                try {
-                                    await db.collection('ClubMembers').doc(clubMemberId).update({
-                                        points: firebase.firestore.FieldValue.increment(pointsEarned - pointsToUse),
-                                        totalSpent: firebase.firestore.FieldValue.increment(total),
-                                        orderCount: firebase.firestore.FieldValue.increment(1)
-                                    });
-                                    
-                                    if (currentClubMember) {
-                                        currentClubMember.points = (currentClubMember.points || 0) + pointsEarned - pointsToUse;
-                                        currentClubMember.totalSpent = (currentClubMember.totalSpent || 0) + total;
-                                        currentClubMember.orderCount = (currentClubMember.orderCount || 0) + 1;
-                                        saveClubMember();
-                                    }
-                                } catch (error) {
-                                    console.error('Error updating club points:', error);
-                                }
-                            }
-
-                            const emailSent = await sendReceiptEmail({
-                                orderId: orderRef.id,
-                                customerName: name,
-                                customerEmail: email,
-                                customerPhone: phone,
-                                customerAddress: address,
-                                items: cart,
-                                subtotal: subtotal,
-                                shippingCost: shippingCost,
-                                totalAmount: total,
-                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
-                                couponDetails: appliedCoupon
-                            });
-
-                            if (emailSent) {
-                                alert(`תודה לך, ${name}! התשלום בוצע בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל לתשלום: ${total.toFixed(2)} ₪`);
-                            } else {
-                                const overlay = document.createElement('div');
-                                overlay.style.cssText = `
-                                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                                    background: rgba(0,0,0,0.75); z-index: 9999;
-                                    display: flex; align-items: center; justify-content: center;
-                                `;
-                                overlay.innerHTML = `
-                                    <div style="background: white; border-radius: 16px; padding: 40px; max-width: 400px; width: 90%; text-align: center; direction: rtl;">
-                                        <div style="font-size: 2.5em; margin-bottom: 15px;">✅</div>
-                                        <h2 style="color: #1a1a1a; margin-bottom: 10px;">התשלום בוצע בהצלחה!</h2>
-                                        <p style="color: #555; margin-bottom: 8px;">תודה לך, ${name}!</p>
-                                        <p style="color: #555; margin-bottom: 20px;">סך הכל: <strong>${total.toFixed(2)} ₪</strong></p>
-                                        <div style="background: #fff5e6; border: 1px solid #ffd54f; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-                                            <p style="color: #d35400; font-weight: 600; margin-bottom: 5px;">⚠️ שגיאה בשליחת הקבלה למייל</p>
-                                            <p style="color: #666; font-size: 0.9em;">מעביר אותך לחשבונית בעוד...</p>
-                                        </div>
-                                        <div style="font-size: 3em; font-weight: 900; color: #dc3545;" id="countdown-num">3</div>
-                                    </div>
-                                `;
-                                document.body.appendChild(overlay);
-
-                                let count = 3;
-                                const countdownEl = overlay.querySelector('#countdown-num');
-                                const timer = setInterval(() => {
-                                    count--;
-                                    countdownEl.textContent = count;
-                                    if (count <= 0) {
-                                        clearInterval(timer);
-                                        document.body.removeChild(overlay);
-                                        window.open(`invoice.html#${orderRef.id}`, '_blank');
-                                    }
-                                }, 1000);
-                            }
-
-                            cart = [];
-                            appliedCoupon = null;
-                            appliedGiftCard = null;
-                            pointsToUse = 0;
-                            pointsDiscount = 0;
-                            couponInput.value = '';
-                            couponInput.disabled = false;
-                            applyCouponBtn.disabled = false;
-                            couponMessage.innerHTML = '';
-
-                            const pointsSlider = document.getElementById('points-slider');
-                            if (pointsSlider) {
-                                pointsSlider.value = pointsSlider.min || 10;
-                            }
-
-                            localStorage.removeItem('vipshirts_cart');
-                            localStorage.removeItem('vipshirts_coupon');
-                            updateCartDisplay();
-                            updateClubModal();
-                            checkoutForm.reset();
-                            closeCart();
+                            await finalizeOrder({ paymentType: 'paypal', paypalOrderId: details.id });
                         } catch (error) {
                             console.error('Error:', error);
                             alert("אירעה שגיאה בתהליך התשלום. נסה שוב.");
