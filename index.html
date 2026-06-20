@@ -436,6 +436,262 @@ header h1 {
     border-color: #dc3545;
 }
 
+#open-gift-modal-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(220,53,69,0.55);
+    background: #c82333;
+}
+
+/* ===== GIFT CARD MODAL ===== */
+#gift-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65);
+    z-index: 2500;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    backdrop-filter: blur(3px);
+}
+#gift-modal.active { display: flex; }
+
+.gift-modal-content {
+    background: #fff;
+    border-radius: 22px;
+    max-width: 540px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    position: relative;
+}
+
+.gift-modal-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 24px 26px;
+    border-radius: 22px 22px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+.gift-modal-header h2 {
+    margin: 0;
+    font-size: 1.4em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.gift-close-btn {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    font-size: 1.4em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+}
+.gift-close-btn:hover { background: rgba(255,255,255,0.32); }
+
+.gift-step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+}
+.gift-step-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transition: all 0.25s;
+}
+.gift-step-dot.active { background: #fff; width: 22px; border-radius: 5px; }
+
+.gift-modal-body { padding: 26px; }
+.gift-step { display: none; }
+.gift-step.active { display: block; animation: giftFadeIn 0.25s ease; }
+@keyframes giftFadeIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+
+.gift-amount-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.gift-amount-btn {
+    padding: 18px 10px;
+    border: 2.5px solid #eee;
+    border-radius: 14px;
+    background: #fafafa;
+    font-size: 1.15em;
+    font-weight: 800;
+    color: #2c3e50;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: inherit;
+}
+.gift-amount-btn:hover { border-color: #dc3545; background: #fff5f5; }
+.gift-amount-btn.selected {
+    border-color: #dc3545;
+    background: #dc3545;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(220,53,69,0.3);
+}
+
+.gift-custom-amount {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8f9fa;
+    border: 2px solid #eee;
+    border-radius: 14px;
+    padding: 6px 16px;
+    margin-bottom: 22px;
+}
+.gift-custom-amount input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    padding: 12px 0;
+    font-size: 1.05em;
+    font-family: inherit;
+    text-align: right;
+}
+.gift-custom-amount.active { border-color: #dc3545; background: #fff5f5; }
+
+.gift-form-group { margin-bottom: 15px; }
+.gift-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.95em;
+}
+.gift-form-group input, .gift-form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #d0d0d0;
+    border-radius: 10px;
+    font-size: 0.97em;
+    font-family: inherit;
+    background: #fffafa;
+    transition: border 0.15s;
+}
+.gift-form-group input:focus, .gift-form-group textarea:focus {
+    border-color: #dc3545;
+    outline: none;
+}
+.gift-form-group textarea { min-height: 90px; resize: vertical; }
+
+.gift-delivery-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.gift-delivery-card {
+    border: 2.5px solid #eee;
+    border-radius: 16px;
+    padding: 20px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.gift-delivery-card:hover { border-color: #dc3545; background: #fff5f5; }
+.gift-delivery-card.selected {
+    border-color: #dc3545;
+    background: #fff5f5;
+    box-shadow: 0 6px 16px rgba(220,53,69,0.2);
+}
+.gift-delivery-card .icon { font-size: 2em; margin-bottom: 8px; }
+.gift-delivery-card .title { font-weight: 700; color: #2c3e50; margin-bottom: 4px; }
+.gift-delivery-card .sub { font-size: 0.82em; color: #888; }
+
+.gift-nav-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+}
+.gift-btn {
+    flex: 1;
+    padding: 13px;
+    border-radius: 14px;
+    border: none;
+    font-weight: 800;
+    font-size: 1em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+.gift-btn-next { background: #dc3545; color: #fff; }
+.gift-btn-next:hover { background: #c82333; transform: translateY(-2px); }
+.gift-btn-back { background: #eee; color: #555; }
+.gift-btn-back:hover { background: #ddd; }
+
+.gift-summary-box {
+    background: #f8f9fa;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 18px;
+    border: 1px solid #eee;
+}
+.gift-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.92em;
+    border-bottom: 1px solid #f0f0f0;
+}
+.gift-summary-row:last-child { border-bottom: none; }
+.gift-summary-row strong { color: #2c3e50; }
+
+.gift-link-reveal {
+    background: #fff8e1;
+    border: 1.5px solid #ffd54f;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 18px;
+}
+.gift-link-reveal .warn { color: #d35400; font-weight: 700; font-size: 0.9em; margin-bottom: 10px; }
+.gift-link-reveal input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1.5px solid #ffd54f;
+    text-align: center;
+    font-size: 0.85em;
+    margin-bottom: 10px;
+    background: #fff;
+}
+
+.gift-error-msg {
+    color: #dc3545;
+    font-size: 0.88em;
+    margin-top: -8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    display: none;
+}
+
+@media (max-width: 768px) {
+    #gift-modal { align-items: flex-end; padding: 0; }
+    .gift-modal-content { max-width: 100vw; width: 100vw; border-radius: 24px 24px 0 0; max-height: 92vh; }
+    .gift-modal-header { border-radius: 24px 24px 0 0; }
+    .gift-amount-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .gift-amount-btn { padding: 14px 6px; font-size: 1em; }
+    .gift-delivery-options { grid-template-columns: 1fr; }
+    #gift-banner { padding: 20px; flex-direction: column; text-align: center; }
+    #open-gift-modal-btn { width: 100%; }
+}
+
 .category-card img {
     width: 100%;
     height: 150px;
@@ -2383,6 +2639,10 @@ header h1 {
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<script>
+    window.GIFT_EMAILJS_SERVICE_ID = 'service_rgddgik';
+    window.GIFT_EMAILJS_PUBLIC_KEY = 'txz5kyfLVTI4Bef77';
+</script>
 </head>
 <body>
     <div id="announcement-bar">
@@ -2606,6 +2866,19 @@ header h1 {
         <div id="categories-cards-container"></div>
     </div>
 
+<!-- ===== באנר שוברי מתנה ===== -->
+    <div id="gift-banner-section" style="max-width:1200px;margin:30px auto 0;padding:0 20px;">
+        <div id="gift-banner" style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:22px;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 8px 28px rgba(0,0,0,0.25);">
+            <div style="flex:1;min-width:240px;">
+                <div style="color:#ffd700;font-weight:800;font-size:1.15em;margin-bottom:6px;">🎁 רוצים לפנק חבר בחולצת כדורגל?</div>
+                <div style="color:rgba(255,255,255,0.75);font-size:0.95em;">שלחו לו שובר מתנה של VIP Shirts! לקנייה לחצו כאן</div>
+            </div>
+            <button id="open-gift-modal-btn" style="background:#dc3545;color:#fff;border:none;padding:14px 32px;border-radius:50px;font-weight:800;font-size:1.05em;cursor:pointer;font-family:'Heebo',Arial,sans-serif;box-shadow:0 6px 18px rgba(220,53,69,0.45);transition:transform 0.2s,box-shadow 0.2s;flex-shrink:0;">
+                🛍️ רכישת שובר מתנה
+            </button>
+        </div>
+    </div>
+
     <!-- ===== כרטיסיות תת-קטגוריות ===== -->
     <div id="subcategories-section" style="display:none;">
         <div id="subcategories-home-section" style="max-width:1200px;margin:36px auto 0;padding:0 20px;">
@@ -2758,6 +3031,140 @@ header h1 {
 
                     <div id="paypal-button-container"></div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+<!-- ===== מודאל שובר מתנה ===== -->
+    <div id="gift-modal">
+        <div class="gift-modal-content">
+            <div class="gift-modal-header">
+                <button class="gift-close-btn" type="button" id="gift-close-btn">&times;</button>
+                <h2><span>🎁</span><span>רכישת שובר מתנה</span></h2>
+                <div class="gift-step-indicator">
+                    <div class="gift-step-dot active" data-step="1"></div>
+                    <div class="gift-step-dot" data-step="2"></div>
+                    <div class="gift-step-dot" data-step="3"></div>
+                    <div class="gift-step-dot" data-step="4"></div>
+                    <div class="gift-step-dot" data-step="5"></div>
+                </div>
+            </div>
+            <div class="gift-modal-body">
+
+                <!-- שלב 1: סכום -->
+                <div class="gift-step active" data-step="1">
+                    <h3 style="margin-bottom:16px;color:#2c3e50;">בחרו סכום לשובר</h3>
+                    <div class="gift-amount-grid" id="gift-amount-grid"></div>
+                    <div class="gift-custom-amount" id="gift-custom-amount-wrap">
+                        <span style="color:#888;">₪</span>
+                        <input type="number" id="gift-custom-amount-input" placeholder="סכום מותאם אישית" min="1" step="1">
+                    </div>
+                    <div class="gift-error-msg" id="gift-error-step1">אנא בחר סכום תקין</div>
+                    <div class="gift-nav-buttons">
+                        <button class="gift-btn gift-btn-next" id="gift-step1-next" style="flex:1;">המשך ←</button>
+                    </div>
+                </div>
+
+                <!-- שלב 2: פרטי שולח -->
+                <div class="gift-step" data-step="2">
+                    <h3 style="margin-bottom:16px;color:#2c3e50;">הפרטים שלך (השולח)</h3>
+                    <div class="gift-form-group">
+                        <label>שם מלא *</label>
+                        <input type="text" id="gift-sender-name">
+                    </div>
+                    <div class="gift-form-group">
+                        <label>מספר טלפון *</label>
+                        <input type="tel" id="gift-sender-phone">
+                    </div>
+                    <div class="gift-form-group">
+                        <label>אימייל *</label>
+                        <input type="email" id="gift-sender-email">
+                    </div>
+                    <div class="gift-form-group">
+                        <label>כתובת מלאה *</label>
+                        <input type="text" id="gift-sender-address" placeholder="רחוב, מספר בית, עיר, מיקוד">
+                    </div>
+                    <div class="gift-error-msg" id="gift-error-step2">אנא מלא את כל השדות</div>
+                    <div class="gift-nav-buttons">
+                        <button class="gift-btn gift-btn-back" data-back="1">→ חזרה</button>
+                        <button class="gift-btn gift-btn-next" id="gift-step2-next">המשך ←</button>
+                    </div>
+                </div>
+
+                <!-- שלב 3: פרטי מקבל -->
+                <div class="gift-step" data-step="3">
+                    <h3 style="margin-bottom:16px;color:#2c3e50;">פרטי המקבל</h3>
+                    <div class="gift-form-group">
+                        <label>שם מלא *</label>
+                        <input type="text" id="gift-recipient-name">
+                    </div>
+                    <div class="gift-form-group">
+                        <label>מספר טלפון *</label>
+                        <input type="tel" id="gift-recipient-phone">
+                    </div>
+                    <div class="gift-form-group">
+                        <label>אימייל *</label>
+                        <input type="email" id="gift-recipient-email">
+                    </div>
+                    <div class="gift-form-group">
+                        <label>ברכה אישית *</label>
+                        <textarea id="gift-recipient-message" placeholder="כתבו כאן ברכה חמה..."></textarea>
+                    </div>
+                    <div class="gift-error-msg" id="gift-error-step3">אנא מלא את כל השדות</div>
+                    <div class="gift-nav-buttons">
+                        <button class="gift-btn gift-btn-back" data-back="2">→ חזרה</button>
+                        <button class="gift-btn gift-btn-next" id="gift-step3-next">המשך ←</button>
+                    </div>
+                </div>
+
+                <!-- שלב 4: אופן קבלה -->
+                <div class="gift-step" data-step="4">
+                    <h3 style="margin-bottom:16px;color:#2c3e50;">איך תרצו למסור את המתנה?</h3>
+                    <div class="gift-delivery-options">
+                        <div class="gift-delivery-card" data-delivery="email">
+                            <div class="icon">📧</div>
+                            <div class="title">שליחה במייל</div>
+                            <div class="sub">המקבל יקבל מייל מיידי עם השובר</div>
+                        </div>
+                        <div class="gift-delivery-card" data-delivery="link">
+                            <div class="icon">🔗</div>
+                            <div class="title">קישור ישיר</div>
+                            <div class="sub">תקבלו קישור לשלוח בעצמכם</div>
+                        </div>
+                    </div>
+                    <div class="gift-error-msg" id="gift-error-step4">אנא בחר אופן מסירה</div>
+                    <div class="gift-summary-box" id="gift-summary-box"></div>
+                    <div class="gift-nav-buttons">
+                        <button class="gift-btn gift-btn-back" data-back="3">→ חזרה</button>
+                        <button class="gift-btn gift-btn-next" id="gift-step4-next">המשך לתשלום ←</button>
+                    </div>
+                </div>
+
+                <!-- שלב 5: תשלום -->
+                <div class="gift-step" data-step="5">
+                    <h3 style="margin-bottom:16px;color:#2c3e50;">השלמת תשלום</h3>
+                    <div class="gift-summary-box" id="gift-payment-summary"></div>
+                    <div id="gift-paypal-button-container"></div>
+                    <div class="gift-nav-buttons">
+                        <button class="gift-btn gift-btn-back" data-back="4">→ חזרה</button>
+                    </div>
+                </div>
+
+                <!-- שלב הצלחה -->
+                <div class="gift-step" data-step="success">
+                    <div style="text-align:center;padding:10px 0;">
+                        <div style="font-size:3.2em;margin-bottom:10px;">🎉</div>
+                        <h3 style="color:#28a745;margin-bottom:10px;">השובר נוצר בהצלחה!</h3>
+                        <p style="color:#666;margin-bottom:18px;" id="gift-success-text"></p>
+                        <div class="gift-link-reveal" id="gift-link-reveal-box" style="display:none;">
+                            <div class="warn">⚠️ שמרו קישור זה! הוא לא יוצג שוב</div>
+                            <input type="text" id="gift-final-link" readonly>
+                            <button class="gift-btn gift-btn-next" id="gift-copy-final-link" style="width:100%;">📋 העתק קישור</button>
+                        </div>
+                        <button class="gift-btn gift-btn-next" id="gift-finish-btn" style="width:100%;margin-top:10px;">סגור</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -2969,6 +3376,13 @@ let cart = [];
         let clubModalOpen = false;
         let pointsToUse = 0;
         let pointsDiscount = 0;
+        let giftSelectedAmount = 0;
+        let giftSenderData = {};
+        let giftRecipientData = {};
+        let giftDeliveryMethod = '';
+        let giftCurrentStep = 1;
+        let giftPaypalLoaded = false;
+        let appliedGiftCard = null;
 
         // ===== MOBILE NAV HELPERS =====
         function setMobileActive(btnId) {
@@ -3002,11 +3416,12 @@ function withTimeout(promise, ms = 10000) {
     ]);
 }
 
-        function clearCart() {
+function clearCart() {
     if (!confirm('האם לנקות את העגלה?')) return;
     
     cart = [];
     appliedCoupon = null;
+    appliedGiftCard = null;
     pointsToUse = 0;
     pointsDiscount = 0;
     
@@ -3351,11 +3766,307 @@ function updatePointsUsage() {
         pointsDiscount = 0;
     }
 }
-
-        function updatePointsDisplay() {
+function updatePointsDisplay() {
             document.getElementById('points-to-use').textContent = pointsToUse;
             document.getElementById('points-discount').textContent = pointsDiscount.toFixed(2);
         }
+
+        // ============================================
+        // GIFT CARD MODAL LOGIC
+        // ============================================
+        const GIFT_PRESET_AMOUNTS = [100, 150, 200, 250, 300, 500];
+
+        function renderGiftAmountGrid() {
+            const grid = document.getElementById('gift-amount-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            GIFT_PRESET_AMOUNTS.forEach(amt => {
+                const btn = document.createElement('button');
+                btn.className = 'gift-amount-btn';
+                btn.type = 'button';
+                btn.textContent = amt + ' ₪';
+                btn.addEventListener('click', () => {
+                    giftSelectedAmount = amt;
+                    document.querySelectorAll('.gift-amount-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    document.getElementById('gift-custom-amount-input').value = '';
+                    document.getElementById('gift-custom-amount-wrap').classList.remove('active');
+                });
+                grid.appendChild(btn);
+            });
+        }
+
+        function openGiftModal() {
+            giftCurrentStep = 1;
+            giftSelectedAmount = 0;
+            giftSenderData = {};
+            giftRecipientData = {};
+            giftDeliveryMethod = '';
+            renderGiftAmountGrid();
+            goToGiftStep(1);
+            document.getElementById('gift-custom-amount-input').value = '';
+            ['gift-sender-name','gift-sender-phone','gift-sender-email','gift-sender-address',
+             'gift-recipient-name','gift-recipient-phone','gift-recipient-email','gift-recipient-message']
+             .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+            document.querySelectorAll('.gift-delivery-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('gift-modal').classList.add('active');
+        }
+
+        function closeGiftModal() {
+            document.getElementById('gift-modal').classList.remove('active');
+        }
+
+        function goToGiftStep(step) {
+            giftCurrentStep = step;
+            document.querySelectorAll('.gift-step').forEach(s => s.classList.remove('active'));
+            const target = document.querySelector(`.gift-step[data-step="${step}"]`);
+            if (target) target.classList.add('active');
+            document.querySelectorAll('.gift-step-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.step == step);
+            });
+        }
+
+        document.getElementById('open-gift-modal-btn')?.addEventListener('click', openGiftModal);
+        document.getElementById('gift-close-btn')?.addEventListener('click', closeGiftModal);
+        document.getElementById('gift-modal')?.addEventListener('mousedown', (e) => {
+            if (e.target.id === 'gift-modal') closeGiftModal();
+        });
+
+        document.querySelectorAll('.gift-nav-buttons .gift-btn-back').forEach(btn => {
+            btn.addEventListener('click', () => goToGiftStep(parseInt(btn.dataset.back)));
+        });
+
+        document.getElementById('gift-custom-amount-input')?.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.querySelectorAll('.gift-amount-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById('gift-custom-amount-wrap').classList.toggle('active', !!e.target.value);
+            giftSelectedAmount = val > 0 ? val : 0;
+        });
+
+        // שלב 1 -> 2
+        document.getElementById('gift-step1-next')?.addEventListener('click', () => {
+            const errEl = document.getElementById('gift-error-step1');
+            if (!giftSelectedAmount || giftSelectedAmount <= 0) {
+                errEl.style.display = 'block';
+                return;
+            }
+            errEl.style.display = 'none';
+            goToGiftStep(2);
+        });
+
+        // שלב 2 -> 3
+        document.getElementById('gift-step2-next')?.addEventListener('click', () => {
+            const name = document.getElementById('gift-sender-name').value.trim();
+            const phone = document.getElementById('gift-sender-phone').value.trim();
+            const email = document.getElementById('gift-sender-email').value.trim();
+            const address = document.getElementById('gift-sender-address').value.trim();
+            const errEl = document.getElementById('gift-error-step2');
+            if (!name || !phone || !email || !address) {
+                errEl.style.display = 'block';
+                return;
+            }
+            errEl.style.display = 'none';
+            giftSenderData = { name, phone, email, address };
+            goToGiftStep(3);
+        });
+
+        // שלב 3 -> 4
+        document.getElementById('gift-step3-next')?.addEventListener('click', () => {
+            const name = document.getElementById('gift-recipient-name').value.trim();
+            const phone = document.getElementById('gift-recipient-phone').value.trim();
+            const email = document.getElementById('gift-recipient-email').value.trim();
+            const message = document.getElementById('gift-recipient-message').value.trim();
+            const errEl = document.getElementById('gift-error-step3');
+            if (!name || !phone || !email || !message) {
+                errEl.style.display = 'block';
+                return;
+            }
+            errEl.style.display = 'none';
+            giftRecipientData = { name, phone, email, message };
+            goToGiftStep(4);
+        });
+
+        // בחירת אופן מסירה
+        document.querySelectorAll('.gift-delivery-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.gift-delivery-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                giftDeliveryMethod = card.dataset.delivery;
+                document.getElementById('gift-error-step4').style.display = 'none';
+                renderGiftSummary('gift-summary-box');
+            });
+        });
+
+        function renderGiftSummary(targetId) {
+            const box = document.getElementById(targetId);
+            if (!box) return;
+            box.innerHTML = `
+                <div class="gift-summary-row"><span>סכום השובר</span><strong>${giftSelectedAmount.toFixed(2)} ₪</strong></div>
+                <div class="gift-summary-row"><span>שולח</span><strong>${giftSenderData.name || ''}</strong></div>
+                <div class="gift-summary-row"><span>מקבל</span><strong>${giftRecipientData.name || ''}</strong></div>
+                ${giftDeliveryMethod ? `<div class="gift-summary-row"><span>אופן מסירה</span><strong>${giftDeliveryMethod === 'email' ? 'שליחה במייל' : 'קישור ישיר'}</strong></div>` : ''}
+            `;
+        }
+
+        // שלב 4 -> 5
+        document.getElementById('gift-step4-next')?.addEventListener('click', () => {
+            const errEl = document.getElementById('gift-error-step4');
+            if (!giftDeliveryMethod) {
+                errEl.style.display = 'block';
+                return;
+            }
+            errEl.style.display = 'none';
+            renderGiftSummary('gift-payment-summary');
+            goToGiftStep(5);
+            loadGiftPayPalSDK().then(() => renderGiftPayPalButton());
+        });
+
+        function loadGiftPayPalSDK() {
+            if (giftPaypalLoaded || window.paypal) { giftPaypalLoaded = true; return Promise.resolve(); }
+            return loadPayPalSDK();
+        }
+
+        function generateGiftCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let part1 = '', part2 = '';
+            for (let i = 0; i < 4; i++) part1 += chars[Math.floor(Math.random() * chars.length)];
+            for (let i = 0; i < 4; i++) part2 += chars[Math.floor(Math.random() * chars.length)];
+            return `VIP-${part1}-${part2}`;
+        }
+
+        function renderGiftPayPalButton() {
+            const container = document.getElementById('gift-paypal-button-container');
+            if (!container || typeof paypal === 'undefined') return;
+            container.innerHTML = '';
+
+            paypal.Buttons({
+                style: { color: 'blue', shape: 'pill', label: 'pay', height: 45, layout: 'vertical' },
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: { value: giftSelectedAmount.toFixed(2), currency_code: 'ILS' },
+                            description: 'שובר מתנה VIP Shirts'
+                        }]
+                    });
+                },
+                onApprove: function (data, actions) {
+                    return actions.order.capture().then(async function (details) {
+                        try {
+                            const code = generateGiftCode();
+                            const giftData = {
+                                code: code,
+                                amount: giftSelectedAmount,
+                                remainingAmount: giftSelectedAmount,
+                                senderName: giftSenderData.name,
+                                senderPhone: giftSenderData.phone,
+                                senderEmail: giftSenderData.email,
+                                senderAddress: giftSenderData.address,
+                                recipientName: giftRecipientData.name,
+                                recipientPhone: giftRecipientData.phone,
+                                recipientEmail: giftRecipientData.email,
+                                message: giftRecipientData.message,
+                                deliveryMethod: giftDeliveryMethod,
+                                status: 'active',
+                                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                paypalOrderId: details.id,
+                                redemptions: []
+                            };
+
+                            const giftRef = await db.collection('GiftCards').add(giftData);
+                            const giftLink = `${window.location.origin}/gift.html#${encodeURIComponent(code)}`;
+                            const invoiceLink = `${window.location.origin}/gift-invoice.html#${giftRef.id}`;
+
+                            // קבלה לשולח - תמיד נשלחת
+                            await sendGiftReceiptEmail(giftData, invoiceLink);
+
+                            // מייל מתנה למקבל - רק אם נבחרה שליחה מיידית
+                            if (giftDeliveryMethod === 'email') {
+                                await sendGiftToRecipientEmail(giftData, giftLink);
+                            }
+
+                            goToGiftStep('success');
+                            const successText = document.getElementById('gift-success-text');
+                            const linkBox = document.getElementById('gift-link-reveal-box');
+                            if (giftDeliveryMethod === 'email') {
+                                successText.textContent = `השובר נשלח בהצלחה למייל של ${giftRecipientData.name}! קבלה נשלחה גם למייל שלך.`;
+                                linkBox.style.display = 'none';
+                            } else {
+                                successText.textContent = 'השובר מוכן! העתיקו את הקישור ושלחו אותו למקבל.';
+                                document.getElementById('gift-final-link').value = giftLink;
+                                linkBox.style.display = 'block';
+                            }
+                        } catch (error) {
+                            console.error('Gift card error:', error);
+                            alert('אירעה שגיאה ביצירת השובר. אנא צור קשר עם התמיכה.');
+                        }
+                    });
+                },
+                onCancel: function () { alert('התשלום בוטל.'); },
+                onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
+            }).render('#gift-paypal-button-container');
+        }
+
+        document.getElementById('gift-copy-final-link')?.addEventListener('click', () => {
+            const input = document.getElementById('gift-final-link');
+            navigator.clipboard.writeText(input.value).then(() => {
+                const btn = document.getElementById('gift-copy-final-link');
+                const orig = btn.textContent;
+                btn.textContent = '✓ הועתק!';
+                setTimeout(() => { btn.textContent = orig; }, 2000);
+            });
+        });
+
+        document.getElementById('gift-finish-btn')?.addEventListener('click', closeGiftModal);
+
+        async function sendGiftReceiptEmail(giftData, invoiceLink) {
+            try {
+                await emailjs.send('service_rgddgik', 'invoicegift', {
+                    to_email: giftData.senderEmail,
+                    sender_name: giftData.senderName,
+                    recipient_name: giftData.recipientName,
+                    amount: giftData.amount.toFixed(2),
+                    gift_code: giftData.code,
+                    invoice_link: invoiceLink,
+                    delivery_method: giftData.deliveryMethod === 'email' ? 'נשלח במייל למקבל' : 'קישור ישיר',
+                    date: new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                }, 'txz5kyfLVTI4Bef77');
+                return true;
+            } catch (error) {
+                console.error('Error sending gift receipt email:', error);
+                return false;
+            }
+        }
+
+        async function sendGiftToRecipientEmail(giftData, giftLink) {
+            try {
+                await emailjs.send('service_rgddgik', 'gift', {
+                    to_email: giftData.recipientEmail,
+                    recipient_name: giftData.recipientName,
+                    sender_name: giftData.senderName,
+                    amount: giftData.amount.toFixed(2),
+                    gift_code: giftData.code,
+                    gift_message: giftData.message,
+                    gift_link: giftLink
+                }, 'txz5kyfLVTI4Bef77');
+                return true;
+            } catch (error) {
+                console.error('Error sending gift email to recipient:', error);
+                return false;
+            }
+        }
+
+        // ============================================
+        // GIFT CARD REDEMPTION (hooked into coupon system)
+        // ============================================
+        async function checkAndApplyGiftCard(code) {
+            const snapshot = await db.collection('GiftCards').where('code', '==', code).limit(1).get();
+            if (snapshot.empty) return null;
+            const doc = snapshot.docs[0];
+            const gift = { id: doc.id, ...doc.data() };
+            if (gift.status === 'redeemed' || gift.remainingAmount <= 0) return { error: 'שובר זה נוצל במלואו' };
+            return gift;
+        }
+</parameter>
 
         function showClubMessage(message, type = 'success') {
             const messageDiv = document.getElementById('club-message');
@@ -4155,7 +4866,12 @@ function fetchProducts() {
             }
         }
 
-        function applyCouponDiscount() {
+              function applyCouponDiscount() {
+            if (appliedGiftCard) {
+                // שובר מתנה מקזז מהסכום הכולל (מוצרים + משלוח), עד גובה היתרה הזמינה
+                const maxDiscount = subtotal + shippingCost;
+                return Math.min(appliedGiftCard.remainingAmount, maxDiscount);
+            }
             if (!appliedCoupon) return 0;
             let discount = 0;
             if (appliedCoupon.Type === 'free_shipping') {
@@ -4255,10 +4971,11 @@ function fetchProducts() {
                 </div>
             `;
 
-            if (couponDiscount > 0) {
+              if (couponDiscount > 0) {
+                const discountLabel = appliedGiftCard ? '🎁 שובר מתנה:' : 'הנחת קופון:';
                 totalsHTML += `
                 <div class="total-row" style="color: #28a745;">
-                    <span>הנחת קופון:</span>
+                    <span>${discountLabel}</span>
                     <span>-${couponDiscount.toFixed(2)} ₪</span>
                 </div>
                 `;
@@ -4341,13 +5058,35 @@ function fetchProducts() {
             }
         });
 
-        applyCouponBtn.addEventListener('click', async () => {
+applyCouponBtn.addEventListener('click', async () => {
             const code = couponInput.value.trim();
             if (!code) { couponMessage.innerHTML = '<span style="color: red;">אנא הזן קוד קופון</span>'; return; }
+
+            // ===== בדיקה אם זה שובר מתנה לפני בדיקת קופון רגיל =====
+            couponMessage.innerHTML = '<span style="color:#888;">בודק קוד...</span>';
+            try {
+                const giftResult = await checkAndApplyGiftCard(code);
+                if (giftResult) {
+                    if (giftResult.error) {
+                        couponMessage.innerHTML = `<span style="color: red;">${giftResult.error}</span>`;
+                        return;
+                    }
+                    appliedGiftCard = giftResult;
+                    appliedCoupon = null;
+                    couponInput.disabled = true;
+                    updateCartDisplay();
+                    couponMessage.innerHTML = `<span class="coupon-applied">✓ שובר מתנה הוחל! יתרה: ${giftResult.remainingAmount.toFixed(2)} ₪</span>`;
+                    return;
+                }
+            } catch (e) {
+                console.error('Gift card check error:', e);
+            }
+
             if (!settings || !settings.Coupons) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא תקין</span>'; return; }
             
             const coupon = settings.Coupons.find(c => c.Code === code);
             if (!coupon) { couponMessage.innerHTML = '<span style="color: red;">קוד קופון לא קיים</span>'; return; }
+            appliedGiftCard = null;
             
             if (coupon.ExpiryDate) {
                 const expiry = new Date(coupon.ExpiryDate);
@@ -4778,6 +5517,8 @@ productModal.style.display = 'flex';
 
                             const pointsEarned = Math.floor(total * 0.01);
 
+const giftDiscountApplied = appliedGiftCard ? Math.min(appliedGiftCard.remainingAmount, subtotal + shippingCost) : 0;
+
                             const orderRef = await db.collection('orders').add({
                                 customerName: name,
                                 customerEmail: email,
@@ -4796,8 +5537,9 @@ productModal.style.display = 'flex';
                                 subtotal: parseFloat(subtotal.toFixed(2)),
                                 shippingCost: parseFloat(shippingCost.toFixed(2)),
                                 totalAmount: parseFloat(total.toFixed(2)),
-                                appliedCoupon: appliedCoupon ? appliedCoupon.Code : null,
+                                appliedCoupon: appliedGiftCard ? appliedGiftCard.code : (appliedCoupon ? appliedCoupon.Code : null),
                                 couponDetails: appliedCoupon || null,
+                                giftCardUsed: appliedGiftCard ? { id: appliedGiftCard.id, code: appliedGiftCard.code, amountUsed: parseFloat(giftDiscountApplied.toFixed(2)) } : null,
                                 clubMemberId: clubMemberId,
                                 pointsUsed: pointsToUse,
                                 pointsEarned: pointsEarned,
@@ -4808,6 +5550,22 @@ productModal.style.display = 'flex';
                                 paypalOrderId: details.id,
                                 orderNotes: document.getElementById('order-notes').value.trim() || null,
                             });
+
+                            // עדכון יתרת שובר המתנה אם נוצל
+                            if (appliedGiftCard && giftDiscountApplied > 0) {
+                                try {
+                                    const newRemaining = parseFloat((appliedGiftCard.remainingAmount - giftDiscountApplied).toFixed(2));
+                                    await db.collection('GiftCards').doc(appliedGiftCard.id).update({
+                                        remainingAmount: newRemaining,
+                                        status: newRemaining <= 0 ? 'redeemed' : 'partially_used',
+                                        redemptions: firebase.firestore.FieldValue.arrayUnion({
+                                            orderId: orderRef.id,
+                                            amountUsed: giftDiscountApplied,
+                                            date: new Date().toISOString()
+                                        })
+                                    });
+                                } catch (e) { console.error('Error updating gift card balance:', e); }
+                            }
 
                             if (clubMemberId) {
                                 try {
@@ -4881,6 +5639,7 @@ productModal.style.display = 'flex';
 
                             cart = [];
                             appliedCoupon = null;
+                            appliedGiftCard = null;
                             pointsToUse = 0;
                             pointsDiscount = 0;
                             couponInput.value = '';
