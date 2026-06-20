@@ -3898,15 +3898,16 @@ function updatePointsDisplay() {
         });
 
         function renderGiftSummary(targetId) {
-            const box = document.getElementById(targetId);
-            if (!box) return;
-            box.innerHTML = `
-                <div class="gift-summary-row"><span>סכום השובר</span><strong>${giftSelectedAmount.toFixed(2)} ₪</strong></div>
-                <div class="gift-summary-row"><span>שולח</span><strong>${giftSenderData.name || ''}</strong></div>
-                <div class="gift-summary-row"><span>מקבל</span><strong>${giftRecipientData.name || ''}</strong></div>
-                ${giftDeliveryMethod ? `<div class="gift-summary-row"><span>אופן מסירה</span><strong>${giftDeliveryMethod === 'email' ? 'שליחה במייל' : 'קישור ישיר'}</strong></div>` : ''}
-            `;
-        }
+    const box = document.getElementById(targetId);
+    if (!box) return;
+    
+    box.innerHTML = `
+        <div class="gift-summary-row"><span>סכום השובר</span><strong>${giftSelectedAmount.toFixed(2)} ₪</strong></div>
+        <div class="gift-summary-row"><span>שולח</span><strong>${giftSenderData.name || ''}</strong></div>
+        <div class="gift-summary-row"><span>מקבל</span><strong>${giftRecipientData.name || ''}</strong></div>
+        ${giftDeliveryMethod ? `<div class="gift-summary-row"><span>אופן מסירה</span><strong>${giftDeliveryMethod === 'email' ? 'שליחה במייל' : 'קישור ישיר'}</strong></div>` : ''}
+    `;
+}
 
         // שלב 4 -> 5
         document.getElementById('gift-step4-next')?.addEventListener('click', () => {
