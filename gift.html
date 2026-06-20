@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>שובר מתנה - VIP Shirts</title>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800;900&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: 'Heebo', sans-serif;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 16px;
+        direction: rtl;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle at 30% 30%, rgba(220,53,69,0.15) 0%, transparent 50%),
+                    radial-gradient(circle at 70% 70%, rgba(255,215,0,0.08) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .card-wrap {
+        max-width: 560px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+    }
+
+    .voucher {
+        background: linear-gradient(145deg, #ffffff 0%, #fef9f5 100%);
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+        position: relative;
+    }
+
+    .voucher-top {
+        background: linear-gradient(135deg, #dc3545 0%, #a4182a 100%);
+        padding: 36px 30px 60px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .voucher-top::after {
+        content: '⚽';
+        position: absolute;
+        font-size: 12em;
+        opacity: 0.07;
+        top: -20px;
+        left: -20px;
+        transform: rotate(-15deg);
+    }
+
+    .voucher-logo {
+        width: 90px;
+        height: auto;
+        margin-bottom: 14px;
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3));
+        position: relative;
+        z-index: 2;
+    }
+
+    .voucher-eyebrow {
+        color: rgba(255,255,255,0.85);
+        font-size: 0.95em;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .voucher-title {
+        color: #fff;
+        font-size: 2em;
+        font-weight: 900;
+        margin-top: 6px;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 2;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Ticket notch effect */
+    .notch-row {
+        position: relative;
+        height: 0;
+    }
+    .notch {
+        position: absolute;
+        top: -20px;
+        width: 40px;
+        height: 40px;
+        background: #1a1a1a;
+        border-radius: 50%;
+        z-index: 5;
+    }
+    .notch.right { right: -20px; }
+    .notch.left { left: -20px; }
+
+    .voucher-amount-tag {
+        position: absolute;
+        bottom: -34px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        border-radius: 20px;
+        padding: 16px 38px;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.25);
+        z-index: 4;
+        text-align: center;
+        border: 3px solid #ffd700;
+    }
+    .voucher-amount-tag .amount-num {
+        font-size: 2.1em;
+        font-weight: 900;
+        color: #dc3545;
+        line-height: 1;
+    }
+    .voucher-amount-tag .amount-label {
+        font-size: 0.72em;
+        color: #888;
+        font-weight: 700;
+        letter-spacing: 1px;
+        margin-top: 2px;
+    }
+
+    .voucher-body {
+        padding: 56px 34px 34px;
+        text-align: center;
+    }
+
+    .recipient-line {
+        font-size: 1.15em;
+        color: #555;
+        margin-bottom: 4px;
+    }
+    .recipient-name {
+        font-size: 1.6em;
+        font-weight: 800;
+        color: #1a1a1a;
+        margin-bottom: 20px;
+    }
+
+    .gift-message {
+        background: #fff8f5;
+        border: 1.5px dashed #dc3545;
+        border-radius: 16px;
+        padding: 20px 22px;
+        margin: 0 0 26px;
+        color: #444;
+        font-size: 1.02em;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        position: relative;
+    }
+    .gift-message::before {
+        content: '"';
+        position: absolute;
+        top: -6px;
+        right: 16px;
+        font-size: 3em;
+        color: #dc354533;
+        font-family: Georgia, serif;
+        line-height: 1;
+    }
+
+    .sender-line {
+        color: #999;
+        font-size: 0.92em;
+        margin-bottom: 30px;
+    }
+    .sender-line strong { color: #666; }
+
+    .code-section {
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        border-radius: 18px;
+        padding: 24px 20px;
+        margin-bottom: 24px;
+    }
+    .code-label {
+        color: rgba(255,255,255,0.6);
+        font-size: 0.82em;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+    .code-value {
+        font-size: 1.7em;
+        font-weight: 900;
+        color: #ffd700;
+        letter-spacing: 3px;
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+        margin-bottom: 14px;
+    }
+    .copy-code-btn {
+        background: rgba(255,255,255,0.12);
+        color: #fff;
+        border: 1.5px solid rgba(255,255,255,0.25);
+        padding: 9px 22px;
+        border-radius: 30px;
+        font-family: inherit;
+        font-size: 0.88em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .copy-code-btn:hover { background: rgba(255,255,255,0.2); }
+    .copy-code-btn.copied { background: #28a745; border-color: #28a745; }
+
+    .how-to-use {
+        background: #f8f9fa;
+        border-radius: 14px;
+        padding: 18px 20px;
+        text-align: right;
+        margin-bottom: 26px;
+        border: 1px solid #eee;
+    }
+    .how-to-use-title {
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 0.98em;
+    }
+    .how-to-use ol {
+        margin: 0;
+        padding-right: 20px;
+        color: #555;
+        font-size: 0.9em;
+        line-height: 1.9;
+    }
+
+    .cta-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: #fff;
+        text-decoration: none;
+        padding: 16px 44px;
+        border-radius: 50px;
+        font-weight: 800;
+        font-size: 1.08em;
+        box-shadow: 0 10px 26px rgba(220,53,69,0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 32px rgba(220,53,69,0.5);
+    }
+
+    .voucher-footer {
+        text-align: center;
+        padding: 20px;
+        color: rgba(255,255,255,0.4);
+        font-size: 0.82em;
+        margin-top: 20px;
+    }
+
+    .status-banner {
+        text-align: center;
+        font-weight: 800;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.95em;
+    }
+    .status-banner.used {
+        background: #fff3cd;
+        color: #856404;
+        border: 1.5px solid #ffc107;
+    }
+    .status-banner.partial {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1.5px solid #17a2b8;
+    }
+
+    .message-box {
+        background: white;
+        border-radius: 20px;
+        padding: 50px 30px;
+        text-align: center;
+        max-width: 460px;
+        margin: 0 auto;
+    }
+    .message-box .icon { font-size: 3.5em; margin-bottom: 16px; }
+    .message-box h2 { color: #2c3e50; margin-bottom: 10px; }
+    .message-box p { color: #777; }
+
+    @media (max-width: 480px) {
+        .voucher-top { padding: 28px 20px 56px; }
+        .voucher-title { font-size: 1.6em; }
+        .voucher-body { padding: 50px 22px 26px; }
+        .recipient-name { font-size: 1.3em; }
+        .code-value { font-size: 1.3em; letter-spacing: 2px; }
+        .voucher-amount-tag { padding: 13px 28px; }
+        .voucher-amount-tag .amount-num { font-size: 1.7em; }
+    }
+</style>
+</head>
+<body>
+
+<div class="card-wrap" id="card-wrap">
+    <div class="message-box" id="loading-box">
+        <div class="icon">🎁</div>
+        <h2>טוען שובר מתנה...</h2>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+        authDomain: "timetable-titus.firebaseapp.com",
+        projectId: "timetable-titus",
+        storageBucket: "timetable-titus.firebasestorage.app",
+        messagingSenderId: "199146911555",
+        appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
+        measurementId: "G-JQ02VEC325"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function fmt(n) { return (parseFloat(n) || 0).toFixed(2) + ' ₪'; }
+
+    function showMessageBox(icon, title, text) {
+        document.getElementById('card-wrap').innerHTML = `
+            <div class="message-box">
+                <div class="icon">${icon}</div>
+                <h2>${title}</h2>
+                <p>${text}</p>
+            </div>
+        `;
+    }
+
+    async function init() {
+        const hash = window.location.hash.substring(1);
+        if (!hash) {
+            showMessageBox('❌', 'קוד שובר חסר', 'הקישור שגוי או שאינו תקין.');
+            return;
+        }
+
+        try {
+            // hash is the gift card code itself
+            const snapshot = await db.collection('GiftCards').where('code', '==', hash).limit(1).get();
+            if (snapshot.empty) {
+                showMessageBox('🔍', 'שובר לא נמצא', 'לא הצלחנו לאתר שובר מתנה עם הקוד הזה.');
+                return;
+            }
+
+            const doc = snapshot.docs[0];
+            const gift = doc.data();
+
+            const siteUrl = window.location.origin.replace(/\/gift\.html.*$/, '') || window.location.origin;
+
+            let statusBannerHTML = '';
+            if (gift.status === 'redeemed') {
+                statusBannerHTML = `<div class="status-banner used">⚠️ שובר זה נוצל במלואו</div>`;
+            } else if (gift.status === 'partially_used') {
+                statusBannerHTML = `<div class="status-banner partial">ℹ️ נוצל חלקית — יתרה זמינה: ${fmt(gift.remainingAmount)}</div>`;
+            }
+
+            document.getElementById('card-wrap').innerHTML = `
+                <div class="voucher">
+                    <div class="voucher-top">
+                        <img src="https://vipshirts.ftp.sh/logo.png" alt="VIP Shirts" class="voucher-logo">
+                        <div class="voucher-eyebrow">שובר מתנה דיגיטלי</div>
+                        <div class="voucher-title">🎁 קיבלת מתנה!</div>
+                    </div>
+                    <div class="notch-row">
+                        <div class="notch right"></div>
+                        <div class="notch left"></div>
+                        <div class="voucher-amount-tag">
+                            <div class="amount-num">${fmt(gift.remainingAmount != null ? gift.remainingAmount : gift.amount)}</div>
+                            <div class="amount-label">שווי השובר</div>
+                        </div>
+                    </div>
+                    <div class="voucher-body">
+                        ${statusBannerHTML}
+                        <div class="recipient-line">שובר מתנה בשבילך,</div>
+                        <div class="recipient-name">${escapeHtml(gift.recipientName || '')}</div>
+
+                        ${gift.message ? `<div class="gift-message">${escapeHtml(gift.message)}</div>` : ''}
+
+                        <div class="sender-line">נשלח באהבה מאת <strong>${escapeHtml(gift.senderName || '')}</strong></div>
+
+                        <div class="code-section">
+                            <div class="code-label">קוד השובר למימוש</div>
+                            <div class="code-value" id="gift-code">${gift.code}</div>
+                            <button class="copy-code-btn" id="copy-btn">📋 העתק קוד</button>
+                        </div>
+
+                        <div class="how-to-use">
+                            <div class="how-to-use-title">איך משתמשים בשובר?</div>
+                            <ol>
+                                <li>היכנסו לאתר VIP Shirts ובחרו את החולצה שאתם רוצים</li>
+                                <li>בעגלת הקניות, הזינו את קוד השובר בשדה "קוד הנחה"</li>
+                                <li>השובר יקוזז אוטומטית מהסכום הכולל להזמנה</li>
+                            </ol>
+                        </div>
+
+                        <a href="${siteUrl}/" class="cta-btn">🛍️ למעבר לחנות</a>
+                    </div>
+                </div>
+                <div class="voucher-footer">VIP Shirts &copy; שובר זה תקף לשימוש חד-פעמי או חלקי בהתאם ליתרה</div>
+            `;
+
+            document.getElementById('copy-btn').addEventListener('click', () => {
+                navigator.clipboard.writeText(gift.code).then(() => {
+                    const btn = document.getElementById('copy-btn');
+                    btn.textContent = '✓ הועתק בהצלחה!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = '📋 העתק קוד';
+                        btn.classList.remove('copied');
+                    }, 2200);
+                });
+            });
+
+        } catch (e) {
+            console.error(e);
+            showMessageBox('⚠️', 'שגיאה בטעינת השובר', 'אנא נסה לרענן את הדף או צור קשר עם התמיכה.');
+        }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
