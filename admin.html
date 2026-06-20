@@ -2282,11 +2282,11 @@ function showSkeletonProducts(containerId, count = 6) {
                 <div>${catBadges || '<span style="color:#999;font-size:0.9em;">ללא קטגוריה</span>'}</div>
                 <h3>${product.name}</h3>
                 ${priceHTML}
-                <div class="product-card-actions">
-                    <button class="btn btn-dar€k btn-edit-product-main" data-product-id="${product.id}">ערוך</button>
-                    <button class="btn btn-danger btn-delete-product-main" data-product-id="${product.id}">מחק</button>€
-                    <button class="btn btn-success btn-copy-link-main" data-product-id="${product.id}" title="בנה קישור">🔗</button>
-                </div>
+<div class="product-card-actions">
+    <button class="btn btn-dark btn-edit-product-main" data-product-id="${product.id}">ערוך</button>
+    <button class="btn btn-danger btn-delete-product-main" data-product-id="${product.id}">מחק</button>
+    <button class="btn btn-success btn-copy-link-main" data-product-id="${product.id}" title="בנה קישור">🔗</button>
+</div>
             `;
             allProductsGrid.appendChild(productCard);
         });
