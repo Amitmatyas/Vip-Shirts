@@ -3939,13 +3939,49 @@ function updatePointsDisplay() {
             if (giftPaypalLoaded || window.paypal) { giftPaypalLoaded = true; return Promise.resolve(); }
             return loadPayPalSDK();
         }
-
-        function generateGiftCode() {
+function generateGiftCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let part1 = '', part2 = '';
             for (let i = 0; i < 4; i++) part1 += chars[Math.floor(Math.random() * chars.length)];
             for (let i = 0; i < 4; i++) part2 += chars[Math.floor(Math.random() * chars.length)];
             return `VIP-${part1}-${part2}`;
+        }
+
+        async function sendGiftReceiptEmail(giftData, invoiceLink) {
+            try {
+                await emailjs.send(window.GIFT_EMAILJS_SERVICE_ID, 'invoicegift', {
+                    to_email: giftData.senderEmail,
+                    sender_name: giftData.senderName,
+                    recipient_name: giftData.recipientName,
+                    amount: giftData.amount.toFixed(2),
+                    gift_code: giftData.code,
+                    invoice_link: invoiceLink,
+                    delivery_method: giftData.deliveryMethod === 'email' ? 'נשלח במייל למקבל' : 'קישור ישיר',
+                    date: new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                }, window.GIFT_EMAILJS_PUBLIC_KEY);
+                return true;
+            } catch (error) {
+                console.error('Error sending gift receipt email:', error);
+                return false;
+            }
+        }
+
+        async function sendGiftToRecipientEmail(giftData, giftLink) {
+            try {
+                await emailjs.send(window.GIFT_EMAILJS_SERVICE_ID, 'gift', {
+                    to_email: giftData.recipientEmail,
+                    recipient_name: giftData.recipientName,
+                    sender_name: giftData.senderName,
+                    amount: giftData.amount.toFixed(2),
+                    gift_code: giftData.code,
+                    gift_message: giftData.message,
+                    gift_link: giftLink
+                }, window.GIFT_EMAILJS_PUBLIC_KEY);
+                return true;
+            } catch (error) {
+                console.error('Error sending gift email to recipient:', error);
+                return false;
+            }
         }
 
 // ===== לוגיקה משותפת ליצירת שובר מתנה (משמשת גם את PayPal וגם את כפתור האדמין) =====
