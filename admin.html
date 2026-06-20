@@ -3861,6 +3861,8 @@ modalCloseButtons.forEach(btn => {
         linkOrderModal.classList.remove('active');
         editProductModal.classList.remove('active');
     });
+});
+
 window.addEventListener('click', (event) => {
     if (event.target === orderDetailsModal) orderDetailsModal.classList.remove('active');
     if (event.target === leadDetailsModal) leadDetailsModal.classList.remove('active');
