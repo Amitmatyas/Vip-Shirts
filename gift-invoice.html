@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>קבלה - שובר מתנה VIP Shirts</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;800&display=swap');
+
+        :root {
+            --primary-color: #1a1a1a;
+            --bg-color: #f4f7f6;
+            --border-color: #e1e1e1;
+            --text-main: #2d3436;
+            --text-muted: #636e72;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            direction: rtl;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 50px 45px;
+            max-width: 720px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .invoice-meta h2 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .invoice-meta .invoice-num {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .invoice-meta .invoice-date {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .logo img { width: 120px; height: auto; }
+
+        .gift-ribbon {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .info-block {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px 20px;
+            border-right: 4px solid var(--primary-color);
+        }
+        .info-block.recipient-block { border-right-color: #dc3545; }
+
+        .info-block p {
+            font-size: 0.92rem;
+            color: var(--text-main);
+            line-height: 1.7;
+        }
+
+        .info-block strong {
+            display: block;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .gift-card-box {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            border-radius: 16px;
+            padding: 28px 26px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .gift-card-box .amt-label {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .gift-card-box .amt-value {
+            color: #ffd700;
+            font-size: 2.4rem;
+            font-weight: 900;
+            margin-bottom: 14px;
+        }
+        .gift-card-box .code-label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        .gift-card-box .code-value {
+            color: white;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .message-quote {
+            background: #fff8f5;
+            border: 1.5px dashed #dc3545;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 30px;
+            color: #555;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .totals-section {
+            margin-top: 10px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .totals-box { min-width: 260px; }
+
+        .totals-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.93rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .totals-row:last-child { border-bottom: none; }
+
+        .totals-row.total-final {
+            font-size: 1.15rem;
+            font-weight: 800;
+            padding-top: 14px;
+            margin-top: 4px;
+            border-top: 2px solid var(--primary-color);
+        }
+
+        .invoice-footer {
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 2px solid #eee;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        .invoice-footer strong { color: var(--text-main); }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn-dark { background: var(--primary-color); color: white; }
+        .btn-copy { background: #f0f0f0; color: var(--primary-color); }
+
+        .message {
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .error   { background: #ffeaea; color: #c0392b; }
+        .loading { background: #f0f5ff; color: #2980b9; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border-radius: 0; padding: 30px; }
+            .actions { display: none !important; }
+        }
+
+        @media (max-width: 540px) {
+            .container { padding: 25px 20px; }
+            .invoice-header { flex-direction: column-reverse; gap: 20px; }
+            .info-grid { grid-template-columns: 1fr; gap: 14px; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="state-box"></div>
+
+    <div class="actions" id="actions-bar" style="display:none;">
+        <button class="btn btn-dark" onclick="window.print()">🖨️ הורד / הדפס PDF</button>
+        <button class="btn btn-copy" id="copy-link-btn" onclick="copyLink()">🔗 העתק קישור</button>
+    </div>
+
+    <div id="invoice-content" style="display:none;">
+
+        <div class="invoice-header">
+            <div class="invoice-meta">
+                <div class="gift-ribbon">🎁 רכישת שובר מתנה</div>
+                <h2>קבלה</h2>
+                <div class="invoice-num">מספר הזמנה: #<span id="inv-num"></span></div>
+                <div class="invoice-date">תאריך ושעה: <span id="inv-date"></span></div>
+            </div>
+            <div class="logo">
+                <img src="https://vipshirts.ftp.sh/logo.png" alt="VIP Shirts">
+            </div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-block">
+                <div class="section-title">פרטי השולח (הרוכש)</div>
+                <strong id="inv-sender-name"></strong>
+                <p id="inv-sender-contact"></p>
+                <p id="inv-sender-address"></p>
+            </div>
+            <div class="info-block recipient-block">
+                <div class="section-title">פרטי המקבל</div>
+                <strong id="inv-recipient-name"></strong>
+                <p id="inv-recipient-contact"></p>
+            </div>
+        </div>
+
+        <div id="message-block-wrap"></div>
+
+        <div class="gift-card-box">
+            <div class="amt-label">סכום השובר</div>
+            <div class="amt-value" id="gift-amount"></div>
+            <div class="code-label">קוד השובר</div>
+            <div class="code-value" id="gift-code"></div>
+        </div>
+
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="totals-row">
+                    <span>שיטת מסירה</span>
+                    <span id="inv-delivery-method"></span>
+                </div>
+                <div class="totals-row total-final">
+                    <span>סה"כ שולם</span>
+                    <span id="inv-total"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="invoice-footer">
+            <strong>VIP Shirts</strong> — תודה שבחרת לפנק מישהו קרוב אליך!<br>
+            לשאלות ופניות צור קשר איתנו
+        </div>
+
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+        authDomain: "timetable-titus.firebaseapp.com",
+        projectId: "timetable-titus",
+        storageBucket: "timetable-titus.firebasestorage.app",
+        messagingSenderId: "199146911555",
+        appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
+        measurementId: "G-JQ02VEC325"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    function fmt(n) { return '₪' + (parseFloat(n) || 0).toFixed(2); }
+
+    function showState(msg, type) {
+        document.getElementById('state-box').innerHTML =
+            `<div class="message ${type}">${msg}</div>`;
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str || '';
+        return div.innerHTML;
+    }
+
+    async function init() {
+        const hash = window.location.hash.substring(1);
+        if (!hash) { showState('מזהה הזמנה חסר', 'error'); return; }
+
+        showState('טוען קבלה...', 'loading');
+
+        try {
+            const doc = await db.collection('GiftCards').doc(hash).get();
+            if (!doc.exists) { showState('שובר מתנה לא נמצא', 'error'); return; }
+
+            const g = doc.data();
+
+            document.getElementById('inv-num').textContent = hash.substring(0, 8).toUpperCase();
+            const date = g.createdAt ? g.createdAt.toDate().toLocaleString('he-IL', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            }) : '—';
+            document.getElementById('inv-date').textContent = date;
+
+            document.getElementById('inv-sender-name').textContent = g.senderName || '—';
+            document.getElementById('inv-sender-contact').innerHTML =
+                `${escapeHtml(g.senderPhone || '')}<br>${escapeHtml(g.senderEmail || '')}`;
+            document.getElementById('inv-sender-address').textContent = g.senderAddress || '';
+
+            document.getElementById('inv-recipient-name').textContent = g.recipientName || '—';
+            document.getElementById('inv-recipient-contact').innerHTML =
+                `${escapeHtml(g.recipientPhone || '')}<br>${escapeHtml(g.recipientEmail || '')}`;
+
+            if (g.message) {
+                document.getElementById('message-block-wrap').innerHTML = `
+                    <div class="section-title">ברכה אישית</div>
+                    <div class="message-quote">${escapeHtml(g.message)}</div>
+                `;
+            }
+
+            document.getElementById('gift-amount').textContent = fmt(g.amount);
+            document.getElementById('gift-code').textContent = g.code || '—';
+
+            document.getElementById('inv-delivery-method').textContent =
+                g.deliveryMethod === 'email' ? 'נשלח במייל למקבל' : 'קישור ישיר (נמסר לשולח)';
+
+            document.getElementById('inv-total').textContent = fmt(g.amount);
+
+            document.getElementById('state-box').innerHTML = '';
+            document.getElementById('invoice-content').style.display = 'block';
+            document.getElementById('actions-bar').style.display = 'flex';
+
+        } catch (e) {
+            console.error(e);
+            showState('שגיאה בטעינת הקבלה', 'error');
+        }
+    }
+
+    function copyLink() {
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            const btn = document.getElementById('copy-link-btn');
+            const orig = btn.textContent;
+            btn.textContent = '✓ הועתק!';
+            btn.style.background = '#eafff2';
+            btn.style.color = '#27ae60';
+            setTimeout(() => {
+                btn.textContent = orig;
+                btn.style.background = '';
+                btn.style.color = '';
+            }, 2000);
+        });
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>
