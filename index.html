@@ -4898,7 +4898,7 @@ function buildShippingBreakdown() {
             return '<div style="margin-top:4px;">' + lines.join('') + '</div>';
         }
         
-        function updateCartDisplay() {
+function updateCartDisplay() {
             cartItemsList.innerHTML = '';
             subtotal = 0;
 
@@ -4912,7 +4912,7 @@ function buildShippingBreakdown() {
                 `;
                 shippingInfoElement.innerHTML = '';
             } else {
-cart.forEach(item => {
+                cart.forEach(item => {
                     const listItem = document.createElement('li');
                     let optionsText = '';
                     if (item.selectedOptions) {
@@ -4947,6 +4947,7 @@ cart.forEach(item => {
                     cartItemsList.appendChild(listItem);
                     subtotal += item.price * item.quantity;
                 });
+            }
 
             calculateShipping();
             const couponDiscount = applyCouponDiscount();
