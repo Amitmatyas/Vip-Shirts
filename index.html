@@ -4788,7 +4788,7 @@ function fetchProducts() {
     }
 }
 
-        function calculateShipping() {
+function calculateShipping() {
             if (!settings || !settings.Shipping) { shippingCost = 0; return; }
             const shipping = settings.Shipping;
 
@@ -4797,15 +4797,21 @@ function fetchProducts() {
 
             cart.forEach(item => {
                 const product = products.find(p => p.id === item.id);
-                if (product && product.customShipping !== undefined && product.customShipping >= 0) {
-                    itemsWithCustomShipping.push({ item, product });
+                const effectiveCustomShipping = (item.customShipping !== undefined && item.customShipping >= 0)
+                    ? item.customShipping
+                    : (product && product.customShipping !== undefined && product.customShipping >= 0)
+                        ? product.customShipping
+                        : undefined;
+
+                if (effectiveCustomShipping !== undefined) {
+                    itemsWithCustomShipping.push({ item, product, customShipping: effectiveCustomShipping });
                 } else {
                     itemsWithoutCustomShipping.push({ item, product });
                 }
             });
 
-            const customShippingTotal = itemsWithCustomShipping.reduce((sum, { item, product }) => {
-                return sum + product.customShipping * item.quantity;
+            const customShippingTotal = itemsWithCustomShipping.reduce((sum, { item, customShipping }) => {
+                return sum + customShipping * item.quantity;
             }, 0);
 
             let globalShipping = 0;
@@ -4866,15 +4872,23 @@ function fetchProducts() {
             return discount;
         }
 
-        function buildShippingBreakdown() {
+function buildShippingBreakdown() {
             if (!settings || !settings.Shipping || cart.length === 0) return '';
             
             const lines = [];
             
             cart.forEach(item => {
                 const product = products.find(p => p.id === item.id);
-                if (product && product.customShipping !== undefined && product.customShipping >= 0) {
-                    lines.push(`<div style="font-size:0.8em;color:#888;margin-top:3px;">• ${item.name}: ${product.customShipping.toFixed(2)}₪</div>`);
+                const effectiveCustomShipping = (item.customShipping !== undefined && item.customShipping >= 0)
+                    ? item.customShipping
+                    : (product && product.customShipping !== undefined && product.customShipping >= 0)
+                        ? product.customShipping
+                        : undefined;
+
+                if (effectiveCustomShipping !== undefined) {
+                    if (effectiveCustomShipping > 0) {
+                        lines.push(`<div style="font-size:0.8em;color:#888;margin-top:3px;">• ${item.name}: ${effectiveCustomShipping.toFixed(2)}₪</div>`);
+                    }
                 } else if (settings.Shipping.Method === 'per_item') {
                     lines.push(`<div style="font-size:0.8em;color:#888;margin-top:3px;">• ${item.name}: ${(settings.Shipping.Value * item.quantity).toFixed(2)}₪</div>`);
                 }
