@@ -3374,18 +3374,37 @@ let giftCurrentStep = 1;
         let pendingGiftLinksToShow = [];
         let pendingGiftLinkIndex = 0;
 
-        // ===== ADMIN MODE HELPERS =====
-        function isAdminMode() {
-            return window.location.href.toLowerCase().includes('admin');
-        }
 
-        function isAdminClubMember() {
-            return !!(currentClubMember && currentClubMember.phone === '0552724255');
-        }
+           const ADMIN_PHONE_MAP = {
+    'admin1': '0534818358',
+    'admin2': '0552724255'
+};
 
-        function isAdminCheckoutActive() {
-            return isAdminMode() && isAdminClubMember();
-        }
+
+function detectAdminCodeFromUrl() {
+    const hash = window.location.hash.toLowerCase();
+    const cleanHash = hash.replace('#', '').trim();
+    if (Object.prototype.hasOwnProperty.call(ADMIN_PHONE_MAP, cleanHash)) {
+        return cleanHash;
+    }
+    return null;
+}
+
+let ADMIN_MODE_CODE = detectAdminCodeFromUrl();
+
+function isAdminMode() {
+    return ADMIN_MODE_CODE !== null;
+}
+
+function isAdminClubMember() {
+    if (!ADMIN_MODE_CODE || !currentClubMember) return false;
+    const allowedPhone = ADMIN_PHONE_MAP[ADMIN_MODE_CODE];
+    return currentClubMember.phone === allowedPhone;
+}
+
+function isAdminCheckoutActive() {
+    return isAdminMode() && isAdminClubMember();
+}
 
         // ===== MOBILE NAV HELPERS =====
         function setMobileActive(btnId) {
@@ -5385,7 +5404,7 @@ productModal.style.display = 'flex';
                 encodeURIComponent(v).replace(/%2F/gi, '%252F')
               ).join('&')
             : '';
-        window.history.replaceState(null, '', '#product:' + encodeURIComponent(product.name) + hashOptions);
+        window.history.replaceState(null, '', window.location.pathname + window.location.search + '#product:' + encodeURIComponent(product.name) + hashOptions);
     }
 
         function updateModalPrice() {
@@ -5454,12 +5473,12 @@ productModal.style.display = 'flex';
             currentProductOptions = {};
         });
 
-        function closeProductModal() {
+function closeProductModal() {
             productModal.style.display = 'none';
             currentProductOptions = {};
             isCouponProduct = false;
             couponLockedOptions = null;
-            window.history.replaceState(null, '', window.location.pathname);
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
         }
 
         closeProductModalBtn.addEventListener('click', closeProductModal);
