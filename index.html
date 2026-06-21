@@ -3365,12 +3365,14 @@ let cart = [];
         let clubModalOpen = false;
         let pointsToUse = 0;
         let pointsDiscount = 0;
-        let giftSelectedAmount = 0;
+let giftSelectedAmount = 0;
         let giftSenderData = {};
         let giftRecipientData = {};
         let giftDeliveryMethod = '';
 let giftCurrentStep = 1;
         let appliedGiftCard = null;
+        let pendingGiftLinksToShow = [];
+        let pendingGiftLinkIndex = 0;
 
         // ===== ADMIN MODE HELPERS =====
         function isAdminMode() {
@@ -3966,9 +3968,7 @@ function generateGiftCode() {
             }
         }
 
-// ===== לוגיקה משותפת ליצירת שובר מתנה (משמשת גם את PayPal וגם את כפתור האדמין) =====
-// ===== יצירת שובר מתנה בפיירבייס + שליחת מיילים. נקראת מתוך finalizeOrder אחרי שההזמנה הראשית אושרה =====
-        async function createGiftCardRecord(giftCardData, orderPaymentMeta) {
+async function createGiftCardRecord(giftCardData, orderPaymentMeta) {
             const code = generateGiftCode();
             const giftData = {
                 code: code,
@@ -4002,10 +4002,17 @@ function generateGiftCode() {
                 await sendGiftToRecipientEmail(giftData, giftLink);
             }
 
-            return { id: giftRef.id, code, giftLink };
+            return {
+                id: giftRef.id,
+                code,
+                giftLink,
+                deliveryMethod: giftCardData.deliveryMethod,
+                recipientName: giftCardData.recipientName,
+                amount: giftCardData.amount
+            };
         }
 
-        function addGiftCardToCart() {
+function addGiftCardToCart() {
             const GIFT_LOGO = 'https://vipshirts.ftp.sh/logo.png';
             cart.push({
                 id: 'giftcard-' + Date.now(),
@@ -4036,6 +4043,54 @@ function generateGiftCode() {
             closeGiftModal();
             openCart();
         }
+
+        // ============================================
+        // GIFT LINK SUCCESS MODAL (קישור ישיר - לאחר תשלום)
+        // ============================================
+        function showNextPendingGiftLink() {
+            if (pendingGiftLinkIndex >= pendingGiftLinksToShow.length) {
+                closeGiftModal();
+                pendingGiftLinksToShow = [];
+                pendingGiftLinkIndex = 0;
+                return;
+            }
+            const giftInfo = pendingGiftLinksToShow[pendingGiftLinkIndex];
+
+            goToGiftStep('success');
+
+            const successText = document.getElementById('gift-success-text');
+            if (successText) {
+                successText.textContent = `שובר בסך ${giftInfo.amount.toFixed(2)} ₪ עבור ${giftInfo.recipientName} נוצר בהצלחה.`;
+            }
+
+            const revealBox = document.getElementById('gift-link-reveal-box');
+            const linkInput = document.getElementById('gift-final-link');
+            if (revealBox) revealBox.style.display = 'block';
+            if (linkInput) linkInput.value = giftInfo.link;
+
+            document.getElementById('gift-modal').classList.add('active');
+        }
+
+        document.getElementById('gift-copy-final-link')?.addEventListener('click', () => {
+            const linkInput = document.getElementById('gift-final-link');
+            if (!linkInput) return;
+            linkInput.select();
+            const btn = document.getElementById('gift-copy-final-link');
+            const originalText = btn.textContent;
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                btn.textContent = '✓ הועתק!';
+                setTimeout(() => { btn.textContent = originalText; }, 2000);
+            }).catch(() => {
+                document.execCommand('copy');
+                btn.textContent = '✓ הועתק!';
+                setTimeout(() => { btn.textContent = originalText; }, 2000);
+            });
+        });
+
+        document.getElementById('gift-finish-btn')?.addEventListener('click', () => {
+            pendingGiftLinkIndex++;
+            showNextPendingGiftLink();
+        });
 
         // ============================================
         // GIFT CARD REDEMPTION (hooked into coupon system)
@@ -5525,10 +5580,18 @@ productModal.style.display = 'flex';
                 orderNotes: document.getElementById('order-notes').value.trim() || null,
             });
 
-                           const purchasedGiftCards = cart.filter(item => item.isGiftCard && item.giftCardData);
+const purchasedGiftCards = cart.filter(item => item.isGiftCard && item.giftCardData);
+            const linkGiftCardsToShow = [];
             for (const giftItem of purchasedGiftCards) {
                 try {
-                    await createGiftCardRecord(giftItem.giftCardData, orderPaymentMeta);
+                    const giftResult = await createGiftCardRecord(giftItem.giftCardData, orderPaymentMeta);
+                    if (giftResult.deliveryMethod === 'link') {
+                        linkGiftCardsToShow.push({
+                            link: giftResult.giftLink,
+                            recipientName: giftResult.recipientName,
+                            amount: giftResult.amount
+                        });
+                    }
                 } catch (e) {
                     console.error('Error creating gift card from cart item:', e);
                 }
@@ -5583,8 +5646,13 @@ productModal.style.display = 'flex';
                 couponDetails: appliedCoupon
             });
 
-            if (emailSent) {
+if (emailSent) {
                 alert(`תודה לך, ${name}! ההזמנה בוצעה בהצלחה.\nקבלה נשלחה למייל שלך.\nסך הכל: ${total.toFixed(2)} ₪`);
+                if (linkGiftCardsToShow.length > 0) {
+                    pendingGiftLinksToShow = linkGiftCardsToShow;
+                    pendingGiftLinkIndex = 0;
+                    showNextPendingGiftLink();
+                }
             } else {
                 const overlay = document.createElement('div');
                 overlay.style.cssText = `
@@ -5615,7 +5683,13 @@ productModal.style.display = 'flex';
                     if (count <= 0) {
                         clearInterval(timer);
                         document.body.removeChild(overlay);
-                        window.open(`invoice.html#${orderRef.id}`, '_blank');
+                        if (linkGiftCardsToShow.length > 0) {
+                            pendingGiftLinksToShow = linkGiftCardsToShow;
+                            pendingGiftLinkIndex = 0;
+                            showNextPendingGiftLink();
+                        } else {
+                            window.open(`invoice.html#${orderRef.id}`, '_blank');
+                        }
                     }
                 }, 1000);
             }
