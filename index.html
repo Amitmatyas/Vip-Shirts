@@ -3041,12 +3041,11 @@ header h1 {
             <div class="gift-modal-header">
                 <button class="gift-close-btn" type="button" id="gift-close-btn">&times;</button>
                 <h2><span>🎁</span><span>רכישת שובר מתנה</span></h2>
-                <div class="gift-step-indicator">
+<div class="gift-step-indicator">
                     <div class="gift-step-dot active" data-step="1"></div>
                     <div class="gift-step-dot" data-step="2"></div>
                     <div class="gift-step-dot" data-step="3"></div>
                     <div class="gift-step-dot" data-step="4"></div>
-                    <div class="gift-step-dot" data-step="5"></div>
                 </div>
             </div>
             <div class="gift-modal-body">
@@ -3117,7 +3116,7 @@ header h1 {
                     </div>
                 </div>
 
-                <!-- שלב 4: אופן קבלה -->
+<!-- שלב 4: אופן קבלה -->
                 <div class="gift-step" data-step="4">
                     <h3 style="margin-bottom:16px;color:#2c3e50;">איך תרצו למסור את המתנה?</h3>
                     <div class="gift-delivery-options">
@@ -3136,17 +3135,7 @@ header h1 {
                     <div class="gift-summary-box" id="gift-summary-box"></div>
                     <div class="gift-nav-buttons">
                         <button class="gift-btn gift-btn-back" data-back="3">→ חזרה</button>
-                        <button class="gift-btn gift-btn-next" id="gift-step4-next">המשך לתשלום ←</button>
-                    </div>
-                </div>
-
-                <!-- שלב 5: תשלום -->
-                <div class="gift-step" data-step="5">
-                    <h3 style="margin-bottom:16px;color:#2c3e50;">השלמת תשלום</h3>
-                    <div class="gift-summary-box" id="gift-payment-summary"></div>
-                    <div id="gift-paypal-button-container"></div>
-                    <div class="gift-nav-buttons">
-                        <button class="gift-btn gift-btn-back" data-back="4">→ חזרה</button>
+                        <button class="gift-btn gift-btn-next" id="gift-step4-next">הוסף לעגלה 🛒</button>
                     </div>
                 </div>
 
@@ -3380,9 +3369,8 @@ let cart = [];
         let giftSenderData = {};
         let giftRecipientData = {};
         let giftDeliveryMethod = '';
-        let giftCurrentStep = 1;
-        let giftPaypalLoaded = false;
-              let appliedGiftCard = null;
+let giftCurrentStep = 1;
+        let appliedGiftCard = null;
 
         // ===== ADMIN MODE HELPERS =====
         function isAdminMode() {
@@ -3922,7 +3910,7 @@ function updatePointsDisplay() {
     `;
 }
 
-        // שלב 4 -> 5
+// שלב 4 -> הוספה לעגלה (במקום תשלום נפרד)
         document.getElementById('gift-step4-next')?.addEventListener('click', () => {
             const errEl = document.getElementById('gift-error-step4');
             if (!giftDeliveryMethod) {
@@ -3930,15 +3918,9 @@ function updatePointsDisplay() {
                 return;
             }
             errEl.style.display = 'none';
-            renderGiftSummary('gift-payment-summary');
-            goToGiftStep(5);
-            loadGiftPayPalSDK().then(() => renderGiftPayPalButton());
+            addGiftCardToCart();
         });
 
-        function loadGiftPayPalSDK() {
-            if (giftPaypalLoaded || window.paypal) { giftPaypalLoaded = true; return Promise.resolve(); }
-            return loadPayPalSDK();
-        }
 function generateGiftCode() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let part1 = '', part2 = '';
@@ -3985,25 +3967,26 @@ function generateGiftCode() {
         }
 
 // ===== לוגיקה משותפת ליצירת שובר מתנה (משמשת גם את PayPal וגם את כפתור האדמין) =====
-        async function finalizeGiftCard(giftPaymentMeta) {
+// ===== יצירת שובר מתנה בפיירבייס + שליחת מיילים. נקראת מתוך finalizeOrder אחרי שההזמנה הראשית אושרה =====
+        async function createGiftCardRecord(giftCardData, orderPaymentMeta) {
             const code = generateGiftCode();
             const giftData = {
                 code: code,
-                amount: giftSelectedAmount,
-                remainingAmount: giftSelectedAmount,
-                senderName: giftSenderData.name,
-                senderPhone: giftSenderData.phone,
-                senderEmail: giftSenderData.email,
-                senderAddress: giftSenderData.address,
-                recipientName: giftRecipientData.name,
-                recipientPhone: giftRecipientData.phone,
-                recipientEmail: giftRecipientData.email,
-                message: giftRecipientData.message,
-                deliveryMethod: giftDeliveryMethod,
+                amount: giftCardData.amount,
+                remainingAmount: giftCardData.amount,
+                senderName: giftCardData.senderName,
+                senderPhone: giftCardData.senderPhone,
+                senderEmail: giftCardData.senderEmail,
+                senderAddress: giftCardData.senderAddress,
+                recipientName: giftCardData.recipientName,
+                recipientPhone: giftCardData.recipientPhone,
+                recipientEmail: giftCardData.recipientEmail,
+                message: giftCardData.message,
+                deliveryMethod: giftCardData.deliveryMethod,
                 status: 'active',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                paymentType: giftPaymentMeta.paymentType,
-                paypalOrderId: giftPaymentMeta.paypalOrderId,
+                paymentType: orderPaymentMeta.paymentType,
+                paypalOrderId: orderPaymentMeta.paypalOrderId,
                 redemptions: []
             };
 
@@ -4015,88 +3998,43 @@ function generateGiftCode() {
             await sendGiftReceiptEmail(giftData, invoiceLink);
 
             // מייל מתנה למקבל - רק אם נבחרה שליחה מיידית
-            if (giftDeliveryMethod === 'email') {
+            if (giftCardData.deliveryMethod === 'email') {
                 await sendGiftToRecipientEmail(giftData, giftLink);
             }
 
-            goToGiftStep('success');
-            const successText = document.getElementById('gift-success-text');
-            const linkBox = document.getElementById('gift-link-reveal-box');
-            if (giftDeliveryMethod === 'email') {
-                successText.textContent = `השובר נשלח בהצלחה למייל של ${giftRecipientData.name}! קבלה נשלחה גם למייל שלך.`;
-                linkBox.style.display = 'none';
-            } else {
-                successText.textContent = 'השובר מוכן! העתיקו את הקישור ושלחו אותו למקבל.';
-                document.getElementById('gift-final-link').value = giftLink;
-                linkBox.style.display = 'block';
-            }
+            return { id: giftRef.id, code, giftLink };
         }
 
-        function renderGiftPayPalButton() {
-            const container = document.getElementById('gift-paypal-button-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            // ===== מצב אדמין: כפתור "שלח הזמנה" במקום PayPal =====
-            if (isAdminCheckoutActive()) {
-                const adminBtn = document.createElement('button');
-                adminBtn.type = 'button';
-                adminBtn.textContent = '📦 שלח הזמנה';
-                adminBtn.style.cssText = `
-                    width: 100%;
-                    background: #28a745;
-                    color: #fff;
-                    border: none;
-                    padding: 14px;
-                    border-radius: 50px;
-                    font-size: 1.05em;
-                    font-weight: 800;
-                    cursor: pointer;
-                    font-family: 'Heebo', Arial, sans-serif;
-                    box-shadow: 0 4px 14px rgba(40,167,69,0.4);
-                    transition: background 0.2s, transform 0.15s;
-                `;
-                adminBtn.addEventListener('click', async () => {
-                    adminBtn.disabled = true;
-                    adminBtn.textContent = 'שולח הזמנה...';
-                    try {
-                        await finalizeGiftCard({ paymentType: 'admin_manual', paypalOrderId: null });
-                    } catch (error) {
-                        console.error('Gift card error:', error);
-                        alert('אירעה שגיאה ביצירת השובר. אנא צור קשר עם התמיכה.');
-                        adminBtn.disabled = false;
-                        adminBtn.textContent = '📦 שלח הזמנה';
-                    }
-                });
-                container.appendChild(adminBtn);
-                return;
-            }
-
-            if (typeof paypal === 'undefined') return;
-
-            paypal.Buttons({
-                style: { color: 'blue', shape: 'pill', label: 'pay', height: 45, layout: 'vertical' },
-                createOrder: function (data, actions) {
-                    return actions.order.create({
-                        purchase_units: [{
-                            amount: { value: giftSelectedAmount.toFixed(2), currency_code: 'ILS' },
-                            description: 'שובר מתנה VIP Shirts'
-                        }]
-                    });
-                },
-                onApprove: function (data, actions) {
-                    return actions.order.capture().then(async function (details) {
-                        try {
-                            await finalizeGiftCard({ paymentType: 'paypal', paypalOrderId: details.id });
-                        } catch (error) {
-                            console.error('Gift card error:', error);
-                            alert('אירעה שגיאה ביצירת השובר. אנא צור קשר עם התמיכה.');
-                        }
-                    });
-                },
-                onCancel: function () { alert('התשלום בוטל.'); },
-                onError: function (err) { alert('שגיאה בתשלום: נסה שוב.'); console.error(err); }
-            }).render('#gift-paypal-button-container');
+        function addGiftCardToCart() {
+            const GIFT_LOGO = 'https://vipshirts.ftp.sh/logo.png';
+            cart.push({
+                id: 'giftcard-' + Date.now(),
+                name: '🎁 שובר מתנה',
+                image: GIFT_LOGO,
+                quantity: 1,
+                price: giftSelectedAmount,
+                originalPrice: null,
+                selectedOptions: null,
+                displayImage: GIFT_LOGO,
+                isFreebie: false,
+                isGiftCard: true,
+                customShipping: 0,
+                giftCardData: {
+                    amount: giftSelectedAmount,
+                    senderName: giftSenderData.name,
+                    senderPhone: giftSenderData.phone,
+                    senderEmail: giftSenderData.email,
+                    senderAddress: giftSenderData.address,
+                    recipientName: giftRecipientData.name,
+                    recipientPhone: giftRecipientData.phone,
+                    recipientEmail: giftRecipientData.email,
+                    message: giftRecipientData.message,
+                    deliveryMethod: giftDeliveryMethod
+                }
+            });
+            updateCartDisplay();
+            closeGiftModal();
+            openCart();
         }
 
         // ============================================
@@ -5537,7 +5475,7 @@ productModal.style.display = 'flex';
 
             const giftDiscountApplied = appliedGiftCard ? Math.min(appliedGiftCard.remainingAmount, subtotal + shippingCost) : 0;
 
-            const orderRef = await db.collection('orders').add({
+              const orderRef = await db.collection('orders').add({
                 customerName: name,
                 customerEmail: email,
                 customerPhone: phone,
@@ -5568,6 +5506,16 @@ productModal.style.display = 'flex';
                 paypalOrderId: orderPaymentMeta.paypalOrderId,
                 orderNotes: document.getElementById('order-notes').value.trim() || null,
             });
+
+            // יצירת שוברי מתנה שנרכשו כפריט בעגלה (אם יש)
+            const purchasedGiftCards = cart.filter(item => item.isGiftCard && item.giftCardData);
+            for (const giftItem of purchasedGiftCards) {
+                try {
+                    await createGiftCardRecord(giftItem.giftCardData, orderPaymentMeta);
+                } catch (e) {
+                    console.error('Error creating gift card from cart item:', e);
+                }
+            }
 
             // עדכון יתרת שובר המתנה אם נוצל
             if (appliedGiftCard && giftDiscountApplied > 0) {
@@ -5678,7 +5626,7 @@ productModal.style.display = 'flex';
             closeCart();
         }
 
-        function renderPayPalButton() {
+function renderPayPalButton() {
             const container = document.getElementById('paypal-button-container');
             if (!container) return;
             
@@ -5686,11 +5634,46 @@ productModal.style.display = 'flex';
             
             if (cart.length === 0) return;
 
-            // ===== מצב אדמין: כפתור "שלח הזמנה" במקום PayPal =====
+            // ===== טוטל 0 ש"ח (למשל בזכות נקודות/קופון/שובר): כפתור "שלח הזמנה" לכל לקוח =====
+            if (total <= 0) {
+                const freeOrderBtn = document.createElement('button');
+                freeOrderBtn.type = 'button';
+                freeOrderBtn.textContent = '📦 שלח הזמנה';
+                freeOrderBtn.style.cssText = `
+                    width: 100%;
+                    background: #28a745;
+                    color: #fff;
+                    border: none;
+                    padding: 14px;
+                    border-radius: 50px;
+                    font-size: 1.05em;
+                    font-weight: 800;
+                    cursor: pointer;
+                    font-family: 'Heebo', Arial, sans-serif;
+                    box-shadow: 0 4px 14px rgba(40,167,69,0.4);
+                    transition: background 0.2s, transform 0.15s;
+                `;
+                freeOrderBtn.addEventListener('click', async () => {
+                    freeOrderBtn.disabled = true;
+                    freeOrderBtn.textContent = 'שולח הזמנה...';
+                    try {
+                        await finalizeOrder({ paymentType: 'free_order', paypalOrderId: null });
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert("אירעה שגיאה בתהליך שליחת ההזמנה. נסה שוב.");
+                        freeOrderBtn.disabled = false;
+                        freeOrderBtn.textContent = '📦 שלח הזמנה';
+                    }
+                });
+                container.appendChild(freeOrderBtn);
+                return;
+            }
+
+            // ===== מצב אדמין: כפתור "שלח הזמנה" במקום PayPal (לסכום > 0) =====
             if (isAdminCheckoutActive()) {
                 const adminBtn = document.createElement('button');
                 adminBtn.type = 'button';
-                adminBtn.textContent = '📦 שלח הזמנה';
+                adminBtn.textContent = 'שלח הזמנה';
                 adminBtn.style.cssText = `
                     width: 100%;
                     background: #28a745;
