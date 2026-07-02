@@ -54,7 +54,8 @@
 header {
     background: #222;
     color: #fff;
-    padding: 45px 40px;
+    padding: 70px 40px;
+    min-height: 220px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -69,8 +70,15 @@ header {
 header img {
     width: 150px !important;
     height: auto !important;
-    margin: 0 auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate3d(-50%, -50%, 0);
+    margin: 0;
     display: block;
+    backface-visibility: hidden;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: auto;
 }
 
 header h1 {
@@ -1575,6 +1583,117 @@ header h1 {
             margin: 0;
         }
 
+        /* ===== Testimonials Carousel ===== */
+        .testimonials-section {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .testimonials-section h2 {
+            text-align: center;
+            color: #dc3545;
+            font-size: 1.8em;
+            margin-bottom: 28px;
+        }
+        .testimonials-viewport {
+            overflow: hidden;
+            width: 100%;
+        }
+        .testimonials-carousel-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .testimonials-arrow {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: #dc3545;
+            color: #fff;
+            font-size: 1.6em;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(220,53,69,0.35);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .testimonials-arrow:hover {
+            background: #c82333;
+            transform: scale(1.08);
+        }
+        @media (max-width: 640px) {
+            .testimonials-arrow { width: 36px; height: 36px; font-size: 1.3em; }
+        }
+        .testimonials-track {
+            display: flex;
+            gap: 22px;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .testimonial-card {
+            flex: 0 0 250px;
+            background: #111;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            display: flex;
+            flex-direction: column;
+        }
+        .testimonial-photo-wrap {
+            background: #fff;
+            padding: 14px;
+        }
+        .testimonial-photo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 14px;
+            display: block;
+        }
+        .testimonial-body {
+            padding: 16px 16px 22px;
+            color: #fff;
+            text-align: center;
+        }
+        .testimonial-text {
+            font-size: 0.95em;
+            line-height: 1.55;
+            color: #eee;
+            min-height: 58px;
+            margin: 0 0 14px 0;
+        }
+        .testimonial-stars {
+            background: #222;
+            display: inline-flex;
+            gap: 3px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            margin-bottom: 12px;
+        }
+        .testimonial-stars span {
+            color: #444;
+            font-size: 1.1em;
+            line-height: 1;
+        }
+        .testimonial-stars span.filled {
+            color: #f5a623;
+        }
+        .testimonial-name {
+            display: inline-block;
+            background: #555;
+            color: #eee;
+            font-size: 0.85em;
+            padding: 5px 16px;
+            border-radius: 50px;
+        }
+        @media (max-width: 640px) {
+            .testimonial-card { flex-basis: 200px; }
+            .testimonial-photo { height: 160px; }
+        }
+
         .terms-section {
             text-align: center;
             padding: 20px 0;
@@ -1605,6 +1724,7 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 8px;
+    overflow: hidden;
 }
 
         #club-toggle-button:hover {
@@ -1612,8 +1732,41 @@ header h1 {
             transform: scale(1.05);
         }
 
-        .club-icon {
+.club-icon {
             font-size: 1.2em;
+            position: relative;
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-inline-end: 4px;
+        }
+
+        .club-icon-img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate3d(-50%, -50%, 0);
+            z-index: 0;
+            backface-visibility: hidden;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: auto;
+        }
+
+        .club-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-icon-img {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+            vertical-align: middle;
+            display: inline-block;
         }
 
         #club-modal {
@@ -2670,7 +2823,7 @@ header h1 {
 
     <!-- CLUB TOGGLE BUTTON (desktop only) -->
     <button id="club-toggle-button">
-        <span class="club-icon">⭐</span>
+        <span class="club-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
         <span class="club-text">מועדון VIP</span>
     </button>
 
@@ -2680,7 +2833,7 @@ header h1 {
             <div class="club-modal-header">
                 <button class="close-club-modal" type="button">&times;</button>
                 <h2>
-                    <span>⭐</span>
+                    <span><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
                     <span id="club-modal-title">מועדון VIP</span>
                 </h2>
             </div>
@@ -2754,9 +2907,9 @@ header h1 {
                             <div class="points-value">שווי: <span id="member-points-value">0.00</span> ₪</div>
                         </div>
                         <div style="text-align: center; color: #666; font-size: 0.95em;">
-                            <p>🎁 צבור 1% נקודות מכל קנייה</p>
-                            <p>💰 כל נקודה שווה 1₪</p>
-                            <p>✨ מינימום שימוש: 10 נקודות</p>
+                            <p>צבור 1% נקודות מכל קנייה</p>
+                            <p>כל נקודה שווה 1₪</p>
+                            <p>מינימום שימוש: 10 נקודות</p>
                         </div>
                     </div>
 
@@ -2870,11 +3023,11 @@ header h1 {
     <div id="gift-banner-section" style="max-width:1200px;margin:30px auto 0;padding:0 20px;">
         <div id="gift-banner" style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:22px;padding:26px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:0 8px 28px rgba(0,0,0,0.25);">
             <div style="flex:1;min-width:240px;">
-                <div style="color:#ffd700;font-weight:800;font-size:1.15em;margin-bottom:6px;">🎁 רוצים לפנק מישהו?</div>
+                <div style="color:#ffd700;font-weight:800;font-size:1.15em;margin-bottom:6px;">רוצים לפנק מישהו?</div>
                 <div style="color:rgba(255,255,255,0.75);font-size:0.95em;">שלחו לו שובר מתנה של VIP Shirts!</div>
             </div>
             <button id="open-gift-modal-btn" style="background:#dc3545;color:#fff;border:none;padding:14px 32px;border-radius:50px;font-weight:800;font-size:1.05em;cursor:pointer;font-family:'Heebo',Arial,sans-serif;box-shadow:0 6px 18px rgba(220,53,69,0.45);transition:transform 0.2s,box-shadow 0.2s;flex-shrink:0;">
-                🛍️ רכישת שובר מתנה
+                רכישת שובר מתנה
             </button>
         </div>
     </div>
@@ -2918,7 +3071,7 @@ header h1 {
 
             <div style="text-align: left; margin-top: 8px;">
                 <button id="clear-cart-btn" onclick="clearCart()" style="background: none; border: none; color: #999; font-size: 0.85em; cursor: pointer; padding: 4px 8px; text-decoration: underline;">
-                    🗑 נקה עגלה
+                    נקה עגלה
                 </button>
             </div>
             
@@ -2953,7 +3106,7 @@ header h1 {
 
             <div class="checkout-section" id="checkout-section">
                 <div class="checkout-section-title">
-                    <span>💳</span>
+                    <span></span>
                     <span>השלמת פרטים ותשלום</span>
                 </div>
 
@@ -3025,8 +3178,8 @@ header h1 {
                     </div>
                     
                     <div class="terms-agreement">
-                        ⏱️ זמן משלוח מוערך: 3 שבועות<br>
-                        📋 בביצוע התשלום אני מאשר/ת את <a href="terms.html" target="_blank" style="color: #dc3545; font-weight: bold;">התקנון</a>
+                        זמן משלוח מוערך: 3 שבועות<br>
+                        בביצוע התשלום אני מאשר/ת את <a href="terms.html" target="_blank" style="color: #dc3545; font-weight: bold;">התקנון</a>
                     </div>
 
                     <div id="paypal-button-container"></div>
@@ -3135,7 +3288,7 @@ header h1 {
                     <div class="gift-summary-box" id="gift-summary-box"></div>
                     <div class="gift-nav-buttons">
                         <button class="gift-btn gift-btn-back" data-back="3">→ חזרה</button>
-                        <button class="gift-btn gift-btn-next" id="gift-step4-next">הוסף לעגלה 🛒</button>
+                        <button class="gift-btn gift-btn-next" id="gift-step4-next">הוסף לעגלה</button>
                     </div>
                 </div>
 
@@ -3146,9 +3299,9 @@ header h1 {
                         <h3 style="color:#28a745;margin-bottom:10px;">השובר נוצר בהצלחה!</h3>
                         <p style="color:#666;margin-bottom:18px;" id="gift-success-text"></p>
                         <div class="gift-link-reveal" id="gift-link-reveal-box" style="display:none;">
-                            <div class="warn">⚠️ שמרו קישור זה! הוא לא יוצג שוב</div>
+                            <div class="warn">שמרו קישור זה! הוא לא יוצג שוב</div>
                             <input type="text" id="gift-final-link" readonly>
-                            <button class="gift-btn gift-btn-next" id="gift-copy-final-link" style="width:100%;">📋 העתק קישור</button>
+                            <button class="gift-btn gift-btn-next" id="gift-copy-final-link" style="width:100%;">העתק קישור</button>
                         </div>
                         <button class="gift-btn gift-btn-next" id="gift-finish-btn" style="width:100%;margin-top:10px;">סגור</button>
                     </div>
@@ -3196,6 +3349,18 @@ header h1 {
         </div>
     </div>
     
+    <!-- Testimonials Section -->
+    <div class="testimonials-section" id="testimonials-section" style="display:none;">
+        <h2>לקוחות ממליצים</h2>
+        <div class="testimonials-carousel-wrap">
+            <button class="testimonials-arrow testimonials-arrow-right" id="testimonials-arrow-right" aria-label="הבא" type="button">‹</button>
+            <div class="testimonials-viewport">
+                <div class="testimonials-track" id="testimonials-track"></div>
+            </div>
+            <button class="testimonials-arrow testimonials-arrow-left" id="testimonials-arrow-left" aria-label="הקודם" type="button">›</button>
+        </div>
+    </div>
+
     <!-- Contact Section -->
     <div class="contact-section">
         <h2>צור קשר</h2>
@@ -3268,7 +3433,7 @@ header h1 {
             <span class="nav-badge" id="mob-cart-badge">0</span>
         </button>
         <button class="mobile-nav-btn" id="mob-club-btn" onclick="openClubModal(); setMobileActive('mob-club-btn')">
-            <span class="nav-icon">⭐</span>
+            <span class="nav-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="nav-icon-img"></span>
             <span>מועדון</span>
         </button>
     </div>
@@ -3576,20 +3741,14 @@ function openCart() {
             const clubButton = document.getElementById('club-toggle-button');
             if (currentClubMember) {
                 clubButton.innerHTML = `
-                    <span class="club-icon">👤</span>
+                    <span class="club-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
                     <span class="club-text">${currentClubMember.name.split(' ')[0]}</span>
                 `;
             } else {
                 clubButton.innerHTML = `
-                    <span class="club-icon">⭐</span>
+                    <span class="club-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
                     <span class="club-text">מועדון VIP</span>
                 `;
-            }
-            // Update mobile club button icon
-            const mobClubBtn = document.getElementById('mob-club-btn');
-            if (mobClubBtn) {
-                const icon = mobClubBtn.querySelector('.nav-icon');
-                if (icon) icon.textContent = currentClubMember ? '👤' : '⭐';
             }
         }
 
@@ -3698,7 +3857,7 @@ async function loadMemberOrders() {
             const orderHTML = `
                 <div class="club-order-item">
                     <div class="club-order-header">
-                        <span class="club-order-date">📅 ${orderDate}</span>
+                        <span class="club-order-date">${orderDate}</span>
                         <span class="club-order-total">₪${amount}</span>
                     </div>
                     <div class="club-order-items">${itemsText}</div>
@@ -4035,7 +4194,7 @@ function addGiftCardToCart() {
             const GIFT_LOGO = 'https://vipshirts.ftp.sh/logo.png';
             cart.push({
                 id: 'giftcard-' + Date.now(),
-                name: '🎁 שובר מתנה',
+                name: 'שובר מתנה',
                 image: GIFT_LOGO,
                 quantity: 1,
                 price: giftSelectedAmount,
@@ -4538,7 +4697,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
             resultsBox.innerHTML = '';
 
             if (matched.length === 0) {
-                resultsBox.innerHTML = `<div class="search-no-results">😕 לא נמצאו תוצאות עבור "<strong>${query}</strong>"</div>`;
+                resultsBox.innerHTML = `<div class="search-no-results">לא נמצאו תוצאות עבור "<strong>${query}</strong>"</div>`;
                 resultsBox.classList.add('open');
                 return;
             }
@@ -5044,7 +5203,7 @@ function updateCartDisplay() {
             `;
 
               if (couponDiscount > 0) {
-                const discountLabel = appliedGiftCard ? '🎁 שובר מתנה:' : 'הנחת קופון:';
+                const discountLabel = appliedGiftCard ? 'שובר מתנה:' : 'הנחת קופון:';
                 totalsHTML += `
                 <div class="total-row" style="color: #28a745;">
                     <span>${discountLabel}</span>
@@ -5685,7 +5844,7 @@ if (emailSent) {
                         <p style="color: #555; margin-bottom: 8px;">תודה לך, ${name}!</p>
                         <p style="color: #555; margin-bottom: 20px;">סך הכל: <strong>${total.toFixed(2)} ₪</strong></p>
                         <div style="background: #fff5e6; border: 1px solid #ffd54f; border-radius: 10px; padding: 15px; margin-bottom: 20px;">
-                            <p style="color: #d35400; font-weight: 600; margin-bottom: 5px;">⚠️ שגיאה בשליחת הקבלה למייל</p>
+                            <p style="color: #d35400; font-weight: 600; margin-bottom: 5px;">שגיאה בשליחת הקבלה למייל</p>
                             <p style="color: #666; font-size: 0.9em;">מעביר אותך לחשבונית בעוד...</p>
                         </div>
                         <div style="font-size: 3em; font-weight: 900; color: #dc3545;" id="countdown-num">3</div>
@@ -5747,7 +5906,7 @@ function renderPayPalButton() {
             if (total <= 0) {
                 const freeOrderBtn = document.createElement('button');
                 freeOrderBtn.type = 'button';
-                freeOrderBtn.textContent = '📦 שלח הזמנה';
+                freeOrderBtn.textContent = 'שלח הזמנה';
                 freeOrderBtn.style.cssText = `
                     width: 100%;
                     background: #28a745;
@@ -5771,7 +5930,7 @@ function renderPayPalButton() {
                         console.error('Error:', error);
                         alert("אירעה שגיאה בתהליך שליחת ההזמנה. נסה שוב.");
                         freeOrderBtn.disabled = false;
-                        freeOrderBtn.textContent = '📦 שלח הזמנה';
+                        freeOrderBtn.textContent = 'שלח הזמנה';
                     }
                 });
                 container.appendChild(freeOrderBtn);
@@ -5806,7 +5965,7 @@ function renderPayPalButton() {
                         console.error('Error:', error);
                         alert("אירעה שגיאה בתהליך שליחת ההזמנה. נסה שוב.");
                         adminBtn.disabled = false;
-                        adminBtn.textContent = '📦 שלח הזמנה';
+                        adminBtn.textContent = 'שלח הזמנה';
                     }
                 });
                 container.appendChild(adminBtn);
@@ -6063,7 +6222,7 @@ function makeShirtBtn(shirtCfg, teamName) {
 
             widget.innerHTML = `
                 <div style="text-align:center;">
-                    <div class="mw-upcoming-label">⚽ המשחק הבא · ${matchTimeStr}</div>
+                    <div class="mw-upcoming-label">המשחק הבא · ${matchTimeStr}</div>
                 </div>
                 <div class="mw-teams">
                     <div class="mw-team">
@@ -6183,6 +6342,112 @@ async function loadCountdown() {
     } catch(e) { console.error('Countdown error:', e); }
 }
         
+let testimonialsCarouselInterval = null;
+
+async function loadTestimonials() {
+    try {
+        const settingsDoc = await db.collection('Settings').doc('main').get();
+        if (!settingsDoc.exists) return;
+        const data = settingsDoc.data();
+        const testimonialsData = data.Testimonials || [];
+        const section = document.getElementById('testimonials-section');
+        const track = document.getElementById('testimonials-track');
+        const arrowLeft = document.getElementById('testimonials-arrow-right');
+        const arrowRight = document.getElementById('testimonials-arrow-left');
+
+        if (testimonialsCarouselInterval) { clearInterval(testimonialsCarouselInterval); testimonialsCarouselInterval = null; }
+
+        if (!testimonialsData.length) {
+            section.style.display = 'none';
+            return;
+        }
+
+        section.style.display = 'block';
+        track.innerHTML = '';
+
+        function renderCard(t) {
+            const card = document.createElement('div');
+            card.className = 'testimonial-card';
+            const displayName = (t.anonymous || !t.name) ? 'אנונימי' : t.name;
+            const rating = Math.max(1, Math.min(5, parseInt(t.rating) || 5));
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="${i <= rating ? 'filled' : ''}">★</span>`;
+            }
+            card.innerHTML = `
+                <div class="testimonial-photo-wrap">
+                    <img class="testimonial-photo" src="${t.image || 'https://vipshirts.ftp.sh/logo.png'}" alt="${displayName}" loading="lazy">
+                </div>
+                <div class="testimonial-body">
+                    <p class="testimonial-text">${(t.text || '').replace(/</g, '&lt;')}</p>
+                    <div class="testimonial-stars">${stars}</div>
+                    <div class="testimonial-name">${displayName.replace(/</g, '&lt;')}</div>
+                </div>
+            `;
+            return card;
+        }
+
+        const total = testimonialsData.length;
+        const hasMultiple = total > 1;
+
+        if (hasMultiple) {
+            // Triple-render for a seamless infinite loop in both directions
+            for (let copy = 0; copy < 3; copy++) {
+                testimonialsData.forEach(t => track.appendChild(renderCard(t)));
+            }
+        } else {
+            track.appendChild(renderCard(testimonialsData[0]));
+        }
+
+        if (arrowRight) arrowRight.style.display = hasMultiple ? 'flex' : 'none';
+        if (arrowLeft) arrowLeft.style.display = hasMultiple ? 'flex' : 'none';
+
+        if (!hasMultiple) {
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0px)';
+            return;
+        }
+
+        let renderIndex = total; // start at the beginning of the middle copy
+
+        function applyTransform(instant) {
+            const firstCard = track.children[0];
+            const step = firstCard.offsetWidth + 22; // card width + gap
+            track.style.transition = instant ? 'none' : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            track.style.transform = `translateX(${renderIndex * step}px)`;
+        }
+
+        function goNext() {
+            renderIndex++;
+            applyTransform(false);
+            if (renderIndex >= 2 * total) {
+                setTimeout(() => { renderIndex -= total; applyTransform(true); }, 650);
+            }
+        }
+
+        function goPrev() {
+            renderIndex--;
+            applyTransform(false);
+            if (renderIndex <= 0) {
+                setTimeout(() => { renderIndex += total; applyTransform(true); }, 650);
+            }
+        }
+
+        function restartAutoplay() {
+            if (testimonialsCarouselInterval) clearInterval(testimonialsCarouselInterval);
+            testimonialsCarouselInterval = setInterval(goNext, 5000);
+        }
+
+        applyTransform(true);
+        restartAutoplay();
+
+        if (arrowRight) arrowRight.onclick = () => { goNext(); restartAutoplay(); };
+        if (arrowLeft) arrowLeft.onclick = () => { goPrev(); restartAutoplay(); };
+    } catch (error) {
+        console.error('Error loading testimonials:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('products-browse-section').style.display = 'none';
     loadCartFromStorage();
@@ -6190,7 +6455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         loadSettings();
         fetchProducts();
-        await Promise.all([loadAnnouncements(), loadClubMember(), loadCountdown()]);
+        await Promise.all([loadAnnouncements(), loadClubMember(), loadCountdown(), loadTestimonials()]);
     } catch(error) {
         console.error('שגיאת אתחול:', error);
     }
