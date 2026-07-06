@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ביטול דיוור - VIP Shirts</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" as="style" onload="this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap"></noscript>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Heebo', Arial, sans-serif;
+        margin: 0;
+        background: #f4f4f4;
+        color: #333;
+        direction: rtl;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        padding: 40px 32px;
+        max-width: 460px;
+        width: 100%;
+        text-align: center;
+    }
+    .card img {
+        width: 90px;
+        margin-bottom: 20px;
+    }
+    .card h1 {
+        font-size: 1.5em;
+        color: #2c3e50;
+        margin: 0 0 12px;
+    }
+    .card p {
+        color: #666;
+        line-height: 1.6;
+        margin: 0 0 24px;
+    }
+    .form-group {
+        text-align: right;
+        margin-bottom: 18px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #2c3e50;
+    }
+    .form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid #d0d0d0;
+        border-radius: 8px;
+        font-size: 1em;
+        font-family: inherit;
+    }
+    .btn {
+        display: inline-block;
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.05em;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+        font-family: inherit;
+    }
+    .btn-danger {
+        background: #dc3545;
+        color: #fff;
+    }
+    .btn-danger:hover { background: #c82333; }
+    .btn-danger:disabled { background: #e0a3a9; cursor: not-allowed; }
+    .btn-secondary {
+        background: #f1f1f1;
+        color: #333;
+        margin-top: 10px;
+    }
+    .message {
+        margin-top: 18px;
+        padding: 14px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: none;
+    }
+    .message.success {
+        display: block;
+        background: #e8f5e9;
+        color: #28a745;
+        border: 1px solid #a5d6a7;
+    }
+    .message.error {
+        display: block;
+        background: #fdeef0;
+        color: #dc3545;
+        border: 1px solid #f5b5bd;
+    }
+    .subscriber-info {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        text-align: right;
+        border: 1px solid #e9ecef;
+    }
+    .subscriber-info div { margin-bottom: 4px; color: #444; }
+    .subscriber-info strong { color: #2c3e50; }
+    .loader {
+        color: #999;
+    }
+    a.home-link {
+        display: inline-block;
+        margin-top: 22px;
+        color: #dc3545;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    a.home-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <img src="https://vipshirts.ftp.sh/logo.png" alt="VIP Shirts">
+    <h1>ביטול הרשמה לדיוור</h1>
+    <div id="cancel-content">
+        <p class="loader">טוען...</p>
+    </div>
+    <div id="cancel-message" class="message"></div>
+    <a class="home-link" href="index.html">חזרה לאתר</a>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLHENaXTeorjL87sExB1EJrH7mrEnNYOA",
+        authDomain: "timetable-titus.firebaseapp.com",
+        projectId: "timetable-titus",
+        storageBucket: "timetable-titus.firebasestorage.app",
+        messagingSenderId: "199146911555",
+        appId: "1:199146911555:web:5d9436d716dfc6de7361f6",
+        measurementId: "G-JQ02VEC325"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const contentEl = document.getElementById('cancel-content');
+    const messageEl = document.getElementById('cancel-message');
+
+    function showMessage(text, type) {
+        messageEl.textContent = text;
+        messageEl.className = 'message ' + type;
+    }
+
+    function renderConfirmButton(docId, email) {
+        contentEl.innerHTML = `
+            <div class="subscriber-info">
+                <div><strong>אימייל:</strong> ${email}</div>
+            </div>
+            <p>לחיצה על הכפתור תסיר אותך מרשימת התפוצה של המבצעים והעדכונים שלנו.</p>
+            <button class="btn btn-danger" id="confirm-cancel-btn">ביטול דיוור</button>
+        `;
+        document.getElementById('confirm-cancel-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('confirm-cancel-btn');
+            btn.disabled = true;
+            btn.textContent = 'מבטל...';
+            try {
+                await db.collection('mailing_list').doc(docId).update({
+                    subscribed: false,
+                    unsubscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                contentEl.innerHTML = '';
+                showMessage('הוסרת בהצלחה מרשימת התפוצה. לא תקבל/י יותר עדכונים ומבצעים.', 'success');
+            } catch (error) {
+                console.error(error);
+                btn.disabled = false;
+                btn.textContent = 'ביטול דיוור';
+                showMessage('אירעה שגיאה, נסה/י שוב.', 'error');
+            }
+        });
+    }
+
+    function renderSearchForm() {
+        contentEl.innerHTML = `
+            <div class="form-group">
+                <label for="search-email">כתובת אימייל</label>
+                <input type="email" id="search-email" placeholder="הזן/י את כתובת האימייל שלך" required>
+            </div>
+            <button class="btn btn-danger" id="search-email-btn">חפש/י</button>
+        `;
+        document.getElementById('search-email-btn').addEventListener('click', async () => {
+            const email = document.getElementById('search-email').value.trim();
+            if (!email) return;
+            const btn = document.getElementById('search-email-btn');
+            btn.disabled = true;
+            btn.textContent = 'מחפש...';
+            try {
+                const snapshot = await db.collection('mailing_list').where('email', '==', email).limit(1).get();
+                btn.disabled = false;
+                btn.textContent = 'חפש/י';
+                if (snapshot.empty) {
+                    showMessage('לא נמצאה הרשמה לדיוור עם כתובת האימייל הזו.', 'error');
+                    return;
+                }
+                messageEl.className = 'message';
+                const doc = snapshot.docs[0];
+                const data = doc.data();
+                if (data.subscribed === false) {
+                    contentEl.innerHTML = '';
+                    showMessage('כתובת האימייל הזו כבר הוסרה מרשימת התפוצה.', 'success');
+                    return;
+                }
+                renderConfirmButton(doc.id, data.email);
+            } catch (error) {
+                console.error(error);
+                btn.disabled = false;
+                btn.textContent = 'חפש/י';
+                showMessage('אירעה שגיאה, נסה/י שוב.', 'error');
+            }
+        });
+    }
+
+    async function init() {
+        const params = new URLSearchParams(window.location.search);
+        const mailingId = params.get('id');
+
+        if (mailingId) {
+            try {
+                const doc = await db.collection('mailing_list').doc(mailingId).get();
+                if (!doc.exists) {
+                    renderSearchForm();
+                    showMessage('הקישור אינו תקין. ניתן לחפש לפי כתובת אימייל.', 'error');
+                    return;
+                }
+                const data = doc.data();
+                if (data.subscribed === false) {
+                    contentEl.innerHTML = '';
+                    showMessage('כתובת האימייל הזו כבר הוסרה מרשימת התפוצה.', 'success');
+                    return;
+                }
+                renderConfirmButton(doc.id, data.email);
+            } catch (error) {
+                console.error(error);
+                renderSearchForm();
+            }
+        } else {
+            renderSearchForm();
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
