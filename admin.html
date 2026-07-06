@@ -1052,6 +1052,7 @@
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body>
     <div id="login-overlay">
@@ -1077,6 +1078,7 @@
     <div class="menu-item" data-section="orders">הזמנות</div>
     <div class="menu-item" data-section="leads">פניות</div>
     <div class="menu-item" data-section="customers">מועדון לקוחות</div>
+    <div class="menu-item" data-section="mailing">דיוור</div>
     <div class="menu-item" data-section="giftcards">שוברים</div>
     <div class="menu-item" data-section="testimonials">לקוחות ממליצים</div>
     <div class="menu-item" data-section="bulk-edit">עריכה מרובה</div>
@@ -1245,7 +1247,38 @@
 
                 <div id="customers-list"><p>טוען לקוחות...</p></div>
             </div>
-        
+
+<!-- דיוור -->
+<div class="content-section" id="mailing-section">
+    <div class="content-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <h2>ניהול דיוור</h2>
+        <button class="btn btn-danger" id="open-send-message-btn">✉️ שלח הודעה</button>
+    </div>
+
+    <div class="search-container">
+        <input type="text" id="mailing-search" placeholder="חיפוש לפי שם, אימייל או טלפון...">
+        <button class="btn btn-primary" id="search-mailing-btn">חפש</button>
+        <button class="btn btn-secondary" id="clear-mailing-search-btn">נקה</button>
+    </div>
+
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <div style="background:#e8f5e9;border:1px solid #a5d6a7;border-radius:8px;padding:12px 20px;">
+            <div style="font-size:0.82em;color:#388e3c;font-weight:600;">רשומים לדיוור</div>
+            <div id="mailing-stat-subscribed" style="font-size:1.4em;font-weight:800;color:#2c3e50;">0</div>
+        </div>
+        <div style="background:#fde8ea;border:1px solid #dc3545;border-radius:8px;padding:12px 20px;">
+            <div style="font-size:0.82em;color:#c0392b;font-weight:600;">ביטלו דיוור</div>
+            <div id="mailing-stat-unsubscribed" style="font-size:1.4em;font-weight:800;color:#2c3e50;">0</div>
+        </div>
+    </div>
+
+    <h3 style="color:#2c3e50;margin-bottom:12px;">רשומים לדיוור</h3>
+    <div id="mailing-list-active"><p>טוען נתוני דיוור...</p></div>
+
+    <h3 style="color:#2c3e50;margin:30px 0 12px;">ביטלו את הדיוור</h3>
+    <div id="mailing-list-cancelled"><p>טוען...</p></div>
+</div>
+
 <!-- שוברי מתנה -->
 <div class="content-section" id="giftcards-section">
     <div class="content-header"><h2>ניהול שוברי מתנה</h2></div>
@@ -1621,6 +1654,96 @@
             <div id="customer-leads-list"></div>
         </div>
     </div>
+
+    <!-- מודאל עריכת פרופיל דיוור -->
+    <div id="edit-mailing-modal" class="modal">
+        <div class="modal-content" style="max-width:480px;">
+            <span class="close-button" onclick="document.getElementById('edit-mailing-modal').classList.remove('active')">&times;</span>
+            <h3>עריכת פרופיל דיוור</h3>
+            <div id="edit-mailing-form-container"></div>
+        </div>
+    </div>
+
+    <!-- מודאל שליחת הודעת דיוור -->
+    <div id="send-message-modal" class="modal">
+        <div class="modal-content" style="max-width:720px;">
+            <span class="close-button" onclick="document.getElementById('send-message-modal').classList.remove('active')">&times;</span>
+            <h3>שליחת הודעת דיוור</h3>
+
+            <div class="form-group">
+                <label>נמענים:</label>
+                <select id="mailing-recipients-filter" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid #d0d0d0;font-family:inherit;">
+                    <option value="all">כולם (רשומים לדיוור)</option>
+                    <option value="club">חברי מועדון בלבד</option>
+                    <option value="specific">בחירה ידנית</option>
+                </select>
+            </div>
+
+            <div id="mailing-recipients-specific" style="display:none;max-height:180px;overflow-y:auto;border:1px solid #e9ecef;border-radius:8px;padding:10px;margin-bottom:15px;background:#f8f9fa;"></div>
+
+            <div id="mailing-recipients-count" style="margin-bottom:15px;color:#666;font-size:0.9em;"></div>
+
+            <div class="form-group">
+                <label for="mailing-subject">כותרת ההודעה:</label>
+                <input type="text" id="mailing-subject" placeholder="לדוגמה: מבצע קיץ חדש!" style="width:100%;padding:10px;border-radius:8px;border:1.5px solid #d0d0d0;font-family:inherit;">
+            </div>
+
+            <div class="form-group">
+                <label>תוכן ההודעה:</label>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;background:#f1f1f1;padding:8px;border-radius:8px 8px 0 0;">
+                    <button type="button" class="btn btn-dark" id="mailing-bold-btn" style="padding:6px 12px;font-weight:900;">B</button>
+                    <select id="mailing-fontsize-select" style="padding:6px;border-radius:6px;border:1px solid #ccc;">
+                        <option value="2">רגיל</option>
+                        <option value="4">בינוני</option>
+                        <option value="5">גדול</option>
+                        <option value="6">גדול מאוד</option>
+                    </select>
+                    <button type="button" class="btn btn-secondary" id="mailing-insert-banner-btn" style="padding:6px 12px;">🖼️ הוסף באנר מוצר</button>
+                </div>
+                <div id="mailing-editor" contenteditable="true" style="min-height:180px;border:1.5px solid #d0d0d0;border-radius:0 0 8px 8px;padding:14px;font-family:inherit;background:#fff;"></div>
+            </div>
+
+            <div id="mailing-send-feedback" style="margin:10px 0;font-weight:600;"></div>
+
+            <button class="btn btn-danger" id="send-mailing-btn" style="width:100%;padding:13px;font-size:1.05em;">שלח הודעה</button>
+        </div>
+    </div>
+
+    <!-- מודאל בחירת מוצר לבאנר בהודעת דיוור -->
+    <div id="mailing-product-modal" class="modal">
+        <div class="modal-content" style="max-width:640px;">
+            <span class="close-button" onclick="document.getElementById('mailing-product-modal').classList.remove('active')">&times;</span>
+            <h3 style="margin-bottom:16px;">הוסף באנר מוצר להודעה</h3>
+
+            <div id="mpm-step-select">
+                <div class="search-container" style="margin-bottom:16px;">
+                    <input type="text" id="mpm-product-search" placeholder="חיפוש מוצר לפי שם...">
+                </div>
+                <div id="mpm-product-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-height:400px;overflow-y:auto;"></div>
+            </div>
+
+            <div id="mpm-step-options" style="display:none;">
+                <button type="button" class="btn btn-secondary" id="mpm-back-btn" style="margin-bottom:16px;">← חזרה לרשימת מוצרים</button>
+
+                <div style="display:flex;align-items:center;gap:14px;background:#f8f9fa;border-radius:10px;padding:14px;margin-bottom:20px;border:1px solid #e9ecef;">
+                    <img id="mpm-product-img" src="" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:2px solid #ddd;">
+                    <div>
+                        <div id="mpm-product-name" style="font-weight:700;font-size:1.1em;color:#2c3e50;"></div>
+                        <div id="mpm-product-price" style="color:#dc3545;font-weight:600;margin-top:4px;"></div>
+                    </div>
+                </div>
+
+                <div id="mpm-options-container" style="margin-bottom:18px;"></div>
+
+                <div style="background:#f8f9fa;border-radius:10px;padding:16px;margin-bottom:18px;border:1px solid #e9ecef;">
+                    <div style="font-weight:700;color:#2c3e50;margin-bottom:10px;font-size:0.95em;">תצוגה מקדימה של הבאנר:</div>
+                    <div id="mpm-banner-preview" style="background:#fff;border-radius:8px;border:1px solid #eee;"></div>
+                </div>
+
+                <button class="btn btn-danger" id="mpm-insert-btn" style="width:100%;padding:13px;font-size:1.05em;">➕ הוסף באנר להודעה</button>
+            </div>
+        </div>
+    </div>
     
 <!-- מודאל עריכת שובר מתנה -->
 <div id="edit-giftcard-modal" class="modal">
@@ -1788,6 +1911,7 @@ async function onSuccessfulLogin() {
         await fetchOrders();
         await fetchContactLeads();
         await fetchCustomers();
+        await fetchMailingList();
         await fetchGiftCards();
         await loadShippingSettings();
         await loadCoupons();
@@ -1854,6 +1978,7 @@ const menuItems = document.querySelectorAll('.menu-item');
             contentSections.forEach(cs => cs.classList.remove('active'));
             document.getElementById(`${section}-section`).classList.add('active');
             if (section === 'giftcards') fetchGiftCards(currentGiftCardSearchTerm);
+            if (section === 'mailing') fetchMailingList(currentMailingSearchTerm);
         });
     });
 
@@ -4528,6 +4653,517 @@ async function deleteCustomer(customerId) {
             alert('שגיאה במחיקת לקוח');
         }
     }
+
+// ============================================
+// MAILING LIST MANAGEMENT
+// ============================================
+const mailingSearchInput = document.getElementById('mailing-search');
+const searchMailingBtn = document.getElementById('search-mailing-btn');
+const clearMailingSearchBtn = document.getElementById('clear-mailing-search-btn');
+const editMailingModal = document.getElementById('edit-mailing-modal');
+const sendMessageModal = document.getElementById('send-message-modal');
+let currentMailingSearchTerm = '';
+let allMailingSubscribers = [];
+
+searchMailingBtn.addEventListener('click', () => {
+    currentMailingSearchTerm = mailingSearchInput.value.trim().toLowerCase();
+    fetchMailingList(currentMailingSearchTerm);
+});
+clearMailingSearchBtn.addEventListener('click', () => {
+    mailingSearchInput.value = '';
+    currentMailingSearchTerm = '';
+    fetchMailingList();
+});
+mailingSearchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        currentMailingSearchTerm = mailingSearchInput.value.trim().toLowerCase();
+        fetchMailingList(currentMailingSearchTerm);
+    }
+});
+
+async function fetchMailingList(searchTerm = '') {
+    const activeContainer = document.getElementById('mailing-list-active');
+    const cancelledContainer = document.getElementById('mailing-list-cancelled');
+    activeContainer.innerHTML = '<p>טוען נתוני דיוור...</p>';
+    cancelledContainer.innerHTML = '<p>טוען...</p>';
+
+    try {
+        const snapshot = await db.collection('mailing_list').get();
+        let subscribers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Cross-reference club membership by email
+        const clubSnapshot = await db.collection('ClubMembers').get();
+        const clubByEmail = {};
+        clubSnapshot.docs.forEach(doc => {
+            const data = doc.data();
+            if (data.email) clubByEmail[data.email.toLowerCase()] = doc.id;
+        });
+        subscribers = subscribers.map(sub => ({
+            ...sub,
+            resolvedClubMemberId: sub.clubMemberId || (sub.email ? clubByEmail[sub.email.toLowerCase()] : null) || null
+        }));
+
+        if (searchTerm) {
+            subscribers = subscribers.filter(sub => {
+                const name = (sub.name || '').toLowerCase();
+                const email = (sub.email || '').toLowerCase();
+                const phone = (sub.phone || '').toLowerCase();
+                return name.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm);
+            });
+        }
+
+        allMailingSubscribers = subscribers;
+
+        const active = subscribers.filter(s => s.subscribed !== false);
+        const cancelled = subscribers.filter(s => s.subscribed === false);
+
+        document.getElementById('mailing-stat-subscribed').textContent = active.length;
+        document.getElementById('mailing-stat-unsubscribed').textContent = cancelled.length;
+
+        renderMailingGroup(activeContainer, active, true, searchTerm);
+        renderMailingGroup(cancelledContainer, cancelled, false, searchTerm);
+
+    } catch (error) {
+        console.error('Error fetching mailing list:', error);
+        activeContainer.innerHTML = '<p style="color:red;">שגיאה בטעינת נתוני הדיוור.</p>';
+        cancelledContainer.innerHTML = '';
+    }
+}
+
+function renderMailingGroup(container, list, isActive, searchTerm) {
+    if (list.length === 0) {
+        container.innerHTML = searchTerm
+            ? '<p>לא נמצאו רשומות התואמות לחיפוש.</p>'
+            : (isActive ? '<p>אין רשומים לדיוור.</p>' : '<p>אף אחד לא ביטל את הדיוור.</p>');
+        return;
+    }
+
+    container.innerHTML = '';
+    list.forEach(sub => {
+        const createdAt = sub.createdAt ? new Date(sub.createdAt.toDate()).toLocaleDateString('he-IL') : 'לא ידוע';
+        const card = document.createElement('div');
+        card.classList.add('order-card');
+        card.style.cursor = 'default';
+
+        const clubBadge = sub.resolvedClubMemberId
+            ? `<button class="btn btn-secondary btn-view-club-profile" data-club-id="${sub.resolvedClubMemberId}" onclick="event.stopPropagation()" style="margin-top:6px;">👤 חבר מועדון - צפה בפרופיל</button>`
+            : '';
+
+        card.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:start;gap:20px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:200px;">
+                    <strong style="font-size:1.15em;color:#2c3e50;">${sub.name || 'ללא שם'}</strong>
+                    <p style="margin-top:8px;"><strong>מזהה דיוור:</strong> <span style="font-family:monospace;font-size:0.85em;color:#666;">${sub.mailingId || sub.id}</span></p>
+                    <p><strong>אימייל:</strong> ${sub.email || 'לא ידוע'}</p>
+                    <p><strong>טלפון:</strong> ${sub.phone || 'לא הוזן'}</p>
+                    <p><strong>תאריך הרשמה:</strong> ${createdAt}</p>
+                    ${clubBadge}
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;min-width:140px;">
+                    ${isActive ? `
+                        <button class="btn btn-dark btn-edit-mailing" data-mailing-id="${sub.id}" onclick="event.stopPropagation()">ערוך פרופיל</button>
+                        <button class="btn btn-danger btn-cancel-mailing" data-mailing-id="${sub.id}" onclick="event.stopPropagation()">בטל דיוור</button>
+                    ` : `
+                        <button class="btn btn-success btn-resubscribe-mailing" data-mailing-id="${sub.id}" onclick="event.stopPropagation()">שחזר הרשמה</button>
+                    `}
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+
+    container.querySelectorAll('.btn-view-club-profile').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelector('.menu-item[data-section="customers"]').click();
+            setTimeout(() => openEditCustomerModal(btn.dataset.clubId), 200);
+        });
+    });
+
+    container.querySelectorAll('.btn-edit-mailing').forEach(btn => {
+        btn.addEventListener('click', () => openEditMailingModal(btn.dataset.mailingId));
+    });
+
+    container.querySelectorAll('.btn-cancel-mailing').forEach(btn => {
+        btn.addEventListener('click', () => cancelMailingSubscriber(btn.dataset.mailingId));
+    });
+
+    container.querySelectorAll('.btn-resubscribe-mailing').forEach(btn => {
+        btn.addEventListener('click', () => resubscribeMailingSubscriber(btn.dataset.mailingId));
+    });
+}
+
+async function cancelMailingSubscriber(mailingId) {
+    if (!confirm('לבטל את הדיוור עבור לקוח זה?')) return;
+    try {
+        await db.collection('mailing_list').doc(mailingId).update({
+            subscribed: false,
+            unsubscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await fetchMailingList(currentMailingSearchTerm);
+    } catch (error) {
+        console.error('Error cancelling mailing subscriber:', error);
+        alert('שגיאה בביטול הדיוור');
+    }
+}
+
+async function resubscribeMailingSubscriber(mailingId) {
+    try {
+        await db.collection('mailing_list').doc(mailingId).update({
+            subscribed: true,
+            resubscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await fetchMailingList(currentMailingSearchTerm);
+    } catch (error) {
+        console.error('Error resubscribing mailing subscriber:', error);
+        alert('שגיאה בשחזור ההרשמה');
+    }
+}
+
+async function openEditMailingModal(mailingId) {
+    try {
+        const doc = await db.collection('mailing_list').doc(mailingId).get();
+        if (!doc.exists) { alert('רשומה לא נמצאה'); return; }
+        const data = doc.data();
+        const container = document.getElementById('edit-mailing-form-container');
+        container.innerHTML = `
+            <div class="form-group">
+                <label>שם מלא:</label>
+                <input type="text" id="edit-mailing-name" value="${data.name || ''}">
+            </div>
+            <div class="form-group">
+                <label>אימייל:</label>
+                <input type="email" id="edit-mailing-email" value="${data.email || ''}">
+            </div>
+            <div class="form-group">
+                <label>טלפון:</label>
+                <input type="tel" id="edit-mailing-phone" value="${data.phone || ''}">
+            </div>
+            <button class="btn btn-success" id="save-mailing-btn" style="width:100%;margin-top:10px;">שמור שינויים</button>
+            <button class="btn btn-danger" id="modal-cancel-mailing-btn" style="width:100%;margin-top:10px;">בטל דיוור ללקוח זה</button>
+        `;
+        document.getElementById('save-mailing-btn').addEventListener('click', async () => {
+            try {
+                await db.collection('mailing_list').doc(mailingId).update({
+                    name: document.getElementById('edit-mailing-name').value.trim(),
+                    email: document.getElementById('edit-mailing-email').value.trim(),
+                    phone: document.getElementById('edit-mailing-phone').value.trim()
+                });
+                alert('✓ הפרופיל עודכן בהצלחה!');
+                editMailingModal.classList.remove('active');
+                await fetchMailingList(currentMailingSearchTerm);
+            } catch (error) {
+                console.error('Error updating mailing profile:', error);
+                alert('שגיאה בעדכון הפרופיל');
+            }
+        });
+        document.getElementById('modal-cancel-mailing-btn').addEventListener('click', async () => {
+            editMailingModal.classList.remove('active');
+            await cancelMailingSubscriber(mailingId);
+        });
+        editMailingModal.classList.add('active');
+    } catch (error) {
+        console.error('Error opening mailing edit modal:', error);
+        alert('שגיאה בטעינת הפרופיל');
+    }
+}
+
+// ===== שליחת הודעת דיוור =====
+const SITE_BASE_URL = 'https://vipshirts.ftp.sh';
+const MAILING_EMAILJS_PUBLIC_KEY = 'E4AqisF7OUebNLzVB';
+const MAILING_EMAILJS_SERVICE_ID = 'service_av4ta2b';
+const MAILING_EMAILJS_TEMPLATE_ID = 'VIPDIVOR';
+if (window.emailjs) { emailjs.init(MAILING_EMAILJS_PUBLIC_KEY); }
+
+document.getElementById('open-send-message-btn').addEventListener('click', async () => {
+    document.getElementById('mailing-subject').value = '';
+    document.getElementById('mailing-editor').innerHTML = '';
+    document.getElementById('mailing-send-feedback').textContent = '';
+    document.getElementById('mailing-recipients-filter').value = 'all';
+    document.getElementById('mailing-recipients-specific').style.display = 'none';
+
+    if (allMailingSubscribers.length === 0 || currentMailingSearchTerm) {
+        await fetchMailingList();
+    }
+
+    populateSpecificRecipients();
+    updateRecipientsCount();
+    sendMessageModal.classList.add('active');
+});
+
+document.getElementById('mailing-recipients-filter').addEventListener('change', (e) => {
+    document.getElementById('mailing-recipients-specific').style.display = e.target.value === 'specific' ? 'block' : 'none';
+    updateRecipientsCount();
+});
+
+function populateSpecificRecipients() {
+    const container = document.getElementById('mailing-recipients-specific');
+    const activeSubs = allMailingSubscribers.filter(s => s.subscribed !== false && s.email);
+    if (activeSubs.length === 0) {
+        container.innerHTML = '<p style="color:#999;margin:0;">אין רשומים לדיוור.</p>';
+        return;
+    }
+    container.innerHTML = activeSubs.map(sub => `
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;">
+            <input type="checkbox" class="mailing-specific-checkbox" value="${sub.email}">
+            <span>${sub.name || 'ללא שם'} (${sub.email})</span>
+        </label>
+    `).join('');
+    container.querySelectorAll('.mailing-specific-checkbox').forEach(cb => {
+        cb.addEventListener('change', updateRecipientsCount);
+    });
+}
+
+function getSelectedRecipientEmails() {
+    const filter = document.getElementById('mailing-recipients-filter').value;
+    const activeSubs = allMailingSubscribers.filter(s => s.subscribed !== false && s.email);
+    if (filter === 'all') {
+        return activeSubs.map(s => s.email);
+    }
+    if (filter === 'club') {
+        return activeSubs.filter(s => s.resolvedClubMemberId).map(s => s.email);
+    }
+    // specific
+    return Array.from(document.querySelectorAll('.mailing-specific-checkbox:checked')).map(cb => cb.value);
+}
+
+function updateRecipientsCount() {
+    const emails = getSelectedRecipientEmails();
+    document.getElementById('mailing-recipients-count').textContent = `נמענים: ${emails.length}`;
+}
+
+document.getElementById('mailing-bold-btn').addEventListener('click', () => {
+    document.getElementById('mailing-editor').focus();
+    document.execCommand('bold');
+});
+
+document.getElementById('mailing-fontsize-select').addEventListener('change', (e) => {
+    document.getElementById('mailing-editor').focus();
+    document.execCommand('fontSize', false, e.target.value);
+});
+
+document.getElementById('mailing-insert-banner-btn').addEventListener('click', () => {
+    openMailingProductModal();
+});
+
+// ===== מודאל בחירת מוצר לבאנר בהודעת דיוור =====
+let _mpmSelectedProductId = null;
+let _mpmSelectedOptions = {};
+
+function openMailingProductModal() {
+    document.getElementById('mpm-step-select').style.display = 'block';
+    document.getElementById('mpm-step-options').style.display = 'none';
+    document.getElementById('mpm-product-search').value = '';
+    renderMpmProductGrid();
+    document.getElementById('mailing-product-modal').classList.add('active');
+}
+
+function renderMpmProductGrid(searchTerm = '') {
+    const grid = document.getElementById('mpm-product-grid');
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = term ? products.filter(p => (p.name || '').toLowerCase().includes(term)) : products;
+
+    if (!filtered || filtered.length === 0) {
+        grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">לא נמצאו מוצרים.</p>';
+        return;
+    }
+
+    grid.innerHTML = filtered.map(p => {
+        const price = getEffectivePrice(p);
+        return `
+            <div class="mpm-product-card" data-product-id="${p.id}" style="cursor:pointer;border:1.5px solid #e9ecef;border-radius:10px;padding:10px;text-align:center;transition:border 0.15s;">
+                <img src="${p.image}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;margin-bottom:8px;">
+                <div style="font-weight:600;font-size:0.88em;color:#2c3e50;margin-bottom:4px;line-height:1.3;">${p.name}</div>
+                <div style="color:#dc3545;font-weight:700;font-size:0.9em;">${price.toFixed(2)} ₪</div>
+            </div>`;
+    }).join('');
+
+    grid.querySelectorAll('.mpm-product-card').forEach(card => {
+        card.addEventListener('click', () => selectMpmProduct(card.dataset.productId));
+        card.addEventListener('mouseenter', () => card.style.borderColor = '#dc3545');
+        card.addEventListener('mouseleave', () => card.style.borderColor = '#e9ecef');
+    });
+}
+
+document.getElementById('mpm-product-search').addEventListener('input', (e) => {
+    renderMpmProductGrid(e.target.value);
+});
+
+document.getElementById('mpm-back-btn').addEventListener('click', () => {
+    document.getElementById('mpm-step-select').style.display = 'block';
+    document.getElementById('mpm-step-options').style.display = 'none';
+});
+
+function selectMpmProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    _mpmSelectedProductId = productId;
+    _mpmSelectedOptions = {};
+
+    document.getElementById('mpm-product-img').src = product.image;
+    document.getElementById('mpm-product-name').textContent = product.name;
+    const effectivePrice = getEffectivePrice(product);
+    document.getElementById('mpm-product-price').textContent = effectivePrice.toFixed(2) + ' ₪';
+
+    const container = document.getElementById('mpm-options-container');
+    container.innerHTML = '';
+
+    if (product.customFields && product.customFields.length > 0) {
+        const title = document.createElement('div');
+        title.style.cssText = 'font-weight:700;color:#2c3e50;margin-bottom:12px;font-size:0.95em;';
+        title.textContent = 'בחר אפשרויות להצגה בבאנר (אופציונלי):';
+        container.appendChild(title);
+
+        product.customFields.forEach(field => {
+            const group = document.createElement('div');
+            group.className = 'form-group';
+            group.style.marginBottom = '12px';
+
+            const label = document.createElement('label');
+            label.textContent = field.name + ':';
+            label.style.cssText = 'display:block;margin-bottom:6px;font-weight:600;color:#555;font-size:0.92em;';
+            group.appendChild(label);
+
+            if (field.type === 'select') {
+                const select = document.createElement('select');
+                select.style.cssText = 'width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:0.95em;';
+                select.innerHTML = '<option value="">— לא להציג —</option>';
+                (field.options || []).forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt.value;
+                    o.textContent = opt.value + (opt.extraPrice > 0 ? ` (+${opt.extraPrice.toFixed(2)}₪)` : '');
+                    select.appendChild(o);
+                });
+                select.addEventListener('change', () => {
+                    if (select.value) _mpmSelectedOptions[field.name] = select.value;
+                    else delete _mpmSelectedOptions[field.name];
+                    updateMpmPreview(product);
+                });
+                group.appendChild(select);
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'הזן ' + field.name + ' (ריק = לא להציג)';
+                input.style.cssText = 'width:100%;padding:10px;border:2px solid #ddd;border-radius:6px;font-size:0.95em;';
+                input.addEventListener('input', () => {
+                    if (input.value.trim()) _mpmSelectedOptions[field.name] = input.value.trim();
+                    else delete _mpmSelectedOptions[field.name];
+                    updateMpmPreview(product);
+                });
+                group.appendChild(input);
+            }
+
+            container.appendChild(group);
+        });
+    } else {
+        container.innerHTML = '<p style="color:#888;font-size:0.92em;">למוצר זה אין אפשרויות נוספות.</p>';
+    }
+
+    updateMpmPreview(product);
+
+    document.getElementById('mpm-step-select').style.display = 'none';
+    document.getElementById('mpm-step-options').style.display = 'block';
+}
+
+function buildMailingBannerHtml(product) {
+    const price = getEffectivePrice(product);
+    const productLink = `${SITE_BASE_URL}/${'#product:' + encodeURIComponent(product.name)}${
+        Object.keys(_mpmSelectedOptions).length > 0
+            ? '?' + Object.entries(_mpmSelectedOptions).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&')
+            : ''
+    }`;
+    const optionsLine = Object.entries(_mpmSelectedOptions).length > 0
+        ? `<div style="color:#666;font-size:0.92em;margin-bottom:10px;">${Object.entries(_mpmSelectedOptions).map(([k, v]) => `${k}: ${v}`).join(' | ')}</div>`
+        : '';
+
+    return `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;background:#f8f9fa;border-radius:10px;margin:16px 0;overflow:hidden;border:1px solid #eee;">
+        <tr>
+            <td style="padding:20px;text-align:center;">
+                <img src="${product.image}" alt="${product.name}" style="max-width:220px;width:100%;border-radius:8px;display:block;margin:0 auto 14px;">
+                <div style="font-weight:700;font-size:1.15em;color:#2c3e50;margin-bottom:6px;">${product.name}</div>
+                ${optionsLine}
+                <div style="color:#dc3545;font-weight:800;font-size:1.2em;margin-bottom:16px;">${price.toFixed(2)} ₪</div>
+                <a href="${productLink}" target="_blank" style="background:#dc3545;color:#ffffff;text-decoration:none;font-weight:700;padding:12px 32px;border-radius:8px;display:inline-block;">לצפייה במוצר</a>
+            </td>
+        </tr>
+    </table>`;
+}
+
+function updateMpmPreview(product) {
+    document.getElementById('mpm-banner-preview').innerHTML = buildMailingBannerHtml(product);
+}
+
+document.getElementById('mpm-insert-btn').addEventListener('click', () => {
+    const product = products.find(p => p.id === _mpmSelectedProductId);
+    if (!product) return;
+    const bannerHtml = buildMailingBannerHtml(product);
+    const editor = document.getElementById('mailing-editor');
+    editor.innerHTML += bannerHtml;
+    document.getElementById('mailing-product-modal').classList.remove('active');
+});
+
+document.getElementById('mailing-product-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('mailing-product-modal')) {
+        document.getElementById('mailing-product-modal').classList.remove('active');
+    }
+});
+
+document.getElementById('send-mailing-btn').addEventListener('click', async () => {
+    const subject = document.getElementById('mailing-subject').value.trim();
+    const bodyHtml = document.getElementById('mailing-editor').innerHTML.trim();
+    const feedback = document.getElementById('mailing-send-feedback');
+    const emails = getSelectedRecipientEmails();
+
+    if (!subject) { feedback.style.color = '#dc3545'; feedback.textContent = 'יש להזין כותרת להודעה.'; return; }
+    if (!bodyHtml) { feedback.style.color = '#dc3545'; feedback.textContent = 'יש להזין תוכן להודעה.'; return; }
+    if (emails.length === 0) { feedback.style.color = '#dc3545'; feedback.textContent = 'לא נבחרו נמענים.'; return; }
+
+    if (!confirm(`לשלוח את ההודעה ל-${emails.length} נמענים?`)) return;
+
+    const sendBtn = document.getElementById('send-mailing-btn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'שולח...';
+    feedback.style.color = '#666';
+    feedback.textContent = 'שולח הודעה...';
+
+    try {
+        const templateParams = {
+            to_email: emails.join(','),
+            subject: subject,
+            message_html: bodyHtml,
+            logo_url: 'https://vipshirts.ftp.sh/logo.png',
+            unsubscribe_link: 'https://vipshirts.ftp.sh/canceldivor.html'
+        };
+        await emailjs.send(MAILING_EMAILJS_SERVICE_ID, MAILING_EMAILJS_TEMPLATE_ID, templateParams);
+
+        feedback.style.color = '#28a745';
+        feedback.textContent = `✓ ההודעה נשלחה בהצלחה ל-${emails.length} נמענים!`;
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'שלח הודעה';
+
+        try {
+            await db.collection('MailingCampaigns').add({
+                subject: subject,
+                recipientCount: emails.length,
+                filterUsed: document.getElementById('mailing-recipients-filter').value,
+                sentAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (logErr) { console.warn('Could not log campaign:', logErr); }
+
+        setTimeout(() => { sendMessageModal.classList.remove('active'); }, 1500);
+    } catch (error) {
+        console.error('Error sending mailing message:', error);
+        feedback.style.color = '#dc3545';
+        feedback.textContent = 'שגיאה בשליחת ההודעה. נסה שוב.';
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'שלח הודעה';
+    }
+});
+
+window.addEventListener('click', (event) => {
+    if (event.target === editMailingModal) editMailingModal.classList.remove('active');
+    if (event.target === sendMessageModal) sendMessageModal.classList.remove('active');
+});
 
 // ============================================
 // GIFT CARDS MANAGEMENT
