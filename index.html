@@ -2117,6 +2117,29 @@ header h1 {
             cursor: pointer;
         }
 
+        .join-mailing-checkbox {
+            background: #fdeef0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #dc3545;
+        }
+
+        .join-mailing-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #dc3545;
+        }
+
+        .join-mailing-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
         /* Empty cart message */
         .empty-cart-message {
             text-align: center;
@@ -2885,6 +2908,12 @@ header h1 {
                                 <label>אימות סיסמה:</label>
                                 <input type="password" id="register-password-confirm" required minlength="6">
                             </div>
+                            <div class="join-mailing-checkbox">
+                                <label>
+                                    <input type="checkbox" id="register-join-mailing-checkbox">
+                                    <span>אני רוצה לקבל עדכונים ומבצעים</span>
+                                </label>
+                            </div>
                             <button type="submit" class="club-submit-btn">הירשם למועדון</button>
                         </form>
                     </div>
@@ -2967,6 +2996,7 @@ header h1 {
                             
                             <button type="submit" class="club-submit-btn">עדכן פרטים</button>
                         </form>
+                        <div id="profile-mailing-status" style="margin-top: 15px;"></div>
                         <button class="club-logout-btn" id="club-logout-btn">התנתק</button>
                     </div>
                 </div>
@@ -3161,6 +3191,13 @@ header h1 {
                                   onblur="this.style.borderColor='#d0d0d0'"></textarea>
                     </div>
                     
+                    <div class="join-mailing-checkbox" id="join-mailing-checkbox-wrap">
+                        <label>
+                            <input type="checkbox" id="join-mailing-checkbox">
+                            <span>אני רוצה לקבל עדכונים ומבצעים</span>
+                        </label>
+                    </div>
+
                     <div id="join-club-section" style="display: none;">
                         <div class="join-club-checkbox">
                             <label>
@@ -3811,6 +3848,7 @@ function updateClubModal() {
         modalTitle.textContent = 'מועדון VIP';
     }
     
+    refreshMailingStatusUI();
     updateCheckoutForm();
     updatePointsUsage();
 }
@@ -4359,6 +4397,125 @@ function addGiftCardToCart() {
             }
         });
 
+        // ===== מערכת דיוור (Mailing List) =====
+        async function subscribeToMailingList({ name, email, phone, clubMemberId }) {
+            if (!email) return null;
+            try {
+                const existingSnapshot = await db.collection('mailing_list')
+                    .where('email', '==', email)
+                    .limit(1)
+                    .get();
+
+                if (!existingSnapshot.empty) {
+                    const existingDoc = existingSnapshot.docs[0];
+                    const updateData = {
+                        name: name || existingDoc.data().name || '',
+                        phone: phone || existingDoc.data().phone || ''
+                    };
+                    if (clubMemberId) updateData.clubMemberId = clubMemberId;
+                    if (existingDoc.data().subscribed === false) {
+                        updateData.subscribed = true;
+                        updateData.resubscribedAt = firebase.firestore.FieldValue.serverTimestamp();
+                    }
+                    await existingDoc.ref.update(updateData);
+                    return existingDoc.id;
+                }
+
+                const newSubscriber = {
+                    name: name || '',
+                    email: email,
+                    phone: phone || '',
+                    clubMemberId: clubMemberId || null,
+                    subscribed: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                const subscriberRef = await db.collection('mailing_list').add(newSubscriber);
+                await subscriberRef.update({ mailingId: subscriberRef.id });
+                return subscriberRef.id;
+            } catch (error) {
+                console.error('Error subscribing to mailing list:', error);
+                return null;
+            }
+        }
+
+        async function getMailingDocForEmail(email) {
+            if (!email) return null;
+            try {
+                const snap = await db.collection('mailing_list').where('email', '==', email).limit(1).get();
+                if (snap.empty) return null;
+                return { id: snap.docs[0].id, ...snap.docs[0].data() };
+            } catch (error) {
+                console.error('Error fetching mailing doc:', error);
+                return null;
+            }
+        }
+
+        // מעדכן את מצב הדיוור בממשק: תיבת הדיוור בקופה + כפתור ההפעלה/ביטול בפרופיל האישי
+        async function refreshMailingStatusUI() {
+            const checkoutWrap = document.getElementById('join-mailing-checkbox-wrap');
+            const profileContainer = document.getElementById('profile-mailing-status');
+
+            if (!currentClubMember) {
+                if (checkoutWrap) checkoutWrap.style.display = 'block';
+                if (profileContainer) profileContainer.innerHTML = '';
+                return;
+            }
+
+            const mailingDoc = await getMailingDocForEmail(currentClubMember.email);
+            const isSubscribed = !!(mailingDoc && mailingDoc.subscribed !== false);
+            currentClubMember.mailingDocId = mailingDoc ? mailingDoc.id : null;
+            currentClubMember.mailingSubscribed = isSubscribed;
+
+            // הערה 2: בקופה - אם החבר כבר הסכים לדיוור, לא מציגים את התיבה. אם לא הסכים, כן מציגים.
+            if (checkoutWrap) {
+                checkoutWrap.style.display = isSubscribed ? 'none' : 'block';
+            }
+
+            // הערה 1: בפרופיל האישי - מציגים אפשרות להפעיל/לבטל לפי המצב הנוכחי
+            if (profileContainer) {
+                if (isSubscribed) {
+                    profileContainer.innerHTML = `
+                        <div class="join-mailing-checkbox" style="text-align:center;">
+                            <p style="margin:0 0 10px;">✓ את/ה רשום/ה לקבלת עדכונים ומבצעים</p>
+                            <button type="button" class="club-submit-btn" id="toggle-mailing-btn" style="background:#6c757d;">בטל דיוור</button>
+                        </div>`;
+                } else {
+                    profileContainer.innerHTML = `
+                        <div class="join-mailing-checkbox" style="text-align:center;">
+                            <p style="margin:0 0 10px;color:#666;">לא רשום/ה לקבלת עדכונים ומבצעים</p>
+                            <button type="button" class="club-submit-btn" id="toggle-mailing-btn">הפעל דיוור</button>
+                        </div>`;
+                }
+                document.getElementById('toggle-mailing-btn').addEventListener('click', () => toggleMailingSubscription(isSubscribed));
+            }
+        }
+
+        async function toggleMailingSubscription(currentlySubscribed) {
+            if (!currentClubMember) return;
+            const btn = document.getElementById('toggle-mailing-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'מעדכן...'; }
+            try {
+                if (currentlySubscribed && currentClubMember.mailingDocId) {
+                    await db.collection('mailing_list').doc(currentClubMember.mailingDocId).update({
+                        subscribed: false,
+                        unsubscribedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } else {
+                    await subscribeToMailingList({
+                        name: currentClubMember.name,
+                        email: currentClubMember.email,
+                        phone: currentClubMember.phone,
+                        clubMemberId: currentClubMember.id
+                    });
+                }
+                await refreshMailingStatusUI();
+            } catch (error) {
+                console.error('Error toggling mailing subscription:', error);
+                alert('שגיאה בעדכון הגדרות הדיוור');
+                if (btn) { btn.disabled = false; btn.textContent = currentlySubscribed ? 'בטל דיוור' : 'הפעל דיוור'; }
+            }
+        }
+
         document.getElementById('club-register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -4402,7 +4559,11 @@ function addGiftCardToCart() {
                 updateClubButton();
                 updateClubModal();
                 showClubMessage('נרשמת בהצלחה למועדון VIP!');
-                
+
+                if (document.getElementById('register-join-mailing-checkbox').checked) {
+                    subscribeToMailingList({ name, email, phone, clubMemberId: memberRef.id });
+                }
+
                 document.getElementById('club-register-form').reset();
             } catch (error) {
                 console.error('Registration error:', error);
@@ -5718,6 +5879,10 @@ function closeProductModal() {
                         console.error('Error creating club member:', error);
                     }
                 }
+            }
+
+            if (document.getElementById('join-mailing-checkbox').checked) {
+                subscribeToMailingList({ name, email, phone, clubMemberId });
             }
 
             const pointsEarned = Math.floor(total * 0.01);
