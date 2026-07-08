@@ -1665,22 +1665,38 @@ header h1 {
             min-height: 58px;
             margin: 0 0 14px 0;
         }
-        .testimonial-stars {
-            background: #222;
-            display: inline-flex;
-            gap: 3px;
-            padding: 6px 14px;
-            border-radius: 50px;
-            margin-bottom: 12px;
-        }
-        .testimonial-stars span {
-            color: #444;
-            font-size: 1.1em;
-            line-height: 1;
-        }
-        .testimonial-stars span.filled {
-            color: #f5a623;
-        }
+.testimonial-stars {
+    background: #222;
+    display: inline-flex;
+    gap: 3px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    margin-bottom: 12px;
+    direction: ltr;
+}
+.testimonial-stars .star-wrap {
+    position: relative;
+    display: inline-block;
+    font-size: 1.1em;
+    line-height: 1;
+    width: 1em;
+    height: 1em;
+}
+.testimonial-stars .star-bg {
+    color: #444;
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+}
+.testimonial-stars .star-fg {
+    color: #f5a623;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
         .testimonial-name {
             display: inline-block;
             background: #555;
@@ -6529,27 +6545,28 @@ async function loadTestimonials() {
         section.style.display = 'block';
         track.innerHTML = '';
 
-        function renderCard(t) {
-            const card = document.createElement('div');
-            card.className = 'testimonial-card';
-            const displayName = (t.anonymous || !t.name) ? 'אנונימי' : t.name;
-            const rating = Math.max(1, Math.min(5, parseInt(t.rating) || 5));
-            let stars = '';
-            for (let i = 1; i <= 5; i++) {
-                stars += `<span class="${i <= rating ? 'filled' : ''}">★</span>`;
-            }
-            card.innerHTML = `
-                <div class="testimonial-photo-wrap">
-                    <img class="testimonial-photo" src="${t.image || 'https://vipshirts.ftp.sh/logo.png'}" alt="${displayName}" loading="lazy">
-                </div>
-                <div class="testimonial-body">
-                    <p class="testimonial-text">${(t.text || '').replace(/</g, '&lt;')}</p>
-                    <div class="testimonial-stars">${stars}</div>
-                    <div class="testimonial-name">${displayName.replace(/</g, '&lt;')}</div>
-                </div>
-            `;
-            return card;
-        }
+function renderCard(t) {
+    const card = document.createElement('div');
+    card.className = 'testimonial-card';
+    const displayName = (t.anonymous || !t.name) ? 'אנונימי' : t.name;
+    const rating = Math.max(0, Math.min(5, parseFloat(t.rating) || 5));
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        const fillPercent = Math.max(0, Math.min(100, (rating - (i - 1)) * 100));
+        stars += `<span class="star-wrap"><span class="star-bg">★</span><span class="star-fg" style="width:${fillPercent}%;">★</span></span>`;
+    }
+    card.innerHTML = `
+        <div class="testimonial-photo-wrap">
+            <img class="testimonial-photo" src="${t.image || 'https://vipshirts.ftp.sh/logo.png'}" alt="${displayName}" loading="lazy">
+        </div>
+        <div class="testimonial-body">
+            <p class="testimonial-text">${(t.text || '').replace(/</g, '&lt;')}</p>
+            <div class="testimonial-stars">${stars}</div>
+            <div class="testimonial-name">${displayName.replace(/</g, '&lt;')}</div>
+        </div>
+    `;
+    return card;
+}
 
         const total = testimonialsData.length;
         const hasMultiple = total > 1;
