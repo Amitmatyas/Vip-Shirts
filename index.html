@@ -6549,7 +6549,8 @@ function renderCard(t) {
     const card = document.createElement('div');
     card.className = 'testimonial-card';
     const displayName = (t.anonymous || !t.name) ? 'אנונימי' : t.name;
-    const rating = Math.max(0, Math.min(5, parseFloat(t.rating) || 5));
+    const rawRating = parseFloat(t.rating);
+    const rating = Math.max(0, Math.min(5, isNaN(rawRating) ? 5 : rawRating));
     let stars = '';
     for (let i = 1; i <= 5; i++) {
         const fillPercent = Math.max(0, Math.min(100, (rating - (i - 1)) * 100));
