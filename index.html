@@ -1633,8 +1633,9 @@ header h1 {
             gap: 22px;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .testimonial-card {
+.testimonial-card {
             flex: 0 0 250px;
+            height: 480px;
             background: #111;
             border-radius: 22px;
             overflow: hidden;
@@ -1645,6 +1646,7 @@ header h1 {
         .testimonial-photo-wrap {
             background: #fff;
             padding: 14px;
+            flex-shrink: 0;
         }
         .testimonial-photo {
             width: 100%;
@@ -1657,6 +1659,10 @@ header h1 {
             padding: 16px 16px 22px;
             color: #fff;
             text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
         .testimonial-text {
             font-size: 0.95em;
@@ -1664,15 +1670,26 @@ header h1 {
             color: #eee;
             min-height: 58px;
             margin: 0 0 14px 0;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
         }
 .testimonial-stars {
     background: #222;
     display: inline-flex;
+    align-items: center;
     gap: 3px;
     padding: 6px 14px;
     border-radius: 50px;
     margin-bottom: 12px;
     direction: ltr;
+}
+.testimonial-stars .star-count {
+    color: #f5a623;
+    font-size: 0.85em;
+    font-weight: 700;
+    margin-left: 6px;
 }
 .testimonial-stars .star-wrap {
     position: relative;
@@ -1697,16 +1714,37 @@ header h1 {
     overflow: hidden;
     white-space: nowrap;
 }
-        .testimonial-name {
+              .testimonial-name {
             display: inline-block;
             background: #555;
             color: #eee;
             font-size: 0.85em;
             padding: 5px 16px;
             border-radius: 50px;
+            margin-top: auto;
+        }
+        .testimonial-product-btn {
+            display: inline-block;
+            margin: 14px auto 0;
+            padding: 13px 36px;
+            background: #dc3545;
+            color: #fff;
+            font-family: 'Heebo', Arial, sans-serif;
+            font-weight: 700;
+            font-size: 1.05em;
+            border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 4px 18px rgba(220,53,69,0.45);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .testimonial-product-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(220,53,69,0.55);
         }
         @media (max-width: 640px) {
-            .testimonial-card { flex-basis: 200px; }
+            .testimonial-card { flex-basis: 200px; height: 520px; }
             .testimonial-photo { height: 160px; }
         }
 
@@ -6556,14 +6594,18 @@ function renderCard(t) {
         const fillPercent = Math.max(0, Math.min(100, (rating - (i - 1)) * 100));
         stars += `<span class="star-wrap"><span class="star-bg">★</span><span class="star-fg" style="width:${fillPercent}%;">★</span></span>`;
     }
+    const productBtnHtml = t.productId
+        ? `<button type="button" class="testimonial-product-btn" onclick="openProductModal('${t.productId}')">למוצר</button>`
+        : '';
     card.innerHTML = `
         <div class="testimonial-photo-wrap">
             <img class="testimonial-photo" src="${t.image || 'https://vipshirts.ftp.sh/logo.png'}" alt="${displayName}" loading="lazy">
         </div>
         <div class="testimonial-body">
             <p class="testimonial-text">${(t.text || '').replace(/</g, '&lt;')}</p>
-            <div class="testimonial-stars">${stars}</div>
+            <div class="testimonial-stars">${stars}<span class="star-count">${rating.toFixed(1)}</span></div>
             <div class="testimonial-name">${displayName.replace(/</g, '&lt;')}</div>
+            ${productBtnHtml}
         </div>
     `;
     return card;
