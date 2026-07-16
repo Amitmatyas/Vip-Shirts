@@ -930,6 +930,21 @@
             100% { background-position: 800px 0; }
         }
 
+        /* ===== LOADING OVERLAY (טעינה ראשונית של הפאנל) ===== */
+        @keyframes admin-spin { to { transform: rotate(360deg); } }
+        #admin-loading-overlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.97);
+            z-index: 3000; display: none; align-items: center; justify-content: center;
+            flex-direction: column; gap: 16px; transition: opacity 0.25s ease;
+        }
+        #admin-loading-overlay.active { display: flex; }
+        #admin-loading-overlay .spinner {
+            width: 46px; height: 46px; border-radius: 50%;
+            border: 4px solid #f1d3d3; border-top-color: #dc3545;
+            animation: admin-spin 0.8s linear infinite;
+        }
+        #admin-loading-overlay .loading-text { color: #555; font-size: 0.95em; }
+
         .skeleton {
             background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
             background-size: 800px 100%;
@@ -1050,6 +1065,12 @@
 
         .bulk-progress-text { font-size: 0.9em; color: #666; text-align: center; }
     </style>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
@@ -1064,6 +1085,11 @@
             <button id="login-button">התחבר</button>
             <p id="login-error-message" style="display: none;"></p>
         </div>
+    </div>
+
+    <div id="admin-loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">טוען את פאנל הניהול...</div>
     </div>
 
     <div class="admin-layout" id="admin-layout">
@@ -1336,8 +1362,15 @@
             <input type="text" id="testimonial-name" placeholder="שם הלקוח">
         </div>
         <div class="form-group">
-            <label for="testimonial-product">קישור למוצר (אופציונלי):</label>
-            <select id="testimonial-product"></select>
+            <label>קישור למוצר (אופציונלי):</label>
+            <input type="hidden" id="testimonial-product">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <span id="testimonial-product-name" style="color:#666;">לא נבחר מוצר</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <button type="button" class="btn btn-secondary" id="testimonial-product-select-btn">בחר מוצר</button>
+                <button type="button" class="btn btn-dark" id="testimonial-product-clear-btn" style="display:none;">הסר קישור</button>
+            </div>
         </div>
         <div class="form-group">
             <label><input type="checkbox" id="testimonial-anonymous"> הצג כאנונימי (ללא שם)</label>
@@ -1752,6 +1785,18 @@
     </div>
 </div>
 
+<!-- מודאל בחירת מוצר להמלצת לקוח -->
+<div id="testimonial-product-modal" class="modal">
+    <div class="modal-content" style="max-width:640px;">
+        <span class="close-button" onclick="document.getElementById('testimonial-product-modal').classList.remove('active')">&times;</span>
+        <h3 style="margin-bottom:16px;">בחר מוצר לקישור להמלצה</h3>
+        <div class="search-container" style="margin-bottom:16px;">
+            <input type="text" id="tpm-product-search" placeholder="חיפוש מוצר לפי שם...">
+        </div>
+        <div id="tpm-product-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-height:400px;overflow-y:auto;"></div>
+    </div>
+</div>
+
 <!-- מודאל בניית קישור מוצר -->
 <div id="product-link-modal" class="modal">
     <div class="modal-content" style="max-width:520px;">
@@ -1796,6 +1841,27 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+// מזרז את זמן ההתחברות הראשוני ל-Firestore: מאפשר ל-SDK לזהות אוטומטית
+// את ערוץ התקשורת המהיר ביותר הזמין (WebChannel/long-polling) במקום
+// לבצע רצף בדיקות שעלול לגרום לעיכוב של מספר שניות ברשתות/פרוקסי מסוימים.
+db.settings({ experimentalAutoDetectLongPolling: true, merge: true });
+
+// ===================================================================
+// ===== fetchSettingsMain: מונע קריאות כפולות למסמך ההגדרות =====
+// ===================================================================
+// מספר פונקציות בפאנל קוראות את אותו מסמך Settings/main בו-זמנית
+// בעת הטעינה הראשונית. הפונקציה הבאה ממזגת קריאות מקבילות לבקשת
+// רשת אחת בלבד (Firestore call יחיד במקום כמה קריאות זהות), מה
+// שמזרז משמעותית את הטעינה הראשונית של הפאנל. קריאות שאינן חופפות
+// בזמן ממשיכות לקבל תמיד נתונים עדכניים מהשרת כרגיל.
+let _settingsMainInFlight = null;
+function fetchSettingsMain() {
+    if (_settingsMainInFlight) return _settingsMainInFlight;
+    _settingsMainInFlight = db.collection('Settings').doc('main').get().finally(() => {
+        _settingsMainInFlight = null;
+    });
+    return _settingsMainInFlight;
+}
 
 const IMGBB_API_KEY = '949918f473144748f8dea05705ac165a';
 const ADMIN_USERNAME = 'Imri';
@@ -1897,34 +1963,90 @@ const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const loginErrorMessage = document.getElementById('login-error-message');
 
+// ===================================================================
+// ===== PRELOAD: מתחיל את כל שאילתות ה-DB כבר במסך ההתחברות =====
+// ===================================================================
+// במקום להמתין ללחיצת "התחבר" לפני שפותחים ולו קריאה אחת ל-Firestore,
+// הטעינה מתחילה מיידית ברגע כניסה לעמוד (עוד לפני שהמשתמש הקליד
+// סיסמה). כך, בזמן שהמשתמש מקליד שם משתמש+סיסמה, הנתונים כבר
+// נטענים ברקע - וברוב המקרים כשהוא לוחץ "התחבר" הנתונים כבר מוכנים
+// או כמעט מוכנים, וזמן ההמתנה לאחר ההתחברות מתקצר משמעותית (ולעיתים
+// כמעט מתאפס). הפונקציה מוגנת מפני הרצה כפולה - אם כבר רצה, מחזירים
+// את אותה הבטחה (Promise) הקיימת.
+// ===== שלב קריטי: רק מה שנדרש כדי להציג את הטאב הראשון (קטגוריות) =====
+// זהו החלק היחיד שהגלגל ממתין לו. שאר הנתונים (הזמנות, לקוחות, דיוור
+// וכו') ממשיכים להיטען ברקע אחריו, כך שהמשתמש לא צריך לחכות להם כדי
+// להתחיל לעבוד בפאנל.
+let _criticalPreloadPromise = null;
+function startCriticalPreload() {
+    if (_criticalPreloadPromise) return _criticalPreloadPromise;
+    _criticalPreloadPromise = (async () => {
+        await Promise.all([
+            initializeSettings(),
+            loadAllProducts()
+        ]);
+        await loadCategories();
+    })();
+    return _criticalPreloadPromise;
+}
+
+let _preloadPromise = null;
+function startPreload() {
+    if (_preloadPromise) return _preloadPromise;
+    _preloadPromise = (async () => {
+        // שלב 1: טעינת מוצרים + קטגוריות — נדרש כדי להציג את הטאב
+        // הראשון שנפתח כברירת מחדל.
+        await startCriticalPreload();
+
+        // שלב 2: כל שאר הטעינות (טאבים שעדיין לא נצפים) רצות ברקע
+        // במקביל, בלי לעכב את הצגת הפאנל. קריאות ה-Settings/main
+        // הכפולות בתוכן ממוזגות אוטומטית לבקשת רשת אחת בזכות
+        // fetchSettingsMain.
+        await Promise.allSettled([
+            fetchOrders(),
+            fetchContactLeads(),
+            fetchCustomers(),
+            fetchMailingList(),
+            fetchGiftCards(),
+            loadShippingSettings(),
+            loadCoupons(),
+            loadAnnouncements(),
+            loadTestimonials(),
+            loadFeaturedProducts()
+        ]);
+    })();
+    return _preloadPromise;
+}
+
 // פונקציית עזר להרצת כל הטעינות לאחר התחברות מוצלחת
 async function onSuccessfulLogin() {
     loginOverlay.style.display = 'none';
     adminLayout.classList.add('active');
     loginErrorMessage.style.display = 'none';
+
+    const loadingOverlay = document.getElementById('admin-loading-overlay');
+    loadingOverlay.classList.add('active');
+
     try {
-        await initializeSettings();
-        await loadAllProducts();
-        await loadCategories();
-        await fetchOrders();
-        await fetchContactLeads();
-        await fetchCustomers();
-        await fetchMailingList();
-        await fetchGiftCards();
-        await loadShippingSettings();
-        await loadCoupons();
-        await loadAnnouncements();
-        await loadTestimonials();
-        await loadFeaturedProducts();
+        // אם הטעינה כבר התחילה (כמעט תמיד המצב, כי היא יוצאת לדרך
+        // מרגע כניסה לעמוד) - פשוט ממתינים לה שתסתיים. אם מסיבה כלשהי
+        // עוד לא התחילה, הקריאה הזו תתחיל אותה עכשיו.
+        await startPreload();
+
         setupImageUpload('product-image-file','product-image-preview','product-upload-status','product-image-url','product-image-upload');
     } catch (err) {
         console.error('שגיאה בטעינה:', err);
         alert('שגיאה בטעינת הנתונים: ' + err.message);
+    } finally {
+        loadingOverlay.classList.remove('active');
     }
 }
 
-// בדיקה האם המשתמש כבר מחובר (Auto-login)
+// הפעלת הטעינה המקדימה מיד עם כניסה לעמוד - עוד לפני הזנת סיסמה
 window.addEventListener('DOMContentLoaded', () => {
+    startPreload();
+
+    // בדיקה האם המשתמש כבר מחובר (Auto-login)
     const isLogged = localStorage.getItem('vip_admin_logged');
     if (isLogged === 'true') {
         onSuccessfulLogin();
@@ -1985,7 +2107,7 @@ const menuItems = document.querySelectorAll('.menu-item');
 // ============================================
 async function initializeSettings() {
     try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const settingsDoc = await fetchSettingsMain();
         if (!settingsDoc.exists) {
             await db.collection('Settings').doc('main').set({
                 Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 },
@@ -2004,7 +2126,7 @@ let subCategoryImagesMap = {};
 
 async function loadCategories() {
 try {
-    const settingsDoc = await db.collection('Settings').doc('main').get();
+    const settingsDoc = await fetchSettingsMain();
     if (settingsDoc.exists) {
         const data = settingsDoc.data();
         categories = data.Categories || [];
@@ -2484,18 +2606,6 @@ function updateCouponProductSelect() {
         couponProductSelect.appendChild(option);
     });
 
-    const testimonialProductSelect = document.getElementById('testimonial-product');
-    if (testimonialProductSelect) {
-        const previousValue = testimonialProductSelect.value;
-        testimonialProductSelect.innerHTML = '<option value="">ללא קישור למוצר</option>';
-        products.forEach(product => {
-            const option = document.createElement('option');
-            option.value = product.id;
-            option.textContent = product.name;
-            testimonialProductSelect.appendChild(option);
-        });
-        testimonialProductSelect.value = previousValue;
-    }
 }
 
 async function deleteProductDirect(productId) {
@@ -3021,6 +3131,7 @@ async function fetchOrders(searchTerm = '') {
                     <label style="font-weight: bold; display: block; margin-bottom: 8px;">מצב ההזמנה (רק למנהל):</label>
                     <textarea class="order-status-text" data-order-id="${order.id}">${order.adminStatus || ''}</textarea>
 <button class="btn btn-success complete-order-btn" data-order-id="${order.id}">סמן כהושלם</button>
+<button class="btn btn-secondary resend-invoice-btn" data-order-id="${order.id}" style="margin-top:8px;">שלח חשבונית ללקוח</button>
 <button class="btn btn-secondary" onclick="event.stopPropagation(); navigator.clipboard.writeText(window.location.origin + '/invoice.html#${order.id}').then(() => { this.textContent='✓ הועתק'; setTimeout(()=>{ this.textContent='קישור חשבונית'; },2000); })" style="margin-top:8px;">קישור חשבונית</button>                    </div>
             `;
             orderCard.addEventListener('click', (e) => {
@@ -3040,6 +3151,10 @@ async function fetchOrders(searchTerm = '') {
                     } catch (error) { alert('שגיאה בעדכון ההזמנה'); console.error(error); }
                 }
             });
+            const resendInvoiceBtn = orderCard.querySelector('.resend-invoice-btn');
+            resendInvoiceBtn.addEventListener('click', () => {
+                resendInvoiceEmail(order.id, false);
+            });
             ordersList.appendChild(orderCard);
         });
     } catch (error) { ordersList.innerHTML = '<p style="color: red;">שגיאה בטעינת הזמנות.</p>'; console.error(error); }
@@ -3048,6 +3163,53 @@ async function fetchOrders(searchTerm = '') {
 const orderDetailsModal = document.getElementById('order-details-modal');
 let currentEditingOrderId = null;
 let orderEditMode = false;
+
+// ===================================================================
+// ===== שליחת חשבונית מחדש ללקוח (תוספת תפעולית לפאנל) =====
+// ===================================================================
+// הפיצ'ר עובד אך ורק מול הנתונים והתשתית הקיימים כבר באתר
+// (collection 'orders' + עמוד invoice.html הקיים) ואינו דורש
+// שום שינוי בקוד האתר הראשי.
+
+// כדי להפעיל את שליחת החשבונית באימייל יש ליצור תבנית (Template) חדשה
+// בחשבון ה-EmailJS הקיים (usage זהה לתבנית הדיוור), ולהדביק כאן את
+// מזהה התבנית. עד אז הכפתור יציג הודעה מתאימה במקום לשלוח מייל.
+const INVOICE_EMAILJS_SERVICE_ID = 'service_av4ta2b'; // אותו שירות EmailJS שכבר מוגדר במערכת (ראו קטע "דיוור")
+const INVOICE_EMAILJS_TEMPLATE_ID = ''; // TODO: יש להשלים כאן את מזהה תבנית "שליחת חשבונית" מ-EmailJS
+
+// שליחת חשבונית ללקוח באימייל (שליחה חוזרת לפי בקשת המנהל).
+async function resendInvoiceEmail(orderId, silent) {
+    if (!INVOICE_EMAILJS_TEMPLATE_ID) {
+        if (!silent) alert('כדי להפעיל שליחת חשבונית יש להשלים תחילה את מזהה תבנית ה-EmailJS (INVOICE_EMAILJS_TEMPLATE_ID) בקובץ.');
+        return;
+    }
+    try {
+        const doc = await db.collection('orders').doc(orderId).get();
+        if (!doc.exists) return;
+        const o = doc.data();
+        const itemsText = (o.items || []).map(i => `${i.quantity}x ${i.productName || i.name}${i.isFreebie ? ' (מתנה)' : ''} - ${i.isFreebie ? '0.00' : ((i.price || 0) * (i.quantity || 1)).toFixed(2)}₪`).join('\n');
+        const invoiceUrl = `${window.location.origin}/invoice.html#${orderId}`;
+
+        await emailjs.send(INVOICE_EMAILJS_SERVICE_ID, INVOICE_EMAILJS_TEMPLATE_ID, {
+            email: o.customerEmail,
+            order_id: orderId,
+            customer_name: o.customerName || '',
+            customer_phone: o.customerPhone || '',
+            customer_address: o.customerAddress || '',
+            items_list: itemsText,
+            subtotal: (o.subtotal || 0).toFixed(2),
+            shipping_cost: (o.shippingCost || 0).toFixed(2),
+            coupon_code: o.appliedCoupon || '',
+            total_amount: (o.totalAmount || 0).toFixed(2),
+            invoice_url: invoiceUrl
+        });
+
+        if (!silent) alert('החשבונית נשלחה מחדש ללקוח בהצלחה.');
+    } catch (error) {
+        console.error('Error sending invoice email:', error);
+        if (!silent) alert('שגיאה בשליחת החשבונית.');
+    }
+}
 
 function showOrderDetails(order) {
     currentEditingOrderId = order.id;
@@ -3123,6 +3285,11 @@ function renderOrderModal(order, editMode) {
             </div>` : ''}
             <div style="color:#888;font-size:0.9em;margin-bottom:18px;">תאריך הזמנה: ${orderDate}</div>
 
+            <!-- שליחת חשבונית -->
+            <div style="margin-bottom:12px;">
+                <button id="modal-resend-invoice-btn" class="btn btn-secondary" style="width:100%;padding:12px;">שלח חשבונית ללקוח</button>
+            </div>
+
             <!-- כפתור עריכה -->
             <button id="enter-edit-mode-btn" class="btn btn-dark" style="width:100%;padding:13px;font-size:1.05em;">ערוך הזמנה</button>
         `;
@@ -3131,6 +3298,9 @@ function renderOrderModal(order, editMode) {
         m.querySelector('#enter-edit-mode-btn').addEventListener('click', () => {
             orderEditMode = true;
             renderOrderModal(order, true);
+        });
+        m.querySelector('#modal-resend-invoice-btn').addEventListener('click', () => {
+            resendInvoiceEmail(order.id, false);
         });
 
     } else {
@@ -3741,7 +3911,7 @@ document.getElementById('coupon-product').addEventListener('change', function ()
 
 async function loadCoupons() {
 try {
-    const settingsDoc = await db.collection('Settings').doc('main').get();
+    const settingsDoc = await fetchSettingsMain();
     if (settingsDoc.exists) {
         const data = settingsDoc.data();
         const coupons = data.Coupons || [];
@@ -3850,7 +4020,7 @@ if (!code) { alert('אנא הזן קוד קופון'); return; }
 if (type === 'free_product' && !productId) { alert('אנא בחר מוצר'); return; }
 
 try {
-    const settingsDoc = await db.collection('Settings').doc('main').get();
+    const settingsDoc = await fetchSettingsMain();
     const coupons = settingsDoc.data().Coupons || [];
     coupons[index] = {
         Code: code,
@@ -3885,7 +4055,7 @@ document.getElementById('add-coupon-btn').addEventListener('click', async () => 
     };
 
     try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const settingsDoc = await fetchSettingsMain();
         const coupons = settingsDoc.exists ? (settingsDoc.data().Coupons || []) : [];
         coupons.push(newCoupon);
         await db.collection('Settings').doc('main').update({ Coupons: coupons });
@@ -3903,7 +4073,7 @@ document.getElementById('add-coupon-btn').addEventListener('click', async () => 
 window.deleteCoupon = async function (index) {
     if (!confirm('האם למחוק קופון זה?')) return;
     try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const settingsDoc = await fetchSettingsMain();
         const coupons = settingsDoc.data().Coupons || [];
         coupons.splice(index, 1);
         await db.collection('Settings').doc('main').update({ Coupons: coupons });
@@ -3919,7 +4089,7 @@ let announcements = [];
 
 async function loadAnnouncements() {
 try {
-    const settingsDoc = await db.collection('Settings').doc('main').get();
+    const settingsDoc = await fetchSettingsMain();
     if (settingsDoc.exists) {
         const data = settingsDoc.data();
         announcements = data.Announcements || [];
@@ -4024,7 +4194,7 @@ document.getElementById('testimonial-image-file').addEventListener('change', asy
 
 async function loadTestimonials() {
 try {
-    const settingsDoc = await db.collection('Settings').doc('main').get();
+    const settingsDoc = await fetchSettingsMain();
     if (settingsDoc.exists) {
         const data = settingsDoc.data();
         testimonials = data.Testimonials || [];
@@ -4071,7 +4241,14 @@ try {
                     </div>
                     <div class="form-group">
                         <label>קישור למוצר (אופציונלי):</label>
-                        <select id="testimonial-edit-product-${index}"></select>
+                        <input type="hidden" id="testimonial-edit-product-${index}">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                            <span id="testimonial-edit-product-name-${index}" style="color:#666;">לא נבחר מוצר</span>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" class="btn btn-secondary" id="testimonial-edit-product-select-btn-${index}">בחר מוצר</button>
+                            <button type="button" class="btn btn-dark" id="testimonial-edit-product-clear-btn-${index}" style="display:none;">הסר קישור</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label><input type="checkbox" id="testimonial-edit-anonymous-${index}" ${t.anonymous ? 'checked' : ''}> הצג כאנונימי (ללא שם)</label>
@@ -4084,14 +4261,14 @@ try {
             `;
 list.appendChild(item);
 
-            const editProductSelect = document.getElementById(`testimonial-edit-product-${index}`);
-            editProductSelect.innerHTML = '<option value="">ללא קישור למוצר</option>';
-            products.forEach(product => {
-                const option = document.createElement('option');
-                option.value = product.id;
-                option.textContent = product.name;
-                if (t.productId === product.id) option.selected = true;
-                editProductSelect.appendChild(option);
+            document.getElementById(`testimonial-edit-product-${index}`).value = t.productId || '';
+            updateTestimonialProductDisplay(`testimonial-edit-product-name-${index}`, `testimonial-edit-product-clear-btn-${index}`, products.find(p => p.id === t.productId) || null);
+            document.getElementById(`testimonial-edit-product-select-btn-${index}`).addEventListener('click', () => {
+                openTestimonialProductModal(index);
+            });
+            document.getElementById(`testimonial-edit-product-clear-btn-${index}`).addEventListener('click', () => {
+                document.getElementById(`testimonial-edit-product-${index}`).value = '';
+                updateTestimonialProductDisplay(`testimonial-edit-product-name-${index}`, `testimonial-edit-product-clear-btn-${index}`, null);
             });
 
             document.getElementById(`testimonial-edit-image-file-${index}`).addEventListener('change', async (e) => {                const file = e.target.files[0];
@@ -4173,8 +4350,95 @@ document.getElementById('add-testimonial-btn').addEventListener('click', async (
         document.getElementById('testimonial-image-preview').style.display = 'none';
         document.getElementById('testimonial-image-status').textContent = '';
         document.getElementById('testimonial-product').value = '';
+        updateTestimonialProductDisplay('testimonial-product-name', 'testimonial-product-clear-btn', null);
         await loadTestimonials();
     } catch (error) { console.error('Error adding testimonial:', error); alert('שגיאה בהוספת ההמלצה'); }
+});
+
+document.getElementById('testimonial-product-select-btn').addEventListener('click', () => {
+    openTestimonialProductModal(null);
+});
+document.getElementById('testimonial-product-clear-btn').addEventListener('click', () => {
+    document.getElementById('testimonial-product').value = '';
+    updateTestimonialProductDisplay('testimonial-product-name', 'testimonial-product-clear-btn', null);
+});
+
+// ===== מודאל בחירת מוצר להמלצת לקוח (זהה בעיצובו למודאל בחירת המוצר בדיוור) =====
+let _tpmContext = null; // null = טופס הוספת המלצה, אחרת אינדקס ההמלצה הנערכת
+
+function openTestimonialProductModal(context) {
+    _tpmContext = context;
+    document.getElementById('tpm-product-search').value = '';
+    renderTpmProductGrid();
+    document.getElementById('testimonial-product-modal').classList.add('active');
+}
+
+function renderTpmProductGrid(searchTerm = '') {
+    const grid = document.getElementById('tpm-product-grid');
+    const term = searchTerm.trim().toLowerCase();
+    const filtered = term ? products.filter(p => (p.name || '').toLowerCase().includes(term)) : products;
+
+    if (!filtered || filtered.length === 0) {
+        grid.innerHTML = '<p style="color:#999;grid-column:1/-1;text-align:center;">לא נמצאו מוצרים.</p>';
+        return;
+    }
+
+    grid.innerHTML = filtered.map(p => {
+        const price = getEffectivePrice(p);
+        return `
+            <div class="tpm-product-card" data-product-id="${p.id}" style="cursor:pointer;border:1.5px solid #e9ecef;border-radius:10px;padding:10px;text-align:center;transition:border 0.15s;">
+                <img src="${p.image}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;margin-bottom:8px;">
+                <div style="font-weight:600;font-size:0.88em;color:#2c3e50;margin-bottom:4px;line-height:1.3;">${p.name}</div>
+                <div style="color:#dc3545;font-weight:700;font-size:0.9em;">${price.toFixed(2)} ₪</div>
+            </div>`;
+    }).join('');
+
+    grid.querySelectorAll('.tpm-product-card').forEach(card => {
+        card.addEventListener('click', () => selectTpmProduct(card.dataset.productId));
+        card.addEventListener('mouseenter', () => card.style.borderColor = '#dc3545');
+        card.addEventListener('mouseleave', () => card.style.borderColor = '#e9ecef');
+    });
+}
+
+document.getElementById('tpm-product-search').addEventListener('input', (e) => {
+    renderTpmProductGrid(e.target.value);
+});
+
+function selectTpmProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    if (_tpmContext === null) {
+        document.getElementById('testimonial-product').value = productId;
+        updateTestimonialProductDisplay('testimonial-product-name', 'testimonial-product-clear-btn', product);
+    } else {
+        document.getElementById(`testimonial-edit-product-${_tpmContext}`).value = productId;
+        updateTestimonialProductDisplay(`testimonial-edit-product-name-${_tpmContext}`, `testimonial-edit-product-clear-btn-${_tpmContext}`, product);
+    }
+    document.getElementById('testimonial-product-modal').classList.remove('active');
+}
+
+function updateTestimonialProductDisplay(nameSpanId, clearBtnId, product) {
+    const span = document.getElementById(nameSpanId);
+    const clearBtn = document.getElementById(clearBtnId);
+    if (!span) return;
+    if (product) {
+        span.textContent = product.name;
+        span.style.color = '#2c3e50';
+        span.style.fontWeight = '600';
+        if (clearBtn) clearBtn.style.display = 'inline-block';
+    } else {
+        span.textContent = 'לא נבחר מוצר';
+        span.style.color = '#666';
+        span.style.fontWeight = 'normal';
+        if (clearBtn) clearBtn.style.display = 'none';
+    }
+}
+
+document.getElementById('testimonial-product-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('testimonial-product-modal')) {
+        document.getElementById('testimonial-product-modal').classList.remove('active');
+    }
 });
 
 window.deleteTestimonial = async function(index) {
@@ -4192,7 +4456,7 @@ window.deleteTestimonial = async function(index) {
 // ============================================
 async function loadShippingSettings() {
     try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const settingsDoc = await fetchSettingsMain();
         if (settingsDoc.exists) {
             const data = settingsDoc.data();
             settings = data;
@@ -5742,7 +6006,7 @@ let featuredSelectedIds = new Set();
 
 async function loadFeaturedProducts() {
     try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const settingsDoc = await fetchSettingsMain();
         if (settingsDoc.exists) {
             const data = settingsDoc.data();
             featuredSelectedIds = new Set(data.FeaturedProducts || []);
