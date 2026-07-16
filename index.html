@@ -2228,6 +2228,255 @@ header h1 {
             animation: logoPulse 1.5s infinite;
         }
 
+        /* ===== MYSTERY WHEEL ===== */
+        #wheel-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            z-index: 2600;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(3px);
+        }
+        #wheel-modal.active { display: flex; }
+
+        .wheel-modal-content {
+            background: #fff;
+            border-radius: 22px;
+            max-width: 480px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            position: relative;
+            padding: 24px 22px 26px;
+            text-align: center;
+        }
+
+        .wheel-close-btn {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: #f0f0f0;
+            border: none;
+            color: #dc3545;
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            font-size: 1.4em;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            z-index: 5;
+        }
+        .wheel-close-btn:hover { background: #e5e5e5; }
+
+        .wheel-modal-content h2 {
+            color: #dc3545;
+            margin: 0 0 18px 0;
+            font-size: 1.5em;
+        }
+
+        .wheel-add-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+        .wheel-add-row input {
+            flex: 1;
+            padding: 11px 14px;
+            border: 1.5px solid #d0d0d0;
+            border-radius: 10px;
+            font-size: 0.98em;
+            font-family: inherit;
+            background: #fffafa;
+        }
+        .wheel-add-row input:focus { border-color: #dc3545; outline: none; }
+        .wheel-add-row button {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .wheel-add-row button:hover { background: #c82333; }
+
+        .wheel-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0 auto 10px;
+        }
+
+        .wheel-winner-banner {
+            width: 100%;
+            max-width: 300px;
+            background: linear-gradient(135deg, #222, #111);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        .wheel-winner-label {
+            color: #ffd700;
+            font-size: 0.8em;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .wheel-winner-name {
+            color: #fff;
+            font-size: 1.35em;
+            font-weight: 900;
+            margin-bottom: 12px;
+            word-break: break-word;
+        }
+        .wheel-winner-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .wheel-winner-actions button {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        #wheel-continue-btn { background: #28a745; color: #fff; }
+        #wheel-continue-btn:hover { background: #218838; }
+        #wheel-remove-btn { background: #dc3545; color: #fff; }
+        #wheel-remove-btn:hover { background: #c82333; }
+
+        .wheel-pointer {
+            font-size: 2.2em;
+            color: #dc3545;
+            line-height: 1;
+            margin-bottom: -14px;
+            z-index: 5;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+        }
+
+        .wheel-wrap {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+            border: 7px solid #222;
+            background: #eee;
+            position: relative;
+        }
+        #wheel-svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+            transform-origin: 50% 50%;
+            transition: transform 4.2s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+        .wheel-hub {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 34px; height: 34px;
+            transform: translate(-50%, -50%);
+            background: #222;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        #wheel-spin-btn {
+            margin-top: 20px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 13px 44px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 800;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 16px rgba(220,53,69,0.4);
+            transition: all 0.2s;
+        }
+        #wheel-spin-btn:hover:not(:disabled) { background: #c82333; transform: translateY(-2px); }
+        #wheel-spin-btn:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .wheel-participants-section {
+            margin-top: 26px;
+            text-align: right;
+            border-top: 1px solid #f0f0f0;
+            padding-top: 16px;
+        }
+        .wheel-participants-section h3 {
+            color: #2c3e50;
+            font-size: 1.05em;
+            margin: 0 0 10px 0;
+        }
+        #wheel-participants-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        #wheel-participants-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 4px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        #wheel-participants-list li:last-child { border-bottom: none; }
+        .wheel-participant-name {
+            flex: 1;
+            font-size: 0.95em;
+            color: #333;
+            word-break: break-word;
+        }
+        .wheel-participant-name input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1.5px solid #dc3545;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+        .wheel-participant-edit, .wheel-participant-remove {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.05em;
+            padding: 4px 6px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            transition: background 0.15s;
+        }
+        .wheel-participant-edit:hover { background: #fff5f5; }
+        .wheel-participant-remove:hover { background: #fff5f5; }
+        .wheel-empty-msg {
+            text-align: center;
+            color: #aaa;
+            padding: 14px 0;
+            font-size: 0.92em;
+        }
+
+        @media (max-width: 480px) {
+            .wheel-wrap { width: 230px; height: 230px; }
+            .wheel-modal-content { padding: 20px 14px 20px; }
+        }
+
         /* ================================================================
            ===== PREMIUM MOBILE DESIGN (max-width: 768px) =====
            ================================================================ */
@@ -3514,6 +3763,58 @@ header h1 {
     loading="lazy"
     style="width:auto; max-width:95vw; max-height:85vh; object-fit:contain; border-radius:10px;"
 >
+    </div>
+
+    <!-- ===== גלגל המיסטרי ===== -->
+    <div id="wheel-banner-section" style="display: flex; justify-content: center; margin: 40px auto; padding: 0 20px;">
+        <img 
+            src="https://i.ibb.co/gpfJYws/Gemini-Generated-Image-vr9lm5vr9lm5vr9l.png"
+            alt="גלגל המיסטרי"
+            id="wheel-banner-img"
+            loading="lazy"
+            width="1952"
+            height="544"
+            style="width: 100%; max-width: 700px; height: auto; border-radius: 20px; cursor: pointer; box-shadow: 0 4px 18px rgba(0,0,0,0.13); transition: transform 0.3s ease, box-shadow 0.3s ease;"
+            onmouseover="this.style.transform='translateY(-10px) scale(1.03)'; this.style.boxShadow='0 18px 40px rgba(0,0,0,0.22)'"
+            onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 4px 18px rgba(0,0,0,0.13)'"
+            onclick="openWheelModal()"
+        >
+    </div>
+
+    <!-- ===== מודאל גלגל המיסטרי ===== -->
+    <div id="wheel-modal">
+        <div class="wheel-modal-content">
+            <button class="wheel-close-btn" type="button" id="wheel-close-btn">&times;</button>
+            <h2>גלגל המיסטרי</h2>
+
+            <div class="wheel-add-row">
+                <input type="text" id="wheel-name-input" placeholder="הזן שם...">
+                <button type="button" id="wheel-add-name-btn">הוסף שם</button>
+            </div>
+
+            <div class="wheel-container">
+                <div class="wheel-winner-banner" id="wheel-winner-banner" style="display:none;">
+                    <div class="wheel-winner-label">נבחר/ה:</div>
+                    <div class="wheel-winner-name" id="wheel-winner-name"></div>
+                    <div class="wheel-winner-actions">
+                        <button type="button" id="wheel-continue-btn">המשך לסובב</button>
+                        <button type="button" id="wheel-remove-btn">הסר מהגלגל</button>
+                    </div>
+                </div>
+
+                <div class="wheel-pointer">▼</div>
+                <div class="wheel-wrap">
+                    <svg id="wheel-svg" viewBox="0 0 300 300"></svg>
+                    <div class="wheel-hub"></div>
+                </div>
+                <button type="button" id="wheel-spin-btn">סובב!</button>
+            </div>
+
+            <div class="wheel-participants-section">
+                <h3>משתתפים (<span id="wheel-count">0</span>)</h3>
+                <ul id="wheel-participants-list"></ul>
+            </div>
+        </div>
     </div>
     
     <!-- Terms Link -->
@@ -6687,6 +6988,221 @@ function renderCard(t) {
     }
 }
 
+        // ============================================
+        // MYSTERY WHEEL (גלגל המיסטרי)
+        // ============================================
+        let wheelParticipants = []; // { id, name }
+        let wheelIdCounter = 0;
+        let wheelCurrentRotation = 0;
+        let wheelIsSpinning = false;
+        let wheelPendingWinnerId = null;
+
+        const WHEEL_COLORS = ['#dc3545', '#28a745', '#ffb300', '#007bff', '#8e44ad', '#17a2b8', '#e67e22', '#2c3e50'];
+
+        function openWheelModal() {
+            document.getElementById('wheel-modal').classList.add('active');
+            renderWheel();
+            renderWheelParticipantsList();
+        }
+
+        function closeWheelModal() {
+            document.getElementById('wheel-modal').classList.remove('active');
+        }
+
+        document.getElementById('wheel-close-btn')?.addEventListener('click', closeWheelModal);
+        document.getElementById('wheel-modal')?.addEventListener('mousedown', (e) => {
+            if (e.target.id === 'wheel-modal') closeWheelModal();
+        });
+
+        function addWheelName() {
+            const input = document.getElementById('wheel-name-input');
+            const name = input.value.trim();
+            if (!name) return;
+            wheelParticipants.push({ id: 'w' + (wheelIdCounter++), name });
+            input.value = '';
+            input.focus();
+            renderWheel();
+            renderWheelParticipantsList();
+        }
+
+        document.getElementById('wheel-add-name-btn')?.addEventListener('click', addWheelName);
+        document.getElementById('wheel-name-input')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); addWheelName(); }
+        });
+
+        function removeWheelParticipant(id) {
+            wheelParticipants = wheelParticipants.filter(p => p.id !== id);
+            renderWheel();
+            renderWheelParticipantsList();
+        }
+
+        function startEditWheelParticipant(id) {
+            renderWheelParticipantsList(id);
+        }
+
+        function saveEditWheelParticipant(id, newName) {
+            const trimmed = newName.trim();
+            const p = wheelParticipants.find(p => p.id === id);
+            if (p && trimmed) p.name = trimmed;
+            renderWheel();
+            renderWheelParticipantsList();
+        }
+
+        function renderWheelParticipantsList(editingId = null) {
+            const list = document.getElementById('wheel-participants-list');
+            const countEl = document.getElementById('wheel-count');
+            countEl.textContent = wheelParticipants.length;
+            list.innerHTML = '';
+
+            if (wheelParticipants.length === 0) {
+                list.innerHTML = '<li class="wheel-empty-msg">עדיין לא נוספו משתתפים</li>';
+                return;
+            }
+
+            wheelParticipants.forEach(p => {
+                const li = document.createElement('li');
+                if (editingId === p.id) {
+                    li.innerHTML = `
+                        <div class="wheel-participant-name">
+                            <input type="text" value="${p.name.replace(/"/g, '&quot;')}" id="wheel-edit-input-${p.id}">
+                        </div>
+                        <button type="button" class="wheel-participant-edit" title="שמור">✔️</button>
+                        <button type="button" class="wheel-participant-remove" title="בטל">✖️</button>
+                    `;
+                    const saveBtn = li.querySelector('.wheel-participant-edit');
+                    const cancelBtn = li.querySelector('.wheel-participant-remove');
+                    const editInput = li.querySelector(`#wheel-edit-input-${p.id}`);
+                    saveBtn.addEventListener('click', () => saveEditWheelParticipant(p.id, editInput.value));
+                    cancelBtn.addEventListener('click', () => renderWheelParticipantsList());
+                    editInput.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') { e.preventDefault(); saveEditWheelParticipant(p.id, editInput.value); }
+                        if (e.key === 'Escape') { renderWheelParticipantsList(); }
+                    });
+                } else {
+                    li.innerHTML = `
+                        <div class="wheel-participant-name">${p.name.replace(/</g, '&lt;')}</div>
+                        <button type="button" class="wheel-participant-edit" title="ערוך">✏️</button>
+                        <button type="button" class="wheel-participant-remove" title="הסר">🗑</button>
+                    `;
+                    li.querySelector('.wheel-participant-edit').addEventListener('click', () => startEditWheelParticipant(p.id));
+                    li.querySelector('.wheel-participant-remove').addEventListener('click', () => removeWheelParticipant(p.id));
+                }
+                list.appendChild(li);
+            });
+        }
+
+        function polarToCartesianWheel(cx, cy, r, angleDeg) {
+            const angleRad = (angleDeg - 90) * Math.PI / 180;
+            return { x: cx + r * Math.cos(angleRad), y: cy + r * Math.sin(angleRad) };
+        }
+
+        function describeWheelSlice(cx, cy, r, startAngle, endAngle) {
+            const start = polarToCartesianWheel(cx, cy, r, endAngle);
+            const end = polarToCartesianWheel(cx, cy, r, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? '0' : '1';
+            return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+        }
+
+        function renderWheel() {
+            const svg = document.getElementById('wheel-svg');
+            if (!svg) return;
+            svg.innerHTML = '';
+            const cx = 150, cy = 150, r = 148;
+            const count = wheelParticipants.length;
+
+            if (count === 0) {
+                svg.innerHTML = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#eee" stroke="#ddd" stroke-width="2"/>
+                    <text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="16" fill="#999" font-family="Heebo, Arial, sans-serif">הוסף שמות כדי להתחיל</text>`;
+                return;
+            }
+
+            const sliceAngle = 360 / count;
+            const ns = 'http://www.w3.org/2000/svg';
+
+            wheelParticipants.forEach((p, i) => {
+                const startAngle = i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+                const path = document.createElementNS(ns, 'path');
+                path.setAttribute('d', describeWheelSlice(cx, cy, r, startAngle, endAngle));
+                path.setAttribute('fill', WHEEL_COLORS[i % WHEEL_COLORS.length]);
+                path.setAttribute('stroke', '#fff');
+                path.setAttribute('stroke-width', '2');
+                svg.appendChild(path);
+
+                const midAngle = startAngle + sliceAngle / 2;
+                const textR = r * 0.62;
+                const pos = polarToCartesianWheel(cx, cy, textR, midAngle);
+                const text = document.createElementNS(ns, 'text');
+                text.setAttribute('x', pos.x);
+                text.setAttribute('y', pos.y);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.setAttribute('font-size', count > 10 ? '9' : count > 6 ? '11' : '13');
+                text.setAttribute('font-weight', '700');
+                text.setAttribute('fill', '#fff');
+                text.setAttribute('font-family', 'Heebo, Arial, sans-serif');
+                text.setAttribute('transform', `rotate(${midAngle}, ${pos.x}, ${pos.y})`);
+                let displayName = p.name;
+                if (displayName.length > 12) displayName = displayName.slice(0, 11) + '…';
+                text.textContent = displayName;
+                svg.appendChild(text);
+            });
+        }
+
+        function spinWheel() {
+            if (wheelIsSpinning) return;
+            if (wheelParticipants.length < 2) {
+                alert('הוסף לפחות 2 שמות כדי לסובב את הגלגל');
+                return;
+            }
+
+            wheelIsSpinning = true;
+            document.getElementById('wheel-spin-btn').disabled = true;
+            document.getElementById('wheel-winner-banner').style.display = 'none';
+
+            const count = wheelParticipants.length;
+            const winnerIndex = Math.floor(Math.random() * count);
+            const sliceAngle = 360 / count;
+            const targetCenterAngle = winnerIndex * sliceAngle + sliceAngle / 2;
+            const targetMod = (360 - targetCenterAngle) % 360;
+
+            const currentMod = ((wheelCurrentRotation % 360) + 360) % 360;
+            let delta = (targetMod - currentMod + 360) % 360;
+            const extraSpins = 6;
+            wheelCurrentRotation += extraSpins * 360 + delta;
+
+            const svg = document.getElementById('wheel-svg');
+            svg.style.transform = `rotate(${wheelCurrentRotation}deg)`;
+
+            const onTransitionEnd = () => {
+                svg.removeEventListener('transitionend', onTransitionEnd);
+                wheelIsSpinning = false;
+                document.getElementById('wheel-spin-btn').disabled = false;
+                const winner = wheelParticipants[winnerIndex];
+                if (winner) {
+                    wheelPendingWinnerId = winner.id;
+                    document.getElementById('wheel-winner-name').textContent = winner.name;
+                    document.getElementById('wheel-winner-banner').style.display = 'block';
+                }
+            };
+            svg.addEventListener('transitionend', onTransitionEnd);
+        }
+
+        document.getElementById('wheel-spin-btn')?.addEventListener('click', spinWheel);
+
+        document.getElementById('wheel-continue-btn')?.addEventListener('click', () => {
+            document.getElementById('wheel-winner-banner').style.display = 'none';
+            wheelPendingWinnerId = null;
+        });
+
+        document.getElementById('wheel-remove-btn')?.addEventListener('click', () => {
+            if (wheelPendingWinnerId) {
+                removeWheelParticipant(wheelPendingWinnerId);
+                wheelPendingWinnerId = null;
+            }
+            document.getElementById('wheel-winner-banner').style.display = 'none';
+        });
+
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('products-browse-section').style.display = 'none';
     loadCartFromStorage();
@@ -6725,6 +7241,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rawEncoded = fullUrl.substring(hashIndex + 1);
     const raw = decodeURIComponent(rawEncoded.replace(/%252F/gi, '%2F')).trim();
     if (!raw) return;
+
+    if (raw.toLowerCase() === 'mystery') {
+        openWheelModal();
+        return;
+    }
 
     if (raw.startsWith('category:')) {
         const catName = raw.substring('category:'.length).trim();
