@@ -3860,10 +3860,22 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
            firebase.firestore().settings({
-    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+    cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+    experimentalAutoDetectLongPolling: true
 });
 firebase.firestore().enablePersistence({ synchronizeTabs: true })
     .catch(err => console.warn('Persistence:', err));
+
+// Settings/main is needed by several loaders at startup; merge concurrent reads into one request.
+let _settingsMainInFlight = null;
+function fetchSettingsMain() {
+    if (!_settingsMainInFlight) {
+        _settingsMainInFlight = db.collection('Settings').doc('main').get().finally(() => {
+            _settingsMainInFlight = null;
+        });
+    }
+    return _settingsMainInFlight;
+}
            
         const productsContainer = document.getElementById('products-container');
         const cartItemsList = document.getElementById('cart-items');
@@ -3903,19 +3915,18 @@ let cart = [];
             img.src = url;
         }
 
+        // Only warm the first main product images, a few at a time when the browser is idle.
+        // Preloading every size chart / option image at once saturated the connection and delayed everything else.
         function preloadAllProductImages(productList) {
-            productList.forEach(product => {
-                preloadImage(product.image);
-                if (product.sizeCharts) product.sizeCharts.forEach(preloadImage);
-                if (product.customFields) {
-                    product.customFields.forEach(field => {
-                        if (field.options) field.options.forEach(opt => preloadImage(opt.image));
-                    });
-                }
-            });
-            if (settings && settings.CategoryImages) {
-                Object.values(settings.CategoryImages).forEach(preloadImage);
-            }
+            const urls = productList.map(p => p.image).filter(Boolean).slice(0, 24);
+            const run = () => {
+                urls.splice(0, 4).forEach(preloadImage);
+                if (urls.length) setTimeout(schedule, 400);
+            };
+            const schedule = () => ('requestIdleCallback' in window)
+                ? requestIdleCallback(run, { timeout: 2000 })
+                : setTimeout(run, 300);
+            setTimeout(schedule, 1500);
         }
         let appliedCoupon = null;
         let currentModalProductId = null;
@@ -5100,7 +5111,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
 
         async function loadAnnouncements() {
             try {
-                const settingsDoc = await db.collection('Settings').doc('main').get();
+                const settingsDoc = await fetchSettingsMain();
                 if (settingsDoc.exists) {
                     const data = settingsDoc.data();
                     announcements = data.Announcements || [];
@@ -5514,8 +5525,13 @@ function applySettingsDoc(doc) {
 }
 
 function loadSettings() {
-    return db.collection('Settings').doc('main').get()
-        .then(applySettingsDoc)
+    // Paint from the local cache immediately on repeat visits; the server read below refreshes it.
+    let serverApplied = false;
+    db.collection('Settings').doc('main').get({ source: 'cache' })
+        .then(doc => { if (!serverApplied && doc.exists) applySettingsDoc(doc); })
+        .catch(() => {});
+    return fetchSettingsMain()
+        .then(doc => { serverApplied = true; applySettingsDoc(doc); })
         .catch(err => {
             console.error('Settings error:', err);
             settings = { Shipping: { Method: 'fixed', Value: 30, FreeThreshold: 0 }, Coupons: [], Categories: [], SubCategories: {} };
@@ -5524,29 +5540,45 @@ function loadSettings() {
 }
 
 function fetchProducts() {
+    let lastSignature = '';
+    let deepLinkHandled = false;
+
     const applyProducts = snap => {
-        products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const list = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const signature = JSON.stringify(list);
+        if (signature === lastSignature) return;
+        lastSignature = signature;
+        products = list;
         preloadAllProductImages(products);
         renderFeaturedProducts();
-        handleDeepLink();
+        if (!deepLinkHandled) {
+            deepLinkHandled = true;
+            handleDeepLink();
+        }
     };
 
-    const onError = err => {
-        console.warn('onSnapshot failed, falling back:', err);
-        db.collection('soccer_shirts').get().then(applyProducts).catch(e => {
-            productsContainer.innerHTML = `<div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
-                <div style="font-size:3em;margin-bottom:15px;">⚠️</div>
-                <p style="font-size:1.1em;color:#dc3545;font-weight:bold;">שגיאה בטעינת המוצרים</p>
-                <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">רענן דף</button>
-            </div>`;
+    const showError = () => {
+        productsContainer.innerHTML = `<div style="text-align:center;padding:60px;width:100%;grid-column:1/-1;">
+            <div style="font-size:3em;margin-bottom:15px;">⚠️</div>
+            <p style="font-size:1.1em;color:#dc3545;font-weight:bold;">שגיאה בטעינת המוצרים</p>
+            <button onclick="location.reload()" style="background:#dc3545;color:white;border:none;padding:12px 24px;border-radius:12px;cursor:pointer;font-size:1em;font-weight:bold;">רענן דף</button>
+        </div>`;
+    };
+
+    const ref = db.collection('soccer_shirts');
+    let serverLoaded = false;
+
+    // Repeat visits: show cached products right away, then refresh from the server.
+    ref.get({ source: 'cache' })
+        .then(snap => { if (!serverLoaded && !snap.empty) applyProducts(snap); })
+        .catch(() => {});
+
+    ref.get()
+        .then(snap => { serverLoaded = true; applyProducts(snap); })
+        .catch(err => {
+            console.warn('Products fetch failed:', err);
+            if (!lastSignature) showError();
         });
-    };
-
-    try {
-        db.collection('soccer_shirts').get().then(applyProducts).catch(onError);
-    } catch(e) {
-        onError(e);
-    }
 }
 
 function calculateShipping() {
@@ -6879,7 +6911,7 @@ let testimonialsCarouselInterval = null;
 
 async function loadTestimonials() {
     try {
-        const settingsDoc = await db.collection('Settings').doc('main').get();
+        const settingsDoc = await fetchSettingsMain();
         if (!settingsDoc.exists) return;
         const data = settingsDoc.data();
         const testimonialsData = data.Testimonials || [];

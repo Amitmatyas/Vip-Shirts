@@ -3780,45 +3780,64 @@ const files = Array.from(input.files).slice(0, 10);
 
 if (files.length === 0) return [];
 
-status.textContent = `ממיר ${files.length} תמונות...`;
+status.textContent = `מעלה ${files.length} תמונות...`;
 status.style.color = '#e67e22';
 preview.innerHTML = '';
 
-const base64Images = [];
+// Charts are uploaded to ImgBB and only the URL is stored. Embedding base64 in the product
+// document made every product ~400KB, which every visitor downloaded on page load.
+const urls = [];
 
 for (let i = 0; i < files.length; i++) {
     const file = files[i];
-    // בדיקת גודל - Firestore מגביל מסמך ל-1MB, Base64 מגדיל גודל ב-~33%
-    if (file.size > 500 * 1024) { // 500KB מקסימום לכל תמונה
-        status.textContent = `שגיאה: תמונה ${i+1} גדולה מדי (מקסימום 500KB לתמונה)`;
+    if (file.size > 5 * 1024 * 1024) {
+        status.textContent = `שגיאה: תמונה ${i+1} גדולה מדי (מקסימום 5MB לתמונה)`;
         status.style.color = 'red';
         return [];
     }
-    
-    const base64 = await fileToBase64(file);
-    base64Images.push(base64);
-    
-    // תצוגה מקדימה
-    const img = document.createElement('img');
-    img.src = base64;
-    img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #ddd;';
-    preview.appendChild(img);
+
+    try {
+        const url = await uploadImageToImgBB(file);
+        urls.push(url);
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:6px;border:2px solid #ddd;';
+        preview.appendChild(img);
+    } catch (err) {
+        status.textContent = `שגיאה בהעלאת תמונה ${i+1}`;
+        status.style.color = 'red';
+        return [];
+    }
 }
 
-status.textContent = `✓ ${base64Images.length} תמונות מוכנות`;
+status.textContent = `✓ ${urls.length} תמונות הועלו`;
 status.style.color = '#27ae60';
 
-return base64Images;
+return urls;
 }
     
 document.getElementById('link-order-btn').addEventListener('click', () => { linkOrderModal.classList.add('active'); document.getElementById('order-search-results').innerHTML = ''; });
 
-document.getElementById('order-link-search').addEventListener('input', async (e) => {
+// Orders are loaded once per modal opening and filtered locally, instead of re-reading the whole collection on every keystroke.
+let _linkOrderSearchCache = null;
+let _linkOrderSearchTimer = null;
+document.getElementById('link-order-btn').addEventListener('click', () => { _linkOrderSearchCache = null; });
+
+document.getElementById('order-link-search').addEventListener('input', (e) => {
     const searchTerm = e.target.value.trim().toLowerCase();
+    clearTimeout(_linkOrderSearchTimer);
+    _linkOrderSearchTimer = setTimeout(() => searchOrdersToLink(searchTerm), 250);
+});
+
+async function searchOrdersToLink(searchTerm) {
     if (searchTerm.length < 2) { document.getElementById('order-search-results').innerHTML = ''; return; }
     try {
-        const ordersSnapshot = await db.collection('orders').get();
-        const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(order => {
+        if (!_linkOrderSearchCache) {
+            _linkOrderSearchCache = db.collection('orders').get().then(snap => snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+        const allOrders = await _linkOrderSearchCache;
+        const orders = allOrders.filter(order => {
             const name = (order.customerName || '').toLowerCase();
             const email = (order.customerEmail || '').toLowerCase();
             const phone = (order.customerPhone || '').toLowerCase();
@@ -3834,8 +3853,8 @@ document.getElementById('order-link-search').addEventListener('input', async (e)
             orderItem.addEventListener('click', () => linkLeadToOrder(order.id));
             resultsDiv.appendChild(orderItem);
         });
-    } catch (error) { console.error('Error searching orders:', error); }
-});
+    } catch (error) { _linkOrderSearchCache = null; console.error('Error searching orders:', error); }
+}
 
 async function linkLeadToOrder(orderId) {
     try {
