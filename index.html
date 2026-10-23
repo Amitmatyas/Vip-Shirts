@@ -3163,7 +3163,7 @@ header h1 {
 
     <!-- CLUB TOGGLE BUTTON (desktop only) -->
     <button id="club-toggle-button">
-        <span class="club-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
+        <span class="club-icon"><img src="/account.png" alt="חבר מועדון" class="club-icon-img"></span>
         <span class="club-text">מועדון VIP</span>
     </button>
 
@@ -3838,7 +3838,7 @@ header h1 {
             <span class="nav-badge" id="mob-cart-badge">0</span>
         </button>
         <button class="mobile-nav-btn" id="mob-club-btn" onclick="openClubModal(); setMobileActive('mob-club-btn')">
-            <span class="nav-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="nav-icon-img"></span>
+            <span class="nav-icon"><img src="/account.png" alt="חבר מועדון" class="nav-icon-img"></span>
             <span>מועדון</span>
         </button>
     </div>
@@ -4157,12 +4157,12 @@ function openCart() {
             const clubButton = document.getElementById('club-toggle-button');
             if (currentClubMember) {
                 clubButton.innerHTML = `
-                    <span class="club-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
+                    <span class="club-icon"><img src="/account.png" alt="חבר מועדון" class="club-icon-img"></span>
                     <span class="club-text">${currentClubMember.name.split(' ')[0]}</span>
                 `;
             } else {
                 clubButton.innerHTML = `
-                    <span class="club-icon"><img src="https://vipshirts.ftp.sh/account.png" alt="חבר מועדון" class="club-icon-img"></span>
+                    <span class="club-icon"><img src="/account.png" alt="חבר מועדון" class="club-icon-img"></span>
                     <span class="club-text">מועדון VIP</span>
                 `;
             }
