@@ -3143,7 +3143,7 @@ header h1 {
     </div>
 
 <header>
-    <img src="https://vipshirts.ftp.sh/logo.png" 
+    <img src="/logo.png" 
      alt="VIP Shirts" 
      onclick="showHomePage()" 
      style="cursor:pointer;"
@@ -3689,7 +3689,7 @@ header h1 {
 
     <!-- About Section -->
     <div class="my-about-card">
-    <img src="https://vipshirts.ftp.sh/logo.png" alt="VIP Shirts Logo" class="my-about-logo" width="110" height="110" loading="lazy">
+    <img src="/logo.png" alt="VIP Shirts Logo" class="my-about-logo" width="110" height="110" loading="lazy">
         <div class="my-about-content">
             <h3 class="my-about-title">על VIP Shirts</h3>
             <p class="my-about-text">האתר שלנו נולד מאהבה אמיתית לכדורגל
@@ -5360,7 +5360,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
             const container = document.getElementById('categories-cards-container');
             if (!container) return;
             container.innerHTML = '';
-            const LOGO = 'https://vipshirts.ftp.sh/logo.png';
+            const LOGO = '/logo.png';
             
             const allCard = document.createElement('div');
             allCard.className = 'category-card';
@@ -5424,7 +5424,7 @@ document.getElementById('points-slider').addEventListener('input', (e) => {
 
         function renderCategoryBar() {
             const filterDiv = document.getElementById('category-filter');
-            const LOGO = 'https://vipshirts.ftp.sh/logo.png';
+            const LOGO = '/logo.png';
             
             if (currentCategoryFilter === 'all') {
                 filterDiv.innerHTML = '<button class="active" data-category="all">← דף הבית</button>';
@@ -6947,7 +6947,7 @@ function renderCard(t) {
         : '';
     card.innerHTML = `
         <div class="testimonial-photo-wrap">
-            <img class="testimonial-photo" src="${t.image || 'https://vipshirts.ftp.sh/logo.png'}" alt="${displayName}" loading="lazy">
+            <img class="testimonial-photo" src="${t.image || '/logo.png'}" alt="${displayName}" loading="lazy">
         </div>
         <div class="testimonial-body">
             <p class="testimonial-text">${(t.text || '').replace(/</g, '&lt;')}</p>
